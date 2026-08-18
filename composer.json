@@ -1,0 +1,13 @@
+{
+    "name": "esg-balance/project",
+    "description": "ESG-BALANCE database project",
+    "authors": [
+        {
+            "name": "nicolasbastia",
+            "email": "nicolasbastia.nb@gmail.com"
+        }
+    ],
+    "require": {
+        "mongodb/mongodb": "^1.16"
+    }
+}
