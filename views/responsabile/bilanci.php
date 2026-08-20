@@ -164,5 +164,6 @@ include __DIR__ . '/../partials/back_button.php';
 </table>
 
 <?php
-include __DIR__ . '/../partials/footer.php';
+$backUrl = 'index.php';
+include __DIR__ . '/../partials/back_button.php';
 ?>

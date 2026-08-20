@@ -244,23 +244,17 @@ include __DIR__ . '/../partials/back_button.php';
             required
         >
 
-            <option value="approvato">
+            <option value="approvazione">
+                    Approvato
+                </option>
 
-                Approvato
+                <option value="approvazione con rilievi">
+                    Approvato con rilievi
+                </option>
 
-            </option>
-
-            <option value="approvato_con_rilievi">
-
-                Approvato con rilievi
-
-            </option>
-
-            <option value="respinto">
-
-                Respinto
-
-            </option>
+                <option value="respingimento">
+                    Respinto
+                </option>
 
         </select>
 
@@ -340,5 +334,6 @@ include __DIR__ . '/../partials/back_button.php';
 <?php endif; ?>
 
 <?php
-include __DIR__ . '/../partials/footer.php';
+$backUrl = 'revisioni_revisore.php';
+include __DIR__ . '/../partials/back_button.php';
 ?>

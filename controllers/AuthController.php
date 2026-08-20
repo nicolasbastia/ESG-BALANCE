@@ -23,10 +23,34 @@ class AuthController {
             if($utente) {
 
                 $_SESSION['utente'] = [
+
                     'id' => $utente->id,
                     'username' => $utente->username,
                     'ruolo' => $utente->ruolo
+
                 ];
+
+                /*
+                |--------------------------------------------------------------------------
+                | DATI AGGIUNTIVI REVISORE
+                |--------------------------------------------------------------------------
+                */
+
+                if($utente->ruolo === 'revisore') {
+
+                    $datiRevisore = $repo->getDatiRevisore(
+                        $utente->id
+                    );
+
+                    if($datiRevisore) {
+
+                        $_SESSION['utente']['numero_revisioni'] =
+                            $datiRevisore['numero_revisioni'];
+
+                        $_SESSION['utente']['indice_affidabilita'] =
+                            $datiRevisore['indice_affidabilita'];
+                    }
+                }
 
                 header('Location: index.php');
 
@@ -42,4 +66,5 @@ class AuthController {
         require __DIR__ . '/../views/auth/login.php';
     }
 }
+
 ?>

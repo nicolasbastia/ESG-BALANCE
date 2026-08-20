@@ -275,6 +275,50 @@ if($utente['ruolo'] == 'responsabile') :
 if($utente['ruolo'] == 'revisore') :
 ?>
 
+    <!-- NUMERO REVISIONI -->
+
+    <div class="col-md-4 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Revisioni effettuate
+                </h5>
+
+                <h2>
+                    <?= $utente['numero_revisioni'] ?? 0 ?>
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- INDICE AFFIDABILITA -->
+
+    <div class="col-md-4 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Indice di affidabilità
+                </h5>
+
+                <h2>
+                    <?= $utente['indice_affidabilita'] ?? 0 ?>
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
     <!-- REVISIONI -->
 
     <div class="col-md-4 mb-4">
@@ -303,6 +347,7 @@ if($utente['ruolo'] == 'revisore') :
                     Apri Revisioni
 
                 </a>
+
             </div>
 
         </div>

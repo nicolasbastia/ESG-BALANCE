@@ -20,6 +20,12 @@ switch($action) {
 
         break;
 
+    case 'dettaglioAdmin':
+
+        $controller->dettaglioAdmin();
+
+        break;
+
     default:
 
         $controller->index();

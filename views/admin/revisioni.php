@@ -131,7 +131,7 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <a
 
-                    href="/esg-balance/revisioni.php?action=dettaglio&id=<?= $r['id_bilancio'] ?>"
+                    href="/esg-balance/revisioni.php?action=dettaglioAdmin&id=<?= $r['id_bilancio'] ?>"
 
                     class="btn btn-info btn-sm"
                 >
@@ -151,5 +151,7 @@ include __DIR__ . '/../partials/back_button.php';
 </table>
 
 <?php
-include __DIR__ . '/../partials/footer.php';
+$backUrl = 'index.php';
+
+include __DIR__ . '/../partials/back_button.php';
 ?>

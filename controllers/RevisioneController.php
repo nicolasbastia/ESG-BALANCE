@@ -22,7 +22,6 @@ class RevisioneController {
         $this->notaRepo = new NotaRepository();
 
         $this->giudizioRepo = new GiudizioRepository();
-
     }
 
     /*
@@ -90,7 +89,7 @@ class RevisioneController {
 
     /*
     |--------------------------------------------------------------------------
-    | DETTAGLIO REVISIONE
+    | DETTAGLIO REVISIONE REVISORE
     |--------------------------------------------------------------------------
     */
 
@@ -132,11 +131,81 @@ class RevisioneController {
 
         /*
         |----------------------------------------------------------------------
-        | VIEW
+        | VIEW REVISORE
         |----------------------------------------------------------------------
         */
 
         require __DIR__ . '/../views/revisore/dettaglio.php';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DETTAGLIO REVISIONE ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    public function dettaglioAdmin() {
+
+        $utente = $_SESSION['utente'];
+
+        /*
+        |----------------------------------------------------------------------
+        | CONTROLLO RUOLO
+        |----------------------------------------------------------------------
+        */
+
+        if($utente['ruolo'] !== 'amministratore') {
+
+            header('Location: index.php');
+
+            exit;
+        }
+
+        $idBilancio = $_GET['id'];
+
+        /*
+        |----------------------------------------------------------------------
+        | DATI DEL BILANCIO
+        |----------------------------------------------------------------------
+        */
+
+        $dettagli = $this->repo->getDettaglioBilancio(
+
+            $idBilancio
+
+        );
+
+        /*
+        |----------------------------------------------------------------------
+        | TUTTE LE NOTE DEL BILANCIO
+        |----------------------------------------------------------------------
+        */
+
+        $note = $this->notaRepo->getByBilancio(
+
+            $idBilancio
+
+        );
+
+        /*
+        |----------------------------------------------------------------------
+        | TUTTI I GIUDIZI DEL BILANCIO
+        |----------------------------------------------------------------------
+        */
+
+        $giudizi = $this->giudizioRepo->getTuttiByBilancio(
+
+            $idBilancio
+
+        );
+
+        /*
+        |----------------------------------------------------------------------
+        | VIEW ADMIN - SOLA LETTURA
+        |----------------------------------------------------------------------
+        */
+
+        require __DIR__ . '/../views/admin/dettaglio_revisione.php';
     }
 
     /*
@@ -210,4 +279,5 @@ class RevisioneController {
         }
     }
 }
+
 ?>

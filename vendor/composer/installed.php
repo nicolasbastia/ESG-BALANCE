@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'esg-balance/project',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '643a2f2286b778a4e4c07fe48d6f6c58215e807b',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'esg-balance/project' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '643a2f2286b778a4e4c07fe48d6f6c58215e807b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

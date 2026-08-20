@@ -115,5 +115,37 @@ class GiudizioRepository {
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getTuttiByBilancio($idBilancio) {
+
+    $sql = "
+
+        SELECT
+
+            g.*,
+            u.username AS revisore
+
+        FROM giudizio_revisore g
+
+        JOIN revisore_esg r
+        ON g.id_revisore = r.id_utente
+
+        JOIN utente u
+        ON r.id_utente = u.id_utente
+
+        WHERE g.id_bilancio = ?
+
+        ORDER BY g.data_giudizio DESC
+
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+        $idBilancio
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
 ?>

@@ -14,6 +14,12 @@ class UtenteRepository {
         $this->pdo = $pdo;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
+
     public function login(
 
         $username,
@@ -72,5 +78,40 @@ class UtenteRepository {
 
         return null;
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATI REVISORE
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDatiRevisore($idUtente) {
+
+    $sql = "
+
+        SELECT
+
+            (
+                SELECT COUNT(*)
+                FROM giudizio_revisore
+                WHERE id_revisore = r.id_utente
+            ) AS numero_revisioni,
+
+            r.indice_affidabilita
+
+        FROM revisore_esg r
+
+        WHERE r.id_utente = ?
+
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+        $idUtente
+    ]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 }
 ?>

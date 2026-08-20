@@ -222,5 +222,6 @@ include __DIR__ . '/../partials/back_button.php';
 <?php endif; ?>
 
 <?php
-include __DIR__ . '/../partials/footer.php';
+$backUrl = 'bilanci.php';
+include __DIR__ . '/../partials/back_button.php';
 ?>
