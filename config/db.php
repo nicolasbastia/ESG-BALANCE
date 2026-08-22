@@ -4,7 +4,7 @@ $host = "localhost";
 $port = "3307";
 $dbname = "esg_balance";
 $user = "root";
-$password = "root";
+$password = "";
 
 try {
 

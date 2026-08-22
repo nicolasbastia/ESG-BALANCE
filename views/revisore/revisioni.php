@@ -3,7 +3,6 @@
 /** @var array $revisioni */
 
 include __DIR__ . '/../partials/header.php';
-include __DIR__ . '/../partials/back_button.php';
 ?>
 
 <h2 class="mb-4">
@@ -11,6 +10,7 @@ include __DIR__ . '/../partials/back_button.php';
     Revisioni ESG Assegnate
 
 </h2>
+
 
 <table class="table table-bordered">
 
@@ -54,9 +54,7 @@ include __DIR__ . '/../partials/back_button.php';
             <td>
 
                 <a
-
                     href="/esg-balance/revisione_dettaglio.php?id=<?= $r['id_bilancio'] ?>"
-
                     class="btn btn-primary btn-sm"
                 >
 
@@ -75,6 +73,5 @@ include __DIR__ . '/../partials/back_button.php';
 </table>
 
 <?php
-$backUrl = 'index.php';
-include __DIR__ . '/../partials/back_button.php';
+include __DIR__ . '/../partials/footer.php';
 ?>

@@ -191,7 +191,40 @@ if($utente['ruolo'] == 'amministratore') :
 
 if($utente['ruolo'] == 'responsabile') :
 ?>
+    <!-- PROFILO RESPONSABILE -->
 
+    <div class="col-md-4 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+
+                    Il mio profilo
+
+                </h5>
+
+                <p class="card-text">
+
+                    Gestisci il Curriculum Vitae in formato PDF.
+
+                </p>
+
+                <a
+                    href="/esg-balance/profilo_responsabile.php"
+                    class="btn btn-primary"
+                >
+
+                    Gestisci CV
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
     <!-- AZIENDE -->
 
     <div class="col-md-4 mb-4">
@@ -274,7 +307,19 @@ if($utente['ruolo'] == 'responsabile') :
 
 if($utente['ruolo'] == 'revisore') :
 ?>
+    <!-- Pulsante competenze-->
+    <div class="mb-4">
 
+        <a
+            href="/esg-balance/competenza.php"
+            class="btn btn-success"
+        >
+
+            Le mie competenze
+
+        </a>
+
+    </div>
     <!-- NUMERO REVISIONI -->
 
     <div class="col-md-4 mb-4">
