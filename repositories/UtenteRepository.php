@@ -92,7 +92,7 @@ class UtenteRepository {
         SELECT
 
             (
-                SELECT COUNT(*)
+                SELECT COUNT(DISTINCT id_bilancio)
                 FROM giudizio_revisore
                 WHERE id_revisore = r.id_utente
             ) AS numero_revisioni,

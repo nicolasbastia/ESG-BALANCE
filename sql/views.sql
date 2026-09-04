@@ -6,6 +6,7 @@ SELECT
 
 FROM azienda;
 
+
 CREATE VIEW vista_numero_revisori AS
 
 SELECT
@@ -13,6 +14,7 @@ SELECT
     COUNT(*) AS numero_revisori
 
 FROM revisore_esg;
+
 
 CREATE VIEW vista_affidabilita_aziende AS
 
@@ -22,29 +24,40 @@ SELECT
 
     a.nome,
 
-    ROUND(
+    COUNT(
+        CASE
+            WHEN b.stato = 'approvato'
+            THEN 1
+        END
+    ) AS bilanci_approvati,
 
+    COUNT(
+        CASE
+            WHEN b.stato IN ('approvato', 'respinto')
+            THEN 1
+        END
+    ) AS bilanci_conclusi,
+
+    ROUND(
         (
             COUNT(
-
                 CASE
-
-                    WHEN g.esito = 'approvazione'
-
+                    WHEN b.stato = 'approvato'
                     THEN 1
-
                 END
-
-            )
-
-            * 100.0
-
+            ) * 100.0
         )
-
-        / NULLIF(COUNT(g.id_giudizio), 0),
-
+        /
+        NULLIF(
+            COUNT(
+                CASE
+                    WHEN b.stato IN ('approvato', 'respinto')
+                    THEN 1
+                END
+            ),
+            0
+        ),
         2
-
     ) AS percentuale_affidabilita
 
 FROM azienda a
@@ -52,12 +65,10 @@ FROM azienda a
 LEFT JOIN bilancio b
 ON a.id_azienda = b.id_azienda
 
-LEFT JOIN giudizio_revisore g
-ON b.id_bilancio = g.id_bilancio
-
 GROUP BY
     a.id_azienda,
     a.nome;
+
 
 CREATE VIEW vista_classifica_bilanci AS
 
@@ -86,4 +97,3 @@ GROUP BY
     a.nome
 
 ORDER BY totale_indicatori_esg DESC;
-

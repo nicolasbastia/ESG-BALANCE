@@ -14,6 +14,33 @@ include __DIR__ . '/../partials/back_button.php';
 
 </h2>
 
+
+<?php if(isset($_SESSION['errore_revisione'])) : ?>
+
+    <div class="alert alert-danger">
+
+        <?= htmlspecialchars($_SESSION['errore_revisione']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['errore_revisione']); ?>
+
+<?php endif; ?>
+
+
+<?php if(isset($_SESSION['successo_revisione'])) : ?>
+
+    <div class="alert alert-success">
+
+        <?= htmlspecialchars($_SESSION['successo_revisione']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['successo_revisione']); ?>
+
+<?php endif; ?>
+
+
 <form
     method="POST"
     action="/esg-balance/revisioni.php?action=assegna"

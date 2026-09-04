@@ -65,28 +65,27 @@ class GiudizioRepository {
 
         /*
         |--------------------------------------------------------------------------
-        | UPDATE STATO BILANCIO
+        | AGGIORNA AFFIDABILITA REVISORE
         |--------------------------------------------------------------------------
         */
 
-        $update = "
+        $sql = "
 
-            UPDATE bilancio
-
-            SET stato = ?
-
-            WHERE id_bilancio = ?
+            CALL sp_aggiorna_affidabilita_revisore(?)
 
         ";
 
-        $stmt = $this->pdo->prepare($update);
+        $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
+        $stmt->execute([
 
-            $esito,
-            $idBilancio
+            $idRevisore
 
         ]);
+
+        $stmt->closeCursor();
+
+        return true;
     }
     
     /*
@@ -95,26 +94,38 @@ class GiudizioRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function getByBilancio($idBilancio) {
+    public function getByBilancio(
 
-        $sql = "
+    $idBilancio,
+    $idRevisore
 
-            SELECT *
+) {
 
-            FROM giudizio_revisore
+    $sql = "
 
-            WHERE id_bilancio = ?
+        SELECT *
 
-            LIMIT 1
+        FROM giudizio_revisore
 
-        ";
+        WHERE id_bilancio = ?
 
-        $stmt = $this->pdo->prepare($sql);
+        AND id_revisore = ?
 
-        $stmt->execute([$idBilancio]);
+        LIMIT 1
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+
+        $idBilancio,
+        $idRevisore
+
+    ]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
     public function getTuttiByBilancio($idBilancio) {
 

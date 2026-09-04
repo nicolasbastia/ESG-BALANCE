@@ -40,6 +40,72 @@ class AziendaRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | AFFIDABILITA AZIENDA DEL RESPONSABILE
+    |--------------------------------------------------------------------------
+    */
+
+    public function getAffidabilitaByResponsabile($idResponsabile) {
+
+        $sql = "
+
+            SELECT
+                v.id_azienda,
+                v.nome,
+                v.bilanci_approvati,
+                v.bilanci_conclusi,
+                v.percentuale_affidabilita
+
+            FROM vista_affidabilita_aziende v
+
+            JOIN azienda a
+            ON v.id_azienda = a.id_azienda
+
+            WHERE a.id_responsabile = ?
+
+            ORDER BY v.nome
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([$idResponsabile]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AFFIDABILITA TUTTE LE AZIENDE
+    |--------------------------------------------------------------------------
+    */
+
+    public function getTutteAffidabilita() {
+
+        $sql = "
+
+            SELECT
+                id_azienda,
+                nome,
+                bilanci_approvati,
+                bilanci_conclusi,
+                percentuale_affidabilita
+
+            FROM vista_affidabilita_aziende
+
+            ORDER BY nome
+
+        ";
+
+        $stmt = $this->pdo->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | CREATE

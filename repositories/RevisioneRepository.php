@@ -71,73 +71,101 @@ class RevisioneRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function assegna(
+
+    $idBilancio,
+    $idRevisore
+
+) {
+
     /*
     |--------------------------------------------------------------------------
-    | ASSEGNA
+    | CONTROLLO ASSEGNAZIONE GIA ESISTENTE
     |--------------------------------------------------------------------------
     */
 
-    public function assegna(
+    $check = "
+
+        SELECT COUNT(*)
+
+        FROM revisione
+
+        WHERE id_bilancio = ?
+        AND id_revisore = ?
+
+    ";
+
+    $stmt = $this->pdo->prepare($check);
+
+    $stmt->execute([
 
         $idBilancio,
         $idRevisore
 
-    ) {
+    ]);
 
-        $sql = "
+    if($stmt->fetchColumn() > 0) {
 
-            INSERT INTO revisione(
-
-                id_bilancio,
-                id_revisore
-
-            )
-
-            VALUES(
-
-                ?,
-                ?
-
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([
-
-            $idBilancio,
-            $idRevisore
-
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE STATO BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
-        $update = "
-
-            UPDATE bilancio
-
-            SET stato = 'in revisione'
-
-            WHERE id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($update);
-
-        return $stmt->execute([
-
-            $idBilancio
-
-        ]);
+        return false;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CREA ASSEGNAZIONE
+    |--------------------------------------------------------------------------
+    */
 
+    $sql = "
 
+        INSERT INTO revisione(
+
+            id_bilancio,
+            id_revisore
+
+        )
+
+        VALUES(
+
+            ?,
+            ?
+
+        )
+
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+
+        $idBilancio,
+        $idRevisore
+
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | AGGIORNA AFFIDABILITA REVISORE
+    |--------------------------------------------------------------------------
+    */
+
+    $sql = "
+
+        CALL sp_aggiorna_affidabilita_revisore(?)
+
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+
+        $idRevisore
+
+    ]);
+
+    $stmt->closeCursor();
+
+    return true;
+}
 
     /*
     |--------------------------------------------------------------------------

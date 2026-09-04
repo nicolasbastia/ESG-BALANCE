@@ -2,7 +2,7 @@
 
 /** @var array $dettagli */
 /** @var array $note */
-/** @var array|null $giudizio */
+/** @var array $giudizi */
 
 include __DIR__ . '/../partials/header.php';
 include __DIR__ . '/../partials/back_button.php';
@@ -97,54 +97,61 @@ include __DIR__ . '/../partials/back_button.php';
 
 </h3>
 
-<?php if($giudizio) : ?>
+<?php if(!empty($giudizi)) : ?>
 
-<div class="card border-success mb-4">
+    <?php foreach($giudizi as $giudizio) : ?>
 
-    <div class="card-body">
+        <div class="card border-success mb-4">
 
-        <h5>
+            <div class="card-body">
 
-            Esito:
+                <h5>
+                    Revisore:
+                    <?= htmlspecialchars($giudizio['revisore']) ?>
+                </h5>
 
-            <span class="badge bg-success">
+                <h5>
+                    Esito:
 
-                <?= $giudizio['esito'] ?>
+                    <span class="badge bg-success">
 
-            </span>
+                        <?= htmlspecialchars($giudizio['esito']) ?>
 
-        </h5>
+                    </span>
+                </h5>
 
-        <p class="mt-3">
+                <p class="mt-3">
 
-            <strong>
-                Rilievi:
-            </strong>
+                    <strong>
+                        Rilievi:
+                    </strong>
 
-            <br>
+                    <br>
 
-            <?= $giudizio['rilievi'] ?>
+                    <?= htmlspecialchars($giudizio['rilievi']) ?>
 
-        </p>
+                </p>
 
-        <p class="text-muted">
+                <p class="text-muted">
 
-            Data:
-            <?= $giudizio['data_giudizio'] ?>
+                    Data:
+                    <?= htmlspecialchars($giudizio['data_giudizio']) ?>
 
-        </p>
+                </p>
 
-    </div>
+            </div>
 
-</div>
+        </div>
+
+    <?php endforeach; ?>
 
 <?php else : ?>
 
-<div class="alert alert-warning">
+    <div class="alert alert-warning">
 
-    Nessun giudizio disponibile.
+        Nessun giudizio disponibile.
 
-</div>
+    </div>
 
 <?php endif; ?>
 

@@ -138,5 +138,48 @@ class NotaRepository {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function getByRevisoreEBilancio(
+
+    $idRevisore,
+    $idBilancio
+
+) {
+
+    $sql = "
+
+        SELECT
+
+            n.*,
+            vt.nome AS voce
+
+        FROM nota_revisore n
+
+        JOIN voce_bilancio vb
+        ON n.id_voce_bilancio = vb.id_voce_bilancio
+
+        JOIN voce_template vt
+        ON vb.id_voce = vt.id_voce
+
+        WHERE n.id_revisore = ?
+
+        AND vb.id_bilancio = ?
+
+        ORDER BY n.data_nota DESC
+
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+
+        $idRevisore,
+        $idBilancio
+
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
 ?>

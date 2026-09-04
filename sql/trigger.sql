@@ -1,9 +1,11 @@
 DELIMITER $$
 
+DROP TRIGGER IF EXISTS trg_bilancio_in_revisione$$
+
 CREATE TRIGGER trg_bilancio_in_revisione
 
 AFTER INSERT
-ON assegnazione_revisore
+ON revisione
 
 FOR EACH ROW
 
@@ -19,7 +21,10 @@ END$$
 
 DELIMITER ;
 
+
 DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_stato_finale_bilancio$$
 
 CREATE TRIGGER trg_stato_finale_bilancio
 
@@ -35,20 +40,27 @@ BEGIN
     DECLARE respingimenti INT;
 
     /*
-        Numero revisori assegnati
+    |--------------------------------------------------------------------------
+    | NUMERO REVISORI ASSEGNATI
+    |--------------------------------------------------------------------------
     */
+
     SELECT COUNT(*)
 
     INTO totale_revisori
 
-    FROM assegnazione_revisore
+    FROM revisione
 
     WHERE id_bilancio = NEW.id_bilancio;
 
+
     /*
-        Numero giudizi inseriti
+    |--------------------------------------------------------------------------
+    | NUMERO GIUDIZI INSERITI
+    |--------------------------------------------------------------------------
     */
-    SELECT COUNT(*)
+
+    SELECT COUNT(DISTINCT id_revisore)
 
     INTO totale_giudizi
 
@@ -56,9 +68,13 @@ BEGIN
 
     WHERE id_bilancio = NEW.id_bilancio;
 
+
     /*
-        Numero respingimenti
+    |--------------------------------------------------------------------------
+    | NUMERO RESPINGIMENTI
+    |--------------------------------------------------------------------------
     */
+
     SELECT COUNT(*)
 
     INTO respingimenti
@@ -69,14 +85,21 @@ BEGIN
 
     AND esito = 'respingimento';
 
+
     /*
-        Tutti i revisori hanno votato
+    |--------------------------------------------------------------------------
+    | TUTTI I REVISORI HANNO INSERITO IL GIUDIZIO
+    |--------------------------------------------------------------------------
     */
+
     IF totale_revisori = totale_giudizi THEN
 
         /*
-            Almeno un respingimento
+        |--------------------------------------------------------------------------
+        | ALMENO UN RESPINGIMENTO
+        |--------------------------------------------------------------------------
         */
+
         IF respingimenti > 0 THEN
 
             UPDATE bilancio

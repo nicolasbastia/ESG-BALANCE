@@ -124,6 +124,8 @@ DELIMITER ;
 
 DELIMITER $$
 
+DROP PROCEDURE IF EXISTS sp_assegna_revisore$$
+
 CREATE PROCEDURE sp_assegna_revisore(
 
     IN p_id_bilancio INT,
@@ -134,7 +136,7 @@ CREATE PROCEDURE sp_assegna_revisore(
 
 BEGIN
 
-    INSERT INTO assegnazione_revisore(
+    INSERT INTO revisione(
 
         id_bilancio,
         id_revisore,
@@ -222,6 +224,102 @@ BEGIN
         p_testo
 
     );
+
+END$$
+
+DELIMITER ;
+
+
+/* STORED PROCEDURE PER INDICE AFFIDABILITÁ DEL REVISORE*/
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_aggiorna_affidabilita_revisore$$
+
+CREATE PROCEDURE sp_aggiorna_affidabilita_revisore(
+
+    IN p_id_revisore INT
+
+)
+
+BEGIN
+
+    DECLARE v_revisioni_assegnate INT DEFAULT 0;
+
+    DECLARE v_revisioni_concluse INT DEFAULT 0;
+
+    DECLARE v_indice DECIMAL(5,2) DEFAULT 0;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTA REVISIONI ASSEGNATE
+    |--------------------------------------------------------------------------
+    */
+
+    SELECT COUNT(DISTINCT id_bilancio)
+
+    INTO v_revisioni_assegnate
+
+    FROM revisione
+
+    WHERE id_revisore = p_id_revisore;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTA REVISIONI CONCLUSE
+    |--------------------------------------------------------------------------
+    */
+
+    SELECT COUNT(DISTINCT id_bilancio)
+
+    INTO v_revisioni_concluse
+
+    FROM giudizio_revisore
+
+    WHERE id_revisore = p_id_revisore;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CALCOLA INDICE
+    |--------------------------------------------------------------------------
+    */
+
+    IF v_revisioni_assegnate > 0 THEN
+
+        SET v_indice =
+
+            (
+                v_revisioni_concluse
+                /
+                v_revisioni_assegnate
+            ) * 100;
+
+    ELSE
+
+        SET v_indice = 0;
+
+    END IF;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AGGIORNA REVISORE
+    |--------------------------------------------------------------------------
+    */
+
+    UPDATE revisore_esg
+
+    SET
+
+        numero_revisioni = v_revisioni_concluse,
+
+        indice_affidabilita = v_indice
+
+    WHERE id_utente = p_id_revisore;
+
 
 END$$
 

@@ -77,7 +77,7 @@ class BilancioController {
 
         $giudizioRepo = new GiudizioRepository();
 
-        $giudizio = $giudizioRepo->getByBilancio(
+        $giudizi = $giudizioRepo->getTuttiByBilancio(
             $idBilancio
         );
 

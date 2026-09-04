@@ -185,29 +185,23 @@ include __DIR__ . '/../partials/back_button.php';
 
     <?php foreach($note as $n) : ?>
 
-        <tr>
+    <tr>
 
-            <td>
+        <td>
+            <?= $n['voce'] ?>
+        </td>
 
-                <?= $n['voce'] ?>
+        <td>
+            <?= $n['testo'] ?>
+        </td>
 
-            </td>
+        <td>
+            <?= $n['data_nota'] ?>
+        </td>
 
-            <td>
+    </tr>
 
-                <?= $n['testo'] ?>
-
-            </td>
-
-            <td>
-
-                <?= $n['data_nota'] ?>
-
-            </td>
-
-        </tr>
-
-    <?php endforeach; ?>
+<?php endforeach; ?>
 
     </tbody>
 
@@ -215,36 +209,38 @@ include __DIR__ . '/../partials/back_button.php';
 
 <hr>
 
-<h3 class="mt-4">
+<?php if(!$giudizio) : ?>
 
-    Giudizio Finale Revisione
+    <h3 class="mt-4">
 
-</h3>
+        Giudizio Finale Revisione
 
-<form
-    method="POST"
-    action="/esg-balance/revisioni_revisore.php?action=giudizio"
->
+    </h3>
 
-    <input
-        type="hidden"
-        name="id_bilancio"
-        value="<?= $_GET['id'] ?>"
+    <form
+        method="POST"
+        action="/esg-balance/revisioni_revisore.php?action=giudizio"
     >
 
-    <div class="mb-3">
-
-        <label class="form-label">
-            Esito
-        </label>
-
-        <select
-            name="esito"
-            class="form-select"
-            required
+        <input
+            type="hidden"
+            name="id_bilancio"
+            value="<?= $_GET['id'] ?>"
         >
 
-            <option value="approvazione">
+        <div class="mb-3">
+
+            <label class="form-label">
+                Esito
+            </label>
+
+            <select
+                name="esito"
+                class="form-select"
+                required
+            >
+
+                <option value="approvazione">
                     Approvato
                 </option>
 
@@ -256,84 +252,93 @@ include __DIR__ . '/../partials/back_button.php';
                     Respinto
                 </option>
 
-        </select>
+            </select>
 
-    </div>
+        </div>
 
-    <div class="mb-3">
+        <div class="mb-3">
 
-        <label class="form-label">
-            Rilievi
-        </label>
+            <label class="form-label">
+                Rilievi
+            </label>
 
-        <textarea
-            name="rilievi"
-            class="form-control"
-            rows="4"
-        ></textarea>
+            <textarea
+                name="rilievi"
+                class="form-control"
+                rows="4"
+            ></textarea>
 
-    </div>
+        </div>
 
-    <button class="btn btn-success">
+        <button class="btn btn-success">
 
-        Salva Giudizio
+            Salva Giudizio
 
-    </button>
+        </button>
 
-</form>
-
-<?php if($giudizio) : ?>
-
-<hr>
-
-<h3 class="mt-4">
-
-    Giudizio Salvato
-
-</h3>
-
-<div class="card border-success">
-
-    <div class="card-body">
-
-        <h5>
-
-            Esito:
-
-            <span class="badge bg-success">
-
-                <?= $giudizio['esito'] ?>
-
-            </span>
-
-        </h5>
-
-        <p class="mt-3">
-
-            <strong>
-                Rilievi:
-            </strong>
-
-            <br>
-
-            <?= $giudizio['rilievi'] ?>
-
-        </p>
-
-        <p class="text-muted">
-
-            Data:
-            <?= $giudizio['data_giudizio'] ?>
-
-        </p>
-
-    </div>
-
-</div>
+    </form>
 
 <?php endif; ?>
 
+
+<?php if($giudizio) : ?>
+
+    <hr>
+
+    <h3 class="mt-4">
+
+        Giudizio Salvato
+
+    </h3>
+
+    <div class="card border-success">
+
+        <div class="card-body">
+
+            <h5>
+
+                Esito:
+
+                <span class="badge bg-success">
+
+                    <?= $giudizio['esito'] ?>
+
+                </span>
+
+            </h5>
+
+            <p class="mt-3">
+
+                <strong>
+                    Rilievi:
+                </strong>
+
+                <br>
+
+                <?= $giudizio['rilievi'] ?>
+
+            </p>
+
+            <p class="text-muted">
+
+                Data:
+                <?= $giudizio['data_giudizio'] ?>
+
+            </p>
+
+        </div>
+
+    </div>
+
+<?php endif; ?>
+
+
 <?php
+
 $backUrl = 'revisioni_revisore.php';
+
 include __DIR__ . '/../partials/back_button.php';
+
+include __DIR__ . '/../partials/footer.php';
+
 ?>

@@ -68,7 +68,7 @@ CREATE TABLE competenza (
 
 );
 
-CREATE TABLE revisore_competenza (
+CREATE TABLE competenza_revisore (
 
     id_utente INT,
 
@@ -263,6 +263,37 @@ CREATE TABLE assegnazione_revisore (
 
 );
 
+
+CREATE TABLE revisione (
+
+    id_revisione INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_bilancio INT NOT NULL,
+
+    id_revisore INT NOT NULL,
+
+    data_assegnazione TIMESTAMP
+    NOT NULL
+    DEFAULT CURRENT_TIMESTAMP,
+
+    stato VARCHAR(50)
+    DEFAULT 'assegnata',
+
+    UNIQUE (
+        id_bilancio,
+        id_revisore
+    ),
+
+    FOREIGN KEY (id_bilancio)
+    REFERENCES bilancio(id_bilancio)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY (id_revisore)
+    REFERENCES revisore_esg(id_utente)
+    ON DELETE CASCADE
+
+);
+
 CREATE TABLE nota_revisore (
 
     id_nota INT AUTO_INCREMENT PRIMARY KEY,
@@ -302,6 +333,11 @@ CREATE TABLE giudizio_revisore (
     data_giudizio DATE NOT NULL,
 
     rilievi TEXT,
+
+    UNIQUE (
+    id_bilancio,
+    id_revisore
+),
 
     FOREIGN KEY (id_bilancio)
     REFERENCES bilancio(id_bilancio)
