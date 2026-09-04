@@ -24,11 +24,36 @@ class IndicatoreRepository {
 
         $sql = "
 
-            SELECT *
+            SELECT
 
-            FROM indicatore_esg
+                ie.*,
 
-            ORDER BY nome
+                ia.codice_normativa,
+
+                iso.ambito_sociale,
+                iso.frequenza_rilevazione,
+
+                CASE
+
+                    WHEN ia.id_indicatore IS NOT NULL
+                    THEN 'ambientale'
+
+                    WHEN iso.id_indicatore IS NOT NULL
+                    THEN 'sociale'
+
+                    ELSE 'nessuna'
+
+                END AS categoria
+
+            FROM indicatore_esg ie
+
+            LEFT JOIN indicatore_ambientale ia
+            ON ie.id_indicatore = ia.id_indicatore
+
+            LEFT JOIN indicatore_sociale iso
+            ON ie.id_indicatore = iso.id_indicatore
+
+            ORDER BY ie.nome
 
         ";
 
@@ -44,40 +69,156 @@ class IndicatoreRepository {
     */
 
     public function create(
+
         $nome,
         $immagine,
-        $rilevanza
+        $rilevanza,
+        $categoria,
+        $codiceNormativa = null,
+        $ambitoSociale = null,
+        $frequenzaRilevazione = null
+
     ) {
 
-        $sql = "
+        try {
 
-            INSERT INTO indicatore_esg(
+            $this->pdo->beginTransaction();
 
-                nome,
-                immagine,
-                rilevanza
+            /*
+            |--------------------------------------------------------------------------
+            | INSERT INDICATORE BASE
+            |--------------------------------------------------------------------------
+            */
 
-            )
+            $sql = "
 
-            VALUES(
+                INSERT INTO indicatore_esg(
 
-                ?,
-                ?,
-                ?
+                    nome,
+                    immagine,
+                    rilevanza
 
-            )
+                )
 
-        ";
+                VALUES(
 
-        $stmt = $this->pdo->prepare($sql);
+                    ?,
+                    ?,
+                    ?
 
-        return $stmt->execute([
+                )
 
-            $nome,
-            $immagine,
-            $rilevanza
+            ";
 
-        ]);
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->execute([
+
+                $nome,
+                $immagine,
+                $rilevanza
+
+            ]);
+
+            $idIndicatore = $this->pdo->lastInsertId();
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDICATORE AMBIENTALE
+            |--------------------------------------------------------------------------
+            */
+
+            if($categoria === 'ambientale') {
+
+                $sql = "
+
+                    INSERT INTO indicatore_ambientale(
+
+                        id_indicatore,
+                        codice_normativa
+
+                    )
+
+                    VALUES(
+
+                        ?,
+                        ?
+
+                    )
+
+                ";
+
+                $stmt = $this->pdo->prepare($sql);
+
+                $stmt->execute([
+
+                    $idIndicatore,
+                    $codiceNormativa
+
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDICATORE SOCIALE
+            |--------------------------------------------------------------------------
+            */
+
+            if($categoria === 'sociale') {
+
+                $sql = "
+
+                    INSERT INTO indicatore_sociale(
+
+                        id_indicatore,
+                        ambito_sociale,
+                        frequenza_rilevazione
+
+                    )
+
+                    VALUES(
+
+                        ?,
+                        ?,
+                        ?
+
+                    )
+
+                ";
+
+                $stmt = $this->pdo->prepare($sql);
+
+                $stmt->execute([
+
+                    $idIndicatore,
+                    $ambitoSociale,
+                    $frequenzaRilevazione
+
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | NESSUNA CATEGORIA
+            |--------------------------------------------------------------------------
+            |
+            | Non facciamo nessun altro INSERT.
+            |--------------------------------------------------------------------------
+            */
+
+            $this->pdo->commit();
+
+            return true;
+
+        } catch(PDOException $e) {
+
+            if($this->pdo->inTransaction()) {
+
+                $this->pdo->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     /*
@@ -87,6 +228,13 @@ class IndicatoreRepository {
     */
 
     public function delete($id) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Se hai ON DELETE CASCADE nelle due tabelle specializzate,
+        | basta eliminare dalla tabella base.
+        |--------------------------------------------------------------------------
+        */
 
         $sql = "
 
