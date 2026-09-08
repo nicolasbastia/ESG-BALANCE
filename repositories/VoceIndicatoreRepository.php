@@ -116,50 +116,32 @@ class VoceIndicatoreRepository {
     */
 
    public function create(
+    $idVoceBilancio,
+    $idIndicatore,
+    $valore,
+    $fonte,
+    $data
+    
+    ) {
 
+    $sql = "
+        CALL sp_collega_indicatore_voce(?, ?, ?, ?, ?)
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $result = $stmt->execute([
         $idVoceBilancio,
         $idIndicatore,
         $valore,
         $fonte,
         $data
+    ]);
 
-    ) {
+    $stmt->closeCursor();
 
-        $sql = "
-
-            INSERT INTO voce_indicatore(
-
-                id_voce_bilancio,
-                id_indicatore,
-                valore_indicatore,
-                fonte,
-                data_rilevazione
-
-            )
-
-            VALUES(
-
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
-
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-
-            $idVoceBilancio,
-            $idIndicatore,
-            $valore,
-            $fonte,
-            $data
-
-        ]);
+    return $result; 
+    
     }
 }
 ?>

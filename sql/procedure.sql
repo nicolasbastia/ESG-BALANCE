@@ -35,9 +35,75 @@ BEGIN
 
     );
 
+    SELECT LAST_INSERT_ID() AS id_utente;
+
 END$$
 
 DELIMITER ;
+
+
+/* AGGIUNTA EMAIL UTENTE */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_aggiungi_email_utente$$
+
+CREATE PROCEDURE sp_aggiungi_email_utente(
+    IN p_id_utente INT,
+    IN p_email VARCHAR(100)
+)
+BEGIN
+
+    INSERT INTO email_utente(
+        id_utente,
+        email
+    )
+    VALUES(
+        p_id_utente,
+        p_email
+    );
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_crea_revisore_esg$$
+
+CREATE PROCEDURE sp_crea_revisore_esg(
+    IN p_id_utente INT
+)
+BEGIN
+
+    INSERT INTO revisore_esg(
+        id_utente
+    )
+    VALUES(
+        p_id_utente
+    );
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_crea_responsabile_aziendale$$
+
+CREATE PROCEDURE sp_crea_responsabile_aziendale(
+    IN p_id_utente INT
+)
+BEGIN
+
+    INSERT INTO responsabile_aziendale(
+        id_utente
+    )
+    VALUES(
+        p_id_utente
+    );
+
+END$$
+
+DELIMITER ;
+
+
+
+/* REGISTRAZIONE AZIENDE */
 
 DELIMITER $$
 
@@ -324,3 +390,499 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+    /*
+    |--------------------------------------------------------------------------
+    | ELIMINA Bilancio
+    |--------------------------------------------------------------------------
+    */
+
+    DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_elimina_bilancio$$
+
+CREATE PROCEDURE sp_elimina_bilancio(
+    IN p_id_bilancio INT
+)
+BEGIN
+
+    DECLARE v_id_azienda INT;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Se qualcosa fallisce, annulla tutta l'operazione
+    |--------------------------------------------------------------------------
+    */
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Recupera l'azienda proprietaria del bilancio
+    |--------------------------------------------------------------------------
+    */
+
+    SELECT id_azienda
+    INTO v_id_azienda
+    FROM bilancio
+    WHERE id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina giudizi
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE FROM giudizio_revisore
+    WHERE id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina note dei revisori
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE nr
+    FROM nota_revisore nr
+    JOIN voce_bilancio vb
+        ON nr.id_voce_bilancio = vb.id_voce_bilancio
+    WHERE vb.id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina assegnazioni revisori
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE FROM revisione
+    WHERE id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina collegamenti voce-indicatore
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE vi
+    FROM voce_indicatore vi
+    JOIN voce_bilancio vb
+        ON vi.id_voce_bilancio = vb.id_voce_bilancio
+    WHERE vb.id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina voci del bilancio
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE FROM voce_bilancio
+    WHERE id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elimina bilancio
+    |--------------------------------------------------------------------------
+    */
+
+    DELETE FROM bilancio
+    WHERE id_bilancio = p_id_bilancio;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ricalcola nr_bilanci dell'azienda
+    |--------------------------------------------------------------------------
+    */
+
+    UPDATE azienda
+    SET nr_bilanci = (
+        SELECT COUNT(*)
+        FROM bilancio
+        WHERE id_azienda = v_id_azienda
+    )
+    WHERE id_azienda = v_id_azienda;
+
+    COMMIT;
+
+END$$
+
+DELIMITER ;
+
+/*
+    |--------------------------------------------------------------------------
+    | Competenze revisore
+    |--------------------------------------------------------------------------
+    */
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_aggiungi_competenza_revisore$$
+
+CREATE PROCEDURE sp_aggiungi_competenza_revisore(
+    IN p_id_utente INT,
+    IN p_id_competenza INT,
+    IN p_livello INT
+)
+BEGIN
+
+    IF p_livello < 0 OR p_livello > 5 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il livello deve essere compreso tra 0 e 5';
+    END IF;
+
+    INSERT INTO competenza_revisore(
+        id_utente,
+        id_competenza,
+        livello
+    )
+    VALUES(
+        p_id_utente,
+        p_id_competenza,
+        p_livello
+    );
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_modifica_competenza_revisore$$
+
+CREATE PROCEDURE sp_modifica_competenza_revisore(
+    IN p_id_utente INT,
+    IN p_id_competenza INT,
+    IN p_livello INT
+)
+BEGIN
+
+    IF p_livello < 0 OR p_livello > 5 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il livello deve essere compreso tra 0 e 5';
+    END IF;
+
+    UPDATE competenza_revisore
+    SET livello = p_livello
+    WHERE id_utente = p_id_utente
+    AND id_competenza = p_id_competenza;
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_elimina_competenza_revisore$$
+
+CREATE PROCEDURE sp_elimina_competenza_revisore(
+    IN p_id_utente INT,
+    IN p_id_competenza INT
+)
+BEGIN
+
+    DELETE FROM competenza_revisore
+    WHERE id_utente = p_id_utente
+    AND id_competenza = p_id_competenza;
+
+END$$
+
+DELIMITER ;
+
+/*
+    |--------------------------------------------------------------------------
+    | aggiorna CV responsabile
+    |--------------------------------------------------------------------------
+    */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_aggiorna_cv_responsabile$$
+
+CREATE PROCEDURE sp_aggiorna_cv_responsabile(
+    IN p_id_utente INT,
+    IN p_cv_pdf VARCHAR(255)
+)
+BEGIN
+
+    UPDATE responsabile_aziendale
+    SET cv_pdf = p_cv_pdf
+    WHERE id_utente = p_id_utente;
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_elimina_cv_responsabile$$
+
+CREATE PROCEDURE sp_elimina_cv_responsabile(
+    IN p_id_utente INT
+)
+BEGIN
+
+    UPDATE responsabile_aziendale
+    SET cv_pdf = NULL
+    WHERE id_utente = p_id_utente;
+
+END$$
+
+DELIMITER ;
+
+/*
+    |--------------------------------------------------------------------------
+    | salva voce bilancio
+    |--------------------------------------------------------------------------
+    */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_salva_voce_bilancio$$
+
+CREATE PROCEDURE sp_salva_voce_bilancio(
+    IN p_id_bilancio INT,
+    IN p_id_voce INT,
+    IN p_valore DECIMAL(15,2)
+)
+BEGIN
+
+    IF EXISTS (
+        SELECT 1
+        FROM voce_bilancio
+        WHERE id_bilancio = p_id_bilancio
+        AND id_voce = p_id_voce
+    ) THEN
+
+        UPDATE voce_bilancio
+        SET valore = p_valore
+        WHERE id_bilancio = p_id_bilancio
+        AND id_voce = p_id_voce;
+
+    ELSE
+
+        INSERT INTO voce_bilancio (
+            id_bilancio,
+            id_voce,
+            valore
+        )
+        VALUES (
+            p_id_bilancio,
+            p_id_voce,
+            p_valore
+        );
+
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+
+/*
+    |--------------------------------------------------------------------------
+    | crea/elimina voce template
+    |--------------------------------------------------------------------------
+    */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_crea_voce_template$$
+
+CREATE PROCEDURE sp_crea_voce_template(
+    IN p_nome VARCHAR(100),
+    IN p_descrizione TEXT,
+    IN p_id_amministratore INT
+)
+BEGIN
+
+    INSERT INTO voce_template(
+        nome,
+        descrizione,
+        id_amministratore
+    )
+    VALUES(
+        p_nome,
+        p_descrizione,
+        p_id_amministratore
+    );
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_elimina_voce_template$$
+
+CREATE PROCEDURE sp_elimina_voce_template(
+    IN p_id_voce INT
+)
+BEGIN
+
+    DELETE FROM voce_template
+    WHERE id_voce = p_id_voce;
+
+END$$
+
+DELIMITER ;
+
+
+
+/*
+    |--------------------------------------------------------------------------
+    | crea indicatore esg
+    |--------------------------------------------------------------------------
+    */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_crea_indicatore_esg$$
+
+CREATE PROCEDURE sp_crea_indicatore_esg(
+    IN p_nome VARCHAR(100),
+    IN p_immagine VARCHAR(255),
+    IN p_rilevanza INT,
+    IN p_categoria VARCHAR(20),
+    IN p_codice_normativa VARCHAR(100),
+    IN p_ambito_sociale VARCHAR(100),
+    IN p_frequenza_rilevazione VARCHAR(100)
+)
+BEGIN
+
+    DECLARE v_id_indicatore INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF p_rilevanza < 0 OR p_rilevanza > 10 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La rilevanza deve essere compresa tra 0 e 10';
+    END IF;
+
+    IF p_categoria NOT IN ('ambientale', 'sociale', 'nessuna') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Categoria indicatore non valida';
+    END IF;
+
+    START TRANSACTION;
+
+    INSERT INTO indicatore_esg(
+        nome,
+        immagine,
+        rilevanza
+    )
+    VALUES(
+        p_nome,
+        p_immagine,
+        p_rilevanza
+    );
+
+    SET v_id_indicatore = LAST_INSERT_ID();
+
+    IF p_categoria = 'ambientale' THEN
+
+        INSERT INTO indicatore_ambientale(
+            id_indicatore,
+            codice_normativa
+        )
+        VALUES(
+            v_id_indicatore,
+            p_codice_normativa
+        );
+
+    ELSEIF p_categoria = 'sociale' THEN
+
+        INSERT INTO indicatore_sociale(
+            id_indicatore,
+            ambito_sociale,
+            frequenza_rilevazione
+        )
+        VALUES(
+            v_id_indicatore,
+            p_ambito_sociale,
+            p_frequenza_rilevazione
+        );
+
+    END IF;
+
+    COMMIT;
+
+END$$
+
+
+DROP PROCEDURE IF EXISTS sp_elimina_indicatore_esg$$
+
+CREATE PROCEDURE sp_elimina_indicatore_esg(
+    IN p_id_indicatore INT
+)
+BEGIN
+
+    DELETE FROM indicatore_esg
+    WHERE id_indicatore = p_id_indicatore;
+
+END$$
+
+DELIMITER ;
+
+
+
+
+
+/*
+    |--------------------------------------------------------------------------
+    | collega indicatore
+    |--------------------------------------------------------------------------
+    */
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_collega_indicatore_voce$$
+
+CREATE PROCEDURE sp_collega_indicatore_voce(
+    IN p_id_voce_bilancio INT,
+    IN p_id_indicatore INT,
+    IN p_valore_indicatore DECIMAL(15,2),
+    IN p_fonte VARCHAR(255),
+    IN p_data_rilevazione DATE
+)
+BEGIN
+
+    INSERT INTO voce_indicatore(
+        id_voce_bilancio,
+        id_indicatore,
+        valore_indicatore,
+        fonte,
+        data_rilevazione
+    )
+    VALUES(
+        p_id_voce_bilancio,
+        p_id_indicatore,
+        p_valore_indicatore,
+        p_fonte,
+        p_data_rilevazione
+    );
+
+END$$
+
+DELIMITER ;
+
+/*
+    |--------------------------------------------------------------------------
+    | elimina aziende
+    |--------------------------------------------------------------------------
+    */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_elimina_azienda$$
+
+CREATE PROCEDURE sp_elimina_azienda(
+    IN p_id_azienda INT
+)
+BEGIN
+
+    DELETE FROM azienda
+    WHERE id_azienda = p_id_azienda;
+
+END$$
+
+DELIMITER ;
+

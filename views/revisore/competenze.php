@@ -4,6 +4,8 @@
 /** @var array $mieCompetenze */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>

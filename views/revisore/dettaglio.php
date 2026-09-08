@@ -5,6 +5,8 @@
 /** @var array|null $giudizio */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/revisioni_revisore.php';
 include __DIR__ . '/../partials/back_button.php';
 ?>
 
@@ -334,10 +336,6 @@ include __DIR__ . '/../partials/back_button.php';
 
 
 <?php
-
-$backUrl = 'revisioni_revisore.php';
-
-include __DIR__ . '/../partials/back_button.php';
 
 include __DIR__ . '/../partials/footer.php';
 

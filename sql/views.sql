@@ -16,17 +16,26 @@ SELECT
 FROM revisore_esg;
 
 
-CREATE VIEW vista_affidabilita_aziende AS
+CREATE OR REPLACE VIEW vista_affidabilita_aziende AS
 
 SELECT
-
     a.id_azienda,
-
     a.nome,
 
     COUNT(
         CASE
-            WHEN b.stato = 'approvato'
+            WHEN b.stato IN ('approvato', 'respinto')
+            AND EXISTS (
+                SELECT 1
+                FROM giudizio_revisore g
+                WHERE g.id_bilancio = b.id_bilancio
+            )
+            AND NOT EXISTS (
+                SELECT 1
+                FROM giudizio_revisore g
+                WHERE g.id_bilancio = b.id_bilancio
+                AND g.esito <> 'approvazione'
+            )
             THEN 1
         END
     ) AS bilanci_approvati,
@@ -39,14 +48,23 @@ SELECT
     ) AS bilanci_conclusi,
 
     ROUND(
-        (
-            COUNT(
-                CASE
-                    WHEN b.stato = 'approvato'
-                    THEN 1
-                END
-            ) * 100.0
-        )
+        COUNT(
+            CASE
+                WHEN b.stato IN ('approvato', 'respinto')
+                AND EXISTS (
+                    SELECT 1
+                    FROM giudizio_revisore g
+                    WHERE g.id_bilancio = b.id_bilancio
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM giudizio_revisore g
+                    WHERE g.id_bilancio = b.id_bilancio
+                    AND g.esito <> 'approvazione'
+                )
+                THEN 1
+            END
+        ) * 100.0
         /
         NULLIF(
             COUNT(

@@ -117,18 +117,10 @@ class RevisioneRepository {
 
     $sql = "
 
-        INSERT INTO revisione(
-
-            id_bilancio,
-            id_revisore
-
-        )
-
-        VALUES(
-
+        CALL sp_assegna_revisore(
             ?,
-            ?
-
+            ?,
+            CURDATE()
         )
 
     ";
@@ -141,6 +133,8 @@ class RevisioneRepository {
         $idRevisore
 
     ]);
+
+    $stmt->closeCursor();
 
     /*
     |--------------------------------------------------------------------------

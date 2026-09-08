@@ -11,26 +11,6 @@ if(!isset($_SESSION['utente'])) {
 
 $utente = $_SESSION['utente'];
 
-require_once __DIR__ . '/repositories/AziendaRepository.php';
-
-$aziendaRepo = new AziendaRepository();
-
-$affidabilitaAziende = [];
-
-if($utente['ruolo'] == 'amministratore') {
-
-    $affidabilitaAziende = $aziendaRepo->getTutteAffidabilita();
-
-}
-
-if($utente['ruolo'] == 'responsabile') {
-
-    $affidabilitaAziende = $aziendaRepo->getAffidabilitaByResponsabile(
-        $utente['id']
-    );
-
-}
-
 include __DIR__ . '/views/partials/header.php';
 ?>
 
@@ -196,60 +176,6 @@ if($utente['ruolo'] == 'amministratore') :
         </div>
 
     </div>
-
-    <!-- AFFIDABILITA AZIENDE -->
-
-    <?php foreach($affidabilitaAziende as $azienda) : ?>
-
-        <div class="col-md-4 mb-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Affidabilità <?= htmlspecialchars($azienda['nome']) ?>
-                    </h5>
-
-                    <p class="card-text">
-                        Bilanci approvati:
-                        <strong>
-                            <?= $azienda['bilanci_approvati'] ?>
-                        </strong>
-                    </p>
-
-                    <p class="card-text">
-                        Bilanci conclusi:
-                        <strong>
-                            <?= $azienda['bilanci_conclusi'] ?>
-                        </strong>
-                    </p>
-
-                    <p class="card-text">
-                        Indice di affidabilità:
-                    </p>
-
-                    <h2>
-
-                        <?php if($azienda['percentuale_affidabilita'] !== null) : ?>
-
-                            <?= $azienda['percentuale_affidabilita'] ?>%
-
-                        <?php else : ?>
-
-                            Non disponibile
-
-                        <?php endif; ?>
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    <?php endforeach; ?>
     
 <?php endif; ?>
 
@@ -369,60 +295,6 @@ if($utente['ruolo'] == 'responsabile') :
 
     </div>
 
-    <!-- AFFIDABILITA AZIENDE -->
-
-    <?php foreach($affidabilitaAziende as $azienda) : ?>
-
-        <div class="col-md-4 mb-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Affidabilità <?= htmlspecialchars($azienda['nome']) ?>
-                    </h5>
-
-                    <p class="card-text">
-                        Bilanci approvati:
-                        <strong>
-                            <?= $azienda['bilanci_approvati'] ?>
-                        </strong>
-                    </p>
-
-                    <p class="card-text">
-                        Bilanci conclusi:
-                        <strong>
-                            <?= $azienda['bilanci_conclusi'] ?>
-                        </strong>
-                    </p>
-
-                    <p class="card-text">
-                        Indice di affidabilità:
-                    </p>
-
-                    <h2>
-
-                        <?php if($azienda['percentuale_affidabilita'] !== null) : ?>
-
-                            <?= $azienda['percentuale_affidabilita'] ?>%
-
-                        <?php else : ?>
-
-                            Non disponibile
-
-                        <?php endif; ?>
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    <?php endforeach; ?>
-
 <?php endif; ?>
 
 <?php
@@ -528,6 +400,36 @@ if($utente['ruolo'] == 'revisore') :
     </div>
 
 <?php endif; ?>
+
+
+<!-- STATISTICHE VISIBILI A TUTTI -->
+
+<div class="col-md-4 mb-4">
+
+    <div class="card shadow-sm h-100">
+
+        <div class="card-body">
+
+            <h5 class="card-title">
+                Statistiche
+            </h5>
+
+            <p class="card-text">
+                Visualizza le statistiche generali della piattaforma.
+            </p>
+
+            <a
+                href="statistiche.php"
+                class="btn btn-primary"
+            >
+                Visualizza
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
 
 </div>
 

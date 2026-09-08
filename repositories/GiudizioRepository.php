@@ -30,24 +30,12 @@ class GiudizioRepository {
 
         $sql = "
 
-            INSERT INTO giudizio_revisore(
-
-                id_bilancio,
-                id_revisore,
-                esito,
-                rilievi,
-                data_giudizio
-
-            )
-
-            VALUES(
-
+            CALL sp_inserisci_giudizio(
                 ?,
                 ?,
                 ?,
-                ?,
-                NOW()
-
+                CURDATE(),
+                ?
             )
 
         ";
@@ -62,6 +50,8 @@ class GiudizioRepository {
             $rilievi
 
         ]);
+
+        $stmt->closeCursor();
 
         /*
         |--------------------------------------------------------------------------

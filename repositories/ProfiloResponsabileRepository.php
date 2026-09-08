@@ -52,23 +52,21 @@ class ProfiloResponsabileRepository {
 
     public function updateCv($idUtente, $cvPdf) {
 
-        $sql = "
+            $sql = "
+                CALL sp_aggiorna_cv_responsabile(?, ?)
+            ";
 
-            UPDATE responsabile_aziendale
+            $stmt = $this->pdo->prepare($sql);
 
-            SET cv_pdf = ?
+            $result = $stmt->execute([
+                $idUtente,
+                $cvPdf
+            ]);
 
-            WHERE id_utente = ?
+            $stmt->closeCursor();
 
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-            $cvPdf,
-            $idUtente
-        ]);
-    }
+            return $result;
+        }
 
     /*
     |--------------------------------------------------------------------------
@@ -76,21 +74,21 @@ class ProfiloResponsabileRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function deleteCv($idUtente) {
+        public function deleteCv($idUtente) {
 
         $sql = "
-
-            UPDATE responsabile_aziendale
-
-            SET cv_pdf = NULL
-
-            WHERE id_utente = ?
-
+            CALL sp_elimina_cv_responsabile(?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([$idUtente]);
+        $result = $stmt->execute([
+            $idUtente
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 }
 ?>

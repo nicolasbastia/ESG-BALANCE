@@ -23,26 +23,13 @@ class RegisterRepository {
 
         $sql = "
 
-            INSERT INTO utente(
-
-                username,
-                password,
-                codice_fiscale,
-                data_nascita,
-                luogo_nascita,
-                ruolo
-
-            )
-
-            VALUES(
-
+            CALL sp_registra_utente(
                 ?,
                 ?,
                 ?,
                 ?,
                 ?,
                 ?
-
             )
 
         ";
@@ -63,7 +50,11 @@ class RegisterRepository {
 
         ]);
 
-        $idUtente = $this->pdo->lastInsertId();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $idUtente = $result['id_utente'];
+
+        $stmt->closeCursor();
 
         /*
         |--------------------------------------------------------------------------
@@ -76,31 +67,17 @@ class RegisterRepository {
             if(!empty($email)) {
 
                 $sql = "
-
-                    INSERT INTO email_utente(
-
-                        id_utente,
-                        email
-
-                    )
-
-                    VALUES(
-
-                        ?,
-                        ?
-
-                    )
-
+                    CALL sp_aggiungi_email_utente(?, ?)
                 ";
 
                 $stmt = $this->pdo->prepare($sql);
 
                 $stmt->execute([
-
                     $idUtente,
                     $email
-
                 ]);
+
+                $stmt->closeCursor();
             }
         }
 
@@ -112,41 +89,29 @@ class RegisterRepository {
 
         if($data['ruolo'] == 'revisore') {
 
-            $sql = "
+                $sql = "
+                    CALL sp_crea_revisore_esg(?)
+                ";
 
-                INSERT INTO revisore_esg(
+                $stmt = $this->pdo->prepare($sql);
 
-                    id_utente
+                $stmt->execute([$idUtente]);
 
-                )
-
-                VALUES(?)
-
-            ";
-
-            $stmt = $this->pdo->prepare($sql);
-
-            $stmt->execute([$idUtente]);
-        }
-
+                $stmt->closeCursor();
+            }
+            
         if($data['ruolo'] == 'responsabile') {
 
-            $sql = "
+                $sql = "
+                    CALL sp_crea_responsabile_aziendale(?)
+                ";
 
-                INSERT INTO responsabile_aziendale(
+                $stmt = $this->pdo->prepare($sql);
 
-                    id_utente
+                $stmt->execute([$idUtente]);
 
-                )
-
-                VALUES(?)
-
-            ";
-
-            $stmt = $this->pdo->prepare($sql);
-
-            $stmt->execute([$idUtente]);
-        }
+                $stmt->closeCursor();
+            }
 
         return true;
     }

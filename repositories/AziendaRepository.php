@@ -126,20 +126,7 @@ class AziendaRepository {
 
         $sql = "
 
-            INSERT INTO azienda(
-
-                nome,
-                ragione_sociale,
-                partita_iva,
-                settore,
-                numero_dipendenti,
-                logo,
-                id_responsabile
-
-            )
-
-            VALUES(
-
+            CALL sp_registra_azienda(
                 ?,
                 ?,
                 ?,
@@ -147,14 +134,13 @@ class AziendaRepository {
                 ?,
                 ?,
                 ?
-
             )
 
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
+        $result = $stmt->execute([
 
             $nome,
             $ragioneSociale,
@@ -165,6 +151,10 @@ class AziendaRepository {
             $idResponsabile
 
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 
     /*
@@ -175,17 +165,17 @@ class AziendaRepository {
 
     public function delete($id) {
 
-        $sql = "
+    $sql = "
+        CALL sp_elimina_azienda(?)
+    ";
 
-            DELETE FROM azienda
+    $stmt = $this->pdo->prepare($sql);
 
-            WHERE id_azienda = ?
+    $result = $stmt->execute([$id]);
 
-        ";
+    $stmt->closeCursor();
 
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([$id]);
+    return $result;
     }
 }
 ?>

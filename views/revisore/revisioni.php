@@ -3,6 +3,9 @@
 /** @var array $revisioni */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/index.php';
+include __DIR__ . '/../partials/back_button.php';
 ?>
 
 <h2 class="mb-4">

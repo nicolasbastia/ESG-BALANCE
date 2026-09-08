@@ -72,111 +72,31 @@ class VoceBilancioRepository {
 
     /*
     |--------------------------------------------------------------------------
-    | INSERT/UPDATE
+    | Salva valore (sostituisce insert/update)
     |--------------------------------------------------------------------------
     */
 
-    public function salvaValore(
-
+        public function salvaValore(
         $idBilancio,
         $idVoce,
         $valore
-
     ) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ESISTENZA
-        |--------------------------------------------------------------------------
-        */
-
-        $check = "
-
-            SELECT *
-
-            FROM voce_bilancio
-
-            WHERE id_bilancio = ?
-            AND id_voce = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($check);
-
-        $stmt->execute([
-
-            $idBilancio,
-            $idVoce
-
-        ]);
-
-        $esiste = $stmt->fetch();
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE
-        |--------------------------------------------------------------------------
-        */
-
-        if($esiste) {
-
-            $sql = "
-
-                UPDATE voce_bilancio
-
-                SET valore = ?
-
-                WHERE id_bilancio = ?
-                AND id_voce = ?
-
-            ";
-
-            $stmt = $this->pdo->prepare($sql);
-
-            return $stmt->execute([
-
-                $valore,
-                $idBilancio,
-                $idVoce
-
-            ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | INSERT
-        |--------------------------------------------------------------------------
-        */
-
         $sql = "
-
-            INSERT INTO voce_bilancio(
-
-                id_bilancio,
-                id_voce,
-                valore
-
-            )
-
-            VALUES(
-
-                ?,
-                ?,
-                ?
-
-            )
-
+            CALL sp_salva_voce_bilancio(?, ?, ?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
-
+        $result = $stmt->execute([
             $idBilancio,
             $idVoce,
             $valore
-
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 }
 ?>

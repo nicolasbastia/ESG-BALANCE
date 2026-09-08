@@ -125,37 +125,32 @@ class BilancioRepository {
 
     public function create(
 
-        $idAzienda,
-        $dataCreazione
+    $idAzienda,
+    $dataCreazione
 
     ) {
 
         $sql = "
 
-            INSERT INTO bilancio(
-
-                id_azienda,
-                data_creazione
-
-            )
-
-            VALUES(
-
+            CALL sp_crea_bilancio(
                 ?,
                 ?
-
             )
 
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
+        $result = $stmt->execute([
 
             $idAzienda,
             $dataCreazione
 
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 
     /*
@@ -164,125 +159,19 @@ class BilancioRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function delete($id) {
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA GIUDIZI
-        |--------------------------------------------------------------------------
-        */
+        public function delete($id) {
 
         $sql = "
-
-            DELETE FROM giudizio_revisore
-
-            WHERE id_bilancio = ?
-
+            CALL sp_elimina_bilancio(?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$id]);
+        $result = $stmt->execute([$id]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA NOTE REVISIONE
-        |--------------------------------------------------------------------------
-        */
+        $stmt->closeCursor();
 
-        $sql = "
-
-            DELETE nr
-
-            FROM nota_revisore nr
-
-            JOIN voce_bilancio vb
-            ON nr.id_voce_bilancio = vb.id_voce_bilancio
-
-            WHERE vb.id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([$id]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA REVISIONI
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            DELETE FROM revisione
-
-            WHERE id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([$id]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA COLLEGAMENTI ESG
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            DELETE vi
-
-            FROM voce_indicatore vi
-
-            JOIN voce_bilancio vb
-            ON vi.id_voce_bilancio = vb.id_voce_bilancio
-
-            WHERE vb.id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([$id]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA VOCI BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            DELETE FROM voce_bilancio
-
-            WHERE id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([$id]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            DELETE FROM bilancio
-
-            WHERE id_bilancio = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([$id]);
+        return $result;
     }
 }
 ?>

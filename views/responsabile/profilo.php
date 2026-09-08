@@ -3,6 +3,8 @@
 /** @var array|false $profilo */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>

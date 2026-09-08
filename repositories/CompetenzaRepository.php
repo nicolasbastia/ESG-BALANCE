@@ -96,34 +96,20 @@ class CompetenzaRepository {
         }
 
         $sql = "
-
-            INSERT INTO competenza_revisore(
-
-                id_utente,
-                id_competenza,
-                livello
-
-            )
-
-            VALUES(
-
-                ?,
-                ?,
-                ?
-
-            )
-
+            CALL sp_aggiungi_competenza_revisore(?, ?, ?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
-
+        $result = $stmt->execute([
             $idUtente,
             $idCompetenza,
             $livello
-
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 
     /*
@@ -146,25 +132,20 @@ class CompetenzaRepository {
         }
 
         $sql = "
-
-            UPDATE competenza_revisore
-
-            SET livello = ?
-
-            WHERE id_utente = ?
-            AND id_competenza = ?
-
+            CALL sp_modifica_competenza_revisore(?, ?, ?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
-
-            $livello,
+        $result = $stmt->execute([
             $idUtente,
-            $idCompetenza
-
+            $idCompetenza,
+            $livello
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 
     /*
@@ -181,22 +162,19 @@ class CompetenzaRepository {
     ) {
 
         $sql = "
-
-            DELETE FROM competenza_revisore
-
-            WHERE id_utente = ?
-            AND id_competenza = ?
-
+            CALL sp_elimina_competenza_revisore(?, ?)
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
-
+        $result = $stmt->execute([
             $idUtente,
             $idCompetenza
-
         ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 }
 ?>

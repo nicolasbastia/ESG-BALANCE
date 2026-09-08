@@ -43,43 +43,27 @@ class VoceTemplateRepository {
     */
 
     public function create(
+    $nome,
+    $descrizione,
+    $idAmministratore
+    ) {
 
+    $sql = "
+        CALL sp_crea_voce_template(?, ?, ?)
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $result = $stmt->execute([
         $nome,
         $descrizione,
         $idAmministratore
+    ]);
 
-    ) {
+    $stmt->closeCursor();
 
-        $sql = "
-
-            INSERT INTO voce_template(
-
-                nome,
-                descrizione,
-                id_amministratore
-
-            )
-
-            VALUES(
-
-                ?,
-                ?,
-                ?
-
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-
-            $nome,
-            $descrizione,
-            $idAmministratore
-
-        ]);
-    }
+    return $result;
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -89,17 +73,17 @@ class VoceTemplateRepository {
 
     public function delete($id) {
 
-        $sql = "
+    $sql = "
+        CALL sp_elimina_voce_template(?)
+    ";
 
-            DELETE FROM voce_template
+    $stmt = $this->pdo->prepare($sql);
 
-            WHERE id_voce = ?
+    $result = $stmt->execute([$id]);
 
-        ";
+    $stmt->closeCursor();
 
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([$id]);
+    return $result;
     }
 }
 ?>

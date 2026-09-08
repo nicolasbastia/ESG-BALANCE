@@ -191,7 +191,7 @@ CREATE TABLE indicatore_ambientale (
 
     id_indicatore INT PRIMARY KEY,
 
-    codice_normativa_rilevamento VARCHAR(100),
+    codice_normativa VARCHAR(100) NOT NULL,
 
     FOREIGN KEY (id_indicatore)
     REFERENCES indicatore_esg(id_indicatore)
@@ -203,9 +203,9 @@ CREATE TABLE indicatore_sociale (
 
     id_indicatore INT PRIMARY KEY,
 
-    ambito_sociale VARCHAR(100),
+    ambito_sociale VARCHAR(150) NOT NULL,
 
-    frequenza_rilevazione VARCHAR(100),
+    frequenza_rilevazione VARCHAR(100) NOT NULL,
 
     FOREIGN KEY (id_indicatore)
     REFERENCES indicatore_esg(id_indicatore)
@@ -236,29 +236,6 @@ CREATE TABLE voce_indicatore (
 
     FOREIGN KEY (id_indicatore)
     REFERENCES indicatore_esg(id_indicatore)
-    ON DELETE CASCADE
-
-);
-
-CREATE TABLE assegnazione_revisore (
-
-    id_bilancio INT,
-
-    id_revisore INT,
-
-    data_assegnazione DATE,
-
-    PRIMARY KEY (
-        id_bilancio,
-        id_revisore
-    ),
-
-    FOREIGN KEY (id_bilancio)
-    REFERENCES bilancio(id_bilancio)
-    ON DELETE CASCADE,
-
-    FOREIGN KEY (id_revisore)
-    REFERENCES revisore_esg(id_utente)
     ON DELETE CASCADE
 
 );

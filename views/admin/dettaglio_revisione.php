@@ -6,8 +6,7 @@
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = 'index.php';
-
+$backUrl = '/ESG-BALANCE/revisioni.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>

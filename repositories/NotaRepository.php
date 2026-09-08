@@ -29,36 +29,29 @@ class NotaRepository {
 
         $sql = "
 
-            INSERT INTO nota_revisore(
-
-                id_revisore,
-                id_voce_bilancio,
-                testo,
-                data_nota
-
-            )
-
-            VALUES(
-
+            CALL sp_inserisci_nota(
                 ?,
                 ?,
-                ?,
-                NOW()
-
+                CURDATE(),
+                ?
             )
 
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
+        $result = $stmt->execute([
 
             $idRevisore,
             $idVoceBilancio,
             $testo
 
         ]);
-    }
+
+        $stmt->closeCursor();
+
+        return $result;
+            }
 
     /*
     |--------------------------------------------------------------------------

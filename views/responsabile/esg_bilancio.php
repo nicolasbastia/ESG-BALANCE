@@ -6,6 +6,8 @@
 /** @var int|string $idBilancio */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/bilanci.php';
 include __DIR__ . '/../partials/back_button.php';
 ?>
 
@@ -193,7 +195,3 @@ include __DIR__ . '/../partials/back_button.php';
 
 </table>
 
-<?php
-$backUrl = 'bilanci.php';
-include __DIR__ . '/../partials/back_button.php';
-?>

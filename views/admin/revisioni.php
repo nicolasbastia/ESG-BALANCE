@@ -5,6 +5,8 @@
 /** @var array $revisioni */
 
 include __DIR__ . '/../partials/header.php';
+
+$backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
 ?>
 
@@ -176,9 +178,3 @@ include __DIR__ . '/../partials/back_button.php';
     </tbody>
 
 </table>
-
-<?php
-$backUrl = 'index.php';
-
-include __DIR__ . '/../partials/back_button.php';
-?>

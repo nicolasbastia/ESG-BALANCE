@@ -69,158 +69,35 @@ class IndicatoreRepository {
     */
 
     public function create(
+    $nome,
+    $immagine,
+    $rilevanza,
+    $categoria,
+    $codiceNormativa = null,
+    $ambitoSociale = null,
+    $frequenzaRilevazione = null
+) {
 
+    $sql = "
+        CALL sp_crea_indicatore_esg(?, ?, ?, ?, ?, ?, ?)
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $result = $stmt->execute([
         $nome,
         $immagine,
         $rilevanza,
         $categoria,
-        $codiceNormativa = null,
-        $ambitoSociale = null,
-        $frequenzaRilevazione = null
+        $codiceNormativa,
+        $ambitoSociale,
+        $frequenzaRilevazione
+    ]);
 
-    ) {
+    $stmt->closeCursor();
 
-        try {
-
-            $this->pdo->beginTransaction();
-
-            /*
-            |--------------------------------------------------------------------------
-            | INSERT INDICATORE BASE
-            |--------------------------------------------------------------------------
-            */
-
-            $sql = "
-
-                INSERT INTO indicatore_esg(
-
-                    nome,
-                    immagine,
-                    rilevanza
-
-                )
-
-                VALUES(
-
-                    ?,
-                    ?,
-                    ?
-
-                )
-
-            ";
-
-            $stmt = $this->pdo->prepare($sql);
-
-            $stmt->execute([
-
-                $nome,
-                $immagine,
-                $rilevanza
-
-            ]);
-
-            $idIndicatore = $this->pdo->lastInsertId();
-
-            /*
-            |--------------------------------------------------------------------------
-            | INDICATORE AMBIENTALE
-            |--------------------------------------------------------------------------
-            */
-
-            if($categoria === 'ambientale') {
-
-                $sql = "
-
-                    INSERT INTO indicatore_ambientale(
-
-                        id_indicatore,
-                        codice_normativa
-
-                    )
-
-                    VALUES(
-
-                        ?,
-                        ?
-
-                    )
-
-                ";
-
-                $stmt = $this->pdo->prepare($sql);
-
-                $stmt->execute([
-
-                    $idIndicatore,
-                    $codiceNormativa
-
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | INDICATORE SOCIALE
-            |--------------------------------------------------------------------------
-            */
-
-            if($categoria === 'sociale') {
-
-                $sql = "
-
-                    INSERT INTO indicatore_sociale(
-
-                        id_indicatore,
-                        ambito_sociale,
-                        frequenza_rilevazione
-
-                    )
-
-                    VALUES(
-
-                        ?,
-                        ?,
-                        ?
-
-                    )
-
-                ";
-
-                $stmt = $this->pdo->prepare($sql);
-
-                $stmt->execute([
-
-                    $idIndicatore,
-                    $ambitoSociale,
-                    $frequenzaRilevazione
-
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | NESSUNA CATEGORIA
-            |--------------------------------------------------------------------------
-            |
-            | Non facciamo nessun altro INSERT.
-            |--------------------------------------------------------------------------
-            */
-
-            $this->pdo->commit();
-
-            return true;
-
-        } catch(PDOException $e) {
-
-            if($this->pdo->inTransaction()) {
-
-                $this->pdo->rollBack();
-            }
-
-            throw $e;
-        }
-    }
-
+    return $result;
+}
     /*
     |--------------------------------------------------------------------------
     | DELETE
@@ -229,24 +106,17 @@ class IndicatoreRepository {
 
     public function delete($id) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Se hai ON DELETE CASCADE nelle due tabelle specializzate,
-        | basta eliminare dalla tabella base.
-        |--------------------------------------------------------------------------
-        */
+    $sql = "
+        CALL sp_elimina_indicatore_esg(?)
+    ";
 
-        $sql = "
+    $stmt = $this->pdo->prepare($sql);
 
-            DELETE FROM indicatore_esg
+    $result = $stmt->execute([$id]);
 
-            WHERE id_indicatore = ?
+    $stmt->closeCursor();
 
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([$id]);
+    return $result;
     }
 }
 ?>
