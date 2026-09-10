@@ -37,18 +37,18 @@ include __DIR__ . '/../partials/back_button.php';
         <tr>
 
             <td>
-                <?= $r['id_revisione'] ?>
+                <?= $r->id_revisione ?>
             </td>
 
             <td>
-                <?= $r['azienda'] ?>
+                <?= $r->azienda ?>
             </td>
 
             <td>
 
                 <span class="badge bg-warning">
 
-                    <?= $r['stato'] ?>
+                    <?= $r->stato ?>
 
                 </span>
 
@@ -57,7 +57,7 @@ include __DIR__ . '/../partials/back_button.php';
             <td>
 
                 <a
-                    href="/esg-balance/revisione_dettaglio.php?id=<?= $r['id_bilancio'] ?>"
+                    href="/esg-balance/revisione_dettaglio.php?id=<?= $r->id_bilancio ?>"
                     class="btn btn-primary btn-sm"
                 >
 

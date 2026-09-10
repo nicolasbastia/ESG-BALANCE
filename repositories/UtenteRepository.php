@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/Utente.php';
+require_once __DIR__ . '/../models/Revisore.php';
 
 class UtenteRepository {
 
@@ -71,7 +72,10 @@ class UtenteRepository {
 
                 $row['id_utente'],
                 $row['username'],
-                $row['ruolo']
+                $row['ruolo'],
+                $row['codice_fiscale'],
+                $row['data_nascita'],
+                $row['luogo_nascita']
 
             );
         }
@@ -87,31 +91,42 @@ class UtenteRepository {
 
     public function getDatiRevisore($idUtente) {
 
-    $sql = "
+        $sql = "
 
-        SELECT
+            SELECT
 
-            (
-                SELECT COUNT(DISTINCT id_bilancio)
-                FROM giudizio_revisore
-                WHERE id_revisore = r.id_utente
-            ) AS numero_revisioni,
+                r.id_utente,
+                (
+                    SELECT COUNT(DISTINCT id_bilancio)
+                    FROM giudizio_revisore
+                    WHERE id_revisore = r.id_utente
+                ) AS numero_revisioni,
 
-            r.indice_affidabilita
+                r.indice_affidabilita
 
-        FROM revisore_esg r
+            FROM revisore_esg r
 
-        WHERE r.id_utente = ?
+            WHERE r.id_utente = ?
 
-    ";
+        ";
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-    $stmt->execute([
-        $idUtente
-    ]);
+        $stmt->execute([
+            $idUtente
+        ]);
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if(!$row) {
+            return null;
+        }
+
+        return new Revisore(
+            $row['id_utente'],
+            $row['numero_revisioni'],
+            $row['indice_affidabilita']
+        );
+    }
 }
 ?>

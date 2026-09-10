@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/Revisione.php';
 
 class RevisioneRepository {
 
@@ -194,7 +195,22 @@ class RevisioneRepository {
 
         $stmt = $this->pdo->query($sql);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $revisioni = [];
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+            $revisioni[] = new Revisione(
+                $row['id_revisione'],
+                $row['id_bilancio'],
+                $row['id_revisore'],
+                $row['data_assegnazione'],
+                $row['username'],
+                $row['azienda'],
+                isset($row['stato']) ? $row['stato'] : null
+            );
+        }
+
+        return $revisioni;
     }
 
     /*
@@ -232,7 +248,22 @@ class RevisioneRepository {
 
         $stmt->execute([$idRevisore]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $revisioni = [];
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+            $revisioni[] = new Revisione(
+                $row['id_revisione'],
+                $row['id_bilancio'],
+                $row['id_revisore'],
+                $row['data_assegnazione'],
+                null,
+                $row['azienda'],
+                $row['stato']
+            );
+        }
+
+        return $revisioni;
     }
 
     /*

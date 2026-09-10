@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/UtenteRepository.php';
+require_once __DIR__ . '/../models/Revisore.php';
 
 class AuthController {
 
@@ -36,7 +37,7 @@ class AuthController {
                 |--------------------------------------------------------------------------
                 */
 
-                if($utente->ruolo === 'revisore') {
+                if($utente->isRevisore()) {
 
                     $datiRevisore = $repo->getDatiRevisore(
                         $utente->id
@@ -45,10 +46,13 @@ class AuthController {
                     if($datiRevisore) {
 
                         $_SESSION['utente']['numero_revisioni'] =
-                            $datiRevisore['numero_revisioni'];
+                            $datiRevisore->numero_revisioni;
 
                         $_SESSION['utente']['indice_affidabilita'] =
-                            $datiRevisore['indice_affidabilita'];
+                            $datiRevisore->indice_affidabilita;
+
+                        $_SESSION['utente']['livello_affidabilita'] =
+                            $datiRevisore->getLivelloAffidabilita();
                     }
                 }
 

@@ -6,6 +6,7 @@ include __DIR__ . '/../partials/header.php';
 
 $backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
@@ -13,6 +14,32 @@ include __DIR__ . '/../partials/back_button.php';
     Template Bilancio
 
 </h2>
+
+<?php if(isset($_SESSION['errore_template'])) : ?>
+
+    <div class="alert alert-danger">
+
+        <?= htmlspecialchars($_SESSION['errore_template']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['errore_template']); ?>
+
+<?php endif; ?>
+
+
+<?php if(isset($_SESSION['successo_template'])) : ?>
+
+    <div class="alert alert-success">
+
+        <?= htmlspecialchars($_SESSION['successo_template']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['successo_template']); ?>
+
+<?php endif; ?>
+
 
 <form
     method="POST"
@@ -23,7 +50,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Nome
+
         </label>
 
         <input
@@ -38,7 +67,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Descrizione
+
         </label>
 
         <textarea
@@ -49,7 +80,10 @@ include __DIR__ . '/../partials/back_button.php';
 
     </div>
 
-    <button class="btn btn-success">
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
 
         Aggiungi Voce
 
@@ -81,24 +115,29 @@ include __DIR__ . '/../partials/back_button.php';
         <tr>
 
             <td>
-                <?= $v['id_voce'] ?>
+
+                <?= $v->id_voce ?>
+
             </td>
 
             <td>
-                <?= $v['nome'] ?>
+
+                <?= htmlspecialchars($v->nome) ?>
+
             </td>
 
             <td>
-                <?= $v['descrizione'] ?>
+
+                <?= htmlspecialchars($v->descrizione ?? '') ?>
+
             </td>
 
             <td>
 
                 <a
-
-                    href="/esg-balance/template.php?action=delete&id=<?= $v['id_voce'] ?>"
-
+                    href="/esg-balance/template.php?action=delete&id=<?= $v->id_voce ?>"
                     class="btn btn-danger btn-sm"
+                    onclick="return confirm('Vuoi eliminare questa voce del template?');"
                 >
 
                     Elimina
@@ -115,3 +154,8 @@ include __DIR__ . '/../partials/back_button.php';
 
 </table>
 
+<?php
+
+include __DIR__ . '/../partials/footer.php';
+
+?>

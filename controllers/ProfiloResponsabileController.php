@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/ProfiloResponsabileRepository.php';
+require_once __DIR__ . '/../models/ProfiloResponsabile.php';
 require_once __DIR__ . '/../config/logger.php';
 
 class ProfiloResponsabileController {
@@ -83,15 +84,13 @@ class ProfiloResponsabileController {
 
         /*
         |--------------------------------------------------------------------------
-        | CONTROLLO ESTENSIONE
+        | CONTROLLO ESTENSIONE (VALIDAZIONE MODEL)
         |--------------------------------------------------------------------------
         */
 
-        $estensione = strtolower(
-            pathinfo($file['name'], PATHINFO_EXTENSION)
-        );
+        if(!ProfiloResponsabile::isValidCvExtension($file['name'])) {
 
-        if($estensione !== 'pdf') {
+            $_SESSION['errore_cv'] = "Il file deve essere in formato PDF";
 
             header('Location: profilo_responsabile.php');
 
@@ -100,20 +99,13 @@ class ProfiloResponsabileController {
 
         /*
         |--------------------------------------------------------------------------
-        | CONTROLLO MIME
+        | CONTROLLO MIME (VALIDAZIONE MODEL)
         |--------------------------------------------------------------------------
         */
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if(!ProfiloResponsabile::isValidCvMimeType($file['tmp_name'])) {
 
-        $mime = finfo_file(
-            $finfo,
-            $file['tmp_name']
-        );
-
-        finfo_close($finfo);
-
-        if($mime !== 'application/pdf') {
+            $_SESSION['errore_cv'] = "Il file non è un PDF valido";
 
             header('Location: profilo_responsabile.php');
 
@@ -174,13 +166,14 @@ class ProfiloResponsabileController {
             */
 
             if(
-                !empty($profilo['cv_pdf'])
+                $profilo &&
+                $profilo->hasCv()
             ) {
 
                 $vecchioFile =
                     __DIR__ .
                     '/../' .
-                    $profilo['cv_pdf'];
+                    $profilo->cv_pdf;
 
                 if(file_exists($vecchioFile)) {
 
@@ -226,13 +219,13 @@ class ProfiloResponsabileController {
 
         if(
             $profilo &&
-            !empty($profilo['cv_pdf'])
+            $profilo->hasCv()
         ) {
 
             $filePath =
                 __DIR__ .
                 '/../' .
-                $profilo['cv_pdf'];
+                $profilo->cv_pdf;
 
             if(file_exists($filePath)) {
 

@@ -4,9 +4,13 @@ session_start();
 
 require_once __DIR__ . '/../repositories/RevisioneRepository.php';
 require_once __DIR__ . '/../repositories/NotaRepository.php';
-require_once __DIR__ . '/../config/logger.php';
 require_once __DIR__ . '/../repositories/GiudizioRepository.php';
 require_once __DIR__ . '/../repositories/UtenteRepository.php';
+
+require_once __DIR__ . '/../models/Revisione.php';
+require_once __DIR__ . '/../models/GiudizioRevisione.php';
+
+require_once __DIR__ . '/../config/logger.php';
 
 class RevisioneController {
 
@@ -42,51 +46,57 @@ class RevisioneController {
         require __DIR__ . '/../views/admin/revisioni.php';
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | ASSEGNA REVISIONE
+    |--------------------------------------------------------------------------
+    */
+
     public function assegna() {
 
-    if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        $risultato = $this->repo->assegna(
+            $risultato = $this->repo->assegna(
 
-            $_POST['id_bilancio'],
-            $_POST['id_revisore']
+                $_POST['id_bilancio'],
+                $_POST['id_revisore']
 
-        );
+            );
 
-        /*
-        |--------------------------------------------------------------------------
-        | ASSEGNAZIONE GIA ESISTENTE
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | ASSEGNAZIONE GIA ESISTENTE
+            |--------------------------------------------------------------------------
+            */
 
-        if(!$risultato) {
+            if(!$risultato) {
 
-            $_SESSION['errore_revisione'] =
-                "Questo revisore è già assegnato a questo bilancio.";
+                $_SESSION['errore_revisione'] =
+                    "Questo revisore è già assegnato a questo bilancio.";
+
+                header('Location: revisioni.php');
+
+                exit;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | ASSEGNAZIONE RIUSCITA
+            |--------------------------------------------------------------------------
+            */
+
+            salvaEvento(
+                "Assegnato revisore ESG"
+            );
+
+            $_SESSION['successo_revisione'] =
+                "Revisore assegnato correttamente.";
 
             header('Location: revisioni.php');
 
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ASSEGNAZIONE RIUSCITA
-        |--------------------------------------------------------------------------
-        */
-
-        salvaEvento(
-            "Assegnato revisore ESG"
-        );
-
-        $_SESSION['successo_revisione'] =
-            "Revisore assegnato correttamente.";
-
-        header('Location: revisioni.php');
-
-        exit;
     }
-}
 
     /*
     |--------------------------------------------------------------------------
@@ -108,63 +118,63 @@ class RevisioneController {
     }
 
     /*
-|--------------------------------------------------------------------------
-| DETTAGLIO REVISIONE REVISORE
-|--------------------------------------------------------------------------
-*/
-
-public function dettaglio() {
-
-    $idBilancio = $_GET['id'];
-
-    /*
     |--------------------------------------------------------------------------
-    | DATI DEL BILANCIO
+    | DETTAGLIO REVISIONE REVISORE
     |--------------------------------------------------------------------------
     */
 
-    $dettagli = $this->repo->getDettaglioBilancio(
+    public function dettaglio() {
 
-        $idBilancio
+        $idBilancio = $_GET['id'];
 
-    );
+        /*
+        |--------------------------------------------------------------------------
+        | DATI DEL BILANCIO
+        |--------------------------------------------------------------------------
+        */
 
-    $utente = $_SESSION['utente'];
+        $dettagli = $this->repo->getDettaglioBilancio(
 
-    /*
-    |--------------------------------------------------------------------------
-    | NOTE DEL REVISORE PER QUESTO BILANCIO
-    |--------------------------------------------------------------------------
-    */
+            $idBilancio
 
-    $note = $this->notaRepo->getByRevisoreEBilancio(
+        );
 
-        $utente['id'],
-        $idBilancio
+        $utente = $_SESSION['utente'];
 
-    );
+        /*
+        |--------------------------------------------------------------------------
+        | NOTE DEL REVISORE PER QUESTO BILANCIO
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | GIUDIZIO DEL REVISORE PER QUESTO BILANCIO
-    |--------------------------------------------------------------------------
-    */
+        $note = $this->notaRepo->getByRevisoreEBilancio(
 
-    $giudizio = $this->giudizioRepo->getByBilancio(
+            $utente['id'],
+            $idBilancio
 
-        $idBilancio,
-        $utente['id']
+        );
 
-    );
+        /*
+        |--------------------------------------------------------------------------
+        | GIUDIZIO DEL REVISORE PER QUESTO BILANCIO
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | VIEW REVISORE
-    |--------------------------------------------------------------------------
-    */
+        $giudizio = $this->giudizioRepo->getByBilancio(
 
-    require __DIR__ . '/../views/revisore/dettaglio.php';
-}
+            $idBilancio,
+            $utente['id']
+
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW REVISORE
+        |--------------------------------------------------------------------------
+        */
+
+        require __DIR__ . '/../views/revisore/dettaglio.php';
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -177,9 +187,9 @@ public function dettaglio() {
         $utente = $_SESSION['utente'];
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | CONTROLLO RUOLO
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         if($utente['ruolo'] !== 'amministratore') {
@@ -192,9 +202,9 @@ public function dettaglio() {
         $idBilancio = $_GET['id'];
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | DATI DEL BILANCIO
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         $dettagli = $this->repo->getDettaglioBilancio(
@@ -204,9 +214,9 @@ public function dettaglio() {
         );
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | TUTTE LE NOTE DEL BILANCIO
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         $note = $this->notaRepo->getByBilancio(
@@ -216,9 +226,9 @@ public function dettaglio() {
         );
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | TUTTI I GIUDIZI DEL BILANCIO
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         $giudizi = $this->giudizioRepo->getTuttiByBilancio(
@@ -228,9 +238,9 @@ public function dettaglio() {
         );
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | VIEW ADMIN - SOLA LETTURA
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         require __DIR__ . '/../views/admin/dettaglio_revisione.php';
@@ -248,6 +258,43 @@ public function dettaglio() {
 
             $utente = $_SESSION['utente'];
 
+            $idBilancio = $_POST['id_bilancio'];
+
+            /*
+            |--------------------------------------------------------------------------
+            | CONTROLLO REVISIONE CONCLUSA
+            |--------------------------------------------------------------------------
+            */
+
+            $giudizioEsistente =
+                $this->giudizioRepo->esisteGiudizio(
+
+                    $idBilancio,
+                    $utente['id']
+
+                );
+
+            if($giudizioEsistente) {
+
+                $_SESSION['errore_revisione'] =
+                    "La revisione è già conclusa. Non è possibile aggiungere nuove note.";
+
+                header(
+
+                    'Location: revisione_dettaglio.php?id=' .
+                    $idBilancio
+
+                );
+
+                exit;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREA NOTA
+            |--------------------------------------------------------------------------
+            */
+
             $this->notaRepo->create(
 
                 $utente['id'],
@@ -260,10 +307,13 @@ public function dettaglio() {
                 "Creata nota revisione ESG"
             );
 
+            $_SESSION['successo_revisione'] =
+                "Nota inserita correttamente.";
+
             header(
 
                 'Location: revisione_dettaglio.php?id=' .
-                $_POST['id_bilancio']
+                $idBilancio
 
             );
 
@@ -283,15 +333,63 @@ public function dettaglio() {
 
             $utente = $_SESSION['utente'];
 
-            $this->giudizioRepo->create(
+            $idBilancio = $_POST['id_bilancio'];
 
-                $_POST['id_bilancio'],
+            /*
+            |--------------------------------------------------------------------------
+            | CONTROLLO GIUDIZIO GIA PRESENTE
+            |--------------------------------------------------------------------------
+            */
+
+            $giudizioEsistente =
+                $this->giudizioRepo->esisteGiudizio(
+
+                    $idBilancio,
+                    $utente['id']
+
+                );
+
+            if($giudizioEsistente) {
+
+                $_SESSION['errore_revisione'] =
+                    "Hai già inviato il giudizio finale per questa revisione.";
+
+                header(
+
+                    'Location: revisione_dettaglio.php?id=' .
+                    $idBilancio
+
+                );
+
+                exit;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREA MODEL GIUDIZIO
+            |--------------------------------------------------------------------------
+            */
+
+            $giudizio = new GiudizioRevisione(
+
+                null,
+                $idBilancio,
                 $utente['id'],
                 $_POST['esito'],
+                date('Y-m-d'),
                 $_POST['rilievi']
 
             );
 
+            /*
+            |--------------------------------------------------------------------------
+            | SALVA GIUDIZIO
+            |--------------------------------------------------------------------------
+            */
+
+            $this->giudizioRepo->create(
+                $giudizio
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -310,26 +408,32 @@ public function dettaglio() {
             if($datiRevisore) {
 
                 $_SESSION['utente']['numero_revisioni'] =
-                    $datiRevisore['numero_revisioni'];
+                    $datiRevisore->numero_revisioni;
 
                 $_SESSION['utente']['indice_affidabilita'] =
-                    $datiRevisore['indice_affidabilita'];
-            }
-            
+                    $datiRevisore->indice_affidabilita;
 
-        /*
-        |--------------------------------------------------------------------------
-        | LOGGER
-        |--------------------------------------------------------------------------
-        */
+                $_SESSION['utente']['livello_affidabilita'] =
+                    $datiRevisore->getLivelloAffidabilita();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOGGER
+            |--------------------------------------------------------------------------
+            */
+
             salvaEvento(
                 "Creato giudizio revisione ESG"
             );
 
+            $_SESSION['successo_revisione'] =
+                "Giudizio finale inviato correttamente. La revisione è ora conclusa.";
+
             header(
 
                 'Location: revisione_dettaglio.php?id=' .
-                $_POST['id_bilancio']
+                $idBilancio
 
             );
 

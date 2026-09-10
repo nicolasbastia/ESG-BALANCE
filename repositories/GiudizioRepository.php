@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/GiudizioRevisione.php';
 
 class GiudizioRepository {
 
@@ -19,14 +20,7 @@ class GiudizioRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function create(
-
-        $idBilancio,
-        $idRevisore,
-        $esito,
-        $rilievi
-
-    ) {
+    public function create(GiudizioRevisione $giudizio) {
 
         $sql = "
 
@@ -34,7 +28,7 @@ class GiudizioRepository {
                 ?,
                 ?,
                 ?,
-                CURDATE(),
+                ?,
                 ?
             )
 
@@ -44,10 +38,11 @@ class GiudizioRepository {
 
         $stmt->execute([
 
-            $idBilancio,
-            $idRevisore,
-            $esito,
-            $rilievi
+            $giudizio->id_bilancio,
+            $giudizio->id_revisore,
+            $giudizio->esito,
+            $giudizio->data_giudizio,
+            $giudizio->rilievi
 
         ]);
 
@@ -69,7 +64,7 @@ class GiudizioRepository {
 
         $stmt->execute([
 
-            $idRevisore
+            $giudizio->id_revisore
 
         ]);
 
@@ -77,76 +72,141 @@ class GiudizioRepository {
 
         return true;
     }
-    
+
     /*
     |--------------------------------------------------------------------------
-    | GET BY BILANCIO
+    | GET BY BILANCIO E REVISORE
     |--------------------------------------------------------------------------
     */
 
     public function getByBilancio(
 
-    $idBilancio,
-    $idRevisore
+        $idBilancio,
+        $idRevisore
 
-) {
+    ) {
 
-    $sql = "
+        $sql = "
 
-        SELECT *
+            SELECT
+                id_giudizio,
+                id_bilancio,
+                id_revisore,
+                esito,
+                data_giudizio,
+                rilievi
 
-        FROM giudizio_revisore
+            FROM giudizio_revisore
 
-        WHERE id_bilancio = ?
+            WHERE id_bilancio = ?
 
-        AND id_revisore = ?
+            AND id_revisore = ?
 
-        LIMIT 1
+            LIMIT 1
 
-    ";
+        ";
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-    $stmt->execute([
+        $stmt->execute([
+
+            $idBilancio,
+            $idRevisore
+
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if(!$row) {
+
+            return null;
+        }
+
+        return new GiudizioRevisione(
+
+            $row['id_giudizio'],
+            $row['id_bilancio'],
+            $row['id_revisore'],
+            $row['esito'],
+            $row['data_giudizio'],
+            $row['rilievi']
+
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO ESISTENZA GIUDIZIO
+    |--------------------------------------------------------------------------
+    */
+
+    public function esisteGiudizio(
 
         $idBilancio,
         $idRevisore
 
-    ]);
+    ) {
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        $sql = "
+
+            SELECT COUNT(*)
+
+            FROM giudizio_revisore
+
+            WHERE id_bilancio = ?
+
+            AND id_revisore = ?
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+
+            $idBilancio,
+            $idRevisore
+
+        ]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | TUTTI I GIUDIZI DEL BILANCIO
+    |--------------------------------------------------------------------------
+    */
 
     public function getTuttiByBilancio($idBilancio) {
 
-    $sql = "
+        $sql = "
 
-        SELECT
+            SELECT
 
-            g.*,
-            u.username AS revisore
+                g.*,
+                u.username AS revisore
 
-        FROM giudizio_revisore g
+            FROM giudizio_revisore g
 
-        JOIN revisore_esg r
-        ON g.id_revisore = r.id_utente
+            JOIN revisore_esg r
+                ON g.id_revisore = r.id_utente
 
-        JOIN utente u
-        ON r.id_utente = u.id_utente
+            JOIN utente u
+                ON r.id_utente = u.id_utente
 
-        WHERE g.id_bilancio = ?
+            WHERE g.id_bilancio = ?
 
-        ORDER BY g.data_giudizio DESC
+            ORDER BY g.data_giudizio DESC
 
-    ";
+        ";
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-    $stmt->execute([
-        $idBilancio
-    ]);
+        $stmt->execute([
+            $idBilancio
+        ]);
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

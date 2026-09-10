@@ -187,7 +187,7 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <td>
 
-                    <?= htmlspecialchars($c['nome']) ?>
+                    <?= htmlspecialchars($c->nome) ?>
 
                 </td>
 
@@ -195,7 +195,7 @@ include __DIR__ . '/../partials/back_button.php';
 
                     <span class="badge bg-primary">
 
-                        <?= $c['livello'] ?> / 5
+                        <?= $c->livello ?> / 5
 
                     </span>
 
@@ -214,7 +214,7 @@ include __DIR__ . '/../partials/back_button.php';
                         <input
                             type="hidden"
                             name="id_competenza"
-                            value="<?= $c['id_competenza'] ?>"
+                            value="<?= $c->id_competenza ?>"
                         >
 
                         <select
@@ -226,43 +226,43 @@ include __DIR__ . '/../partials/back_button.php';
 
                             <option
                                 value="0"
-                                <?= $c['livello'] == 0 ? 'selected' : '' ?>
+                                <?= $c->livello == 0 ? 'selected' : '' ?>
                             >
                                 0
                             </option>
 
                             <option
                                 value="1"
-                                <?= $c['livello'] == 1 ? 'selected' : '' ?>
+                                <?= $c->livello == 1 ? 'selected' : '' ?>
                             >
                                 1
                             </option>
 
                             <option
                                 value="2"
-                                <?= $c['livello'] == 2 ? 'selected' : '' ?>
+                                <?= $c->livello == 2 ? 'selected' : '' ?>
                             >
                                 2
                             </option>
 
                             <option
                                 value="3"
-                                <?= $c['livello'] == 3 ? 'selected' : '' ?>
+                                <?= $c->livello == 3 ? 'selected' : '' ?>
                             >
                                 3
                             </option>
 
                             <option
                                 value="4"
-                                <?= $c['livello'] == 4 ? 'selected' : '' ?>
+                                <?= $c->livello == 4 ? 'selected' : '' ?>
                             >
                                 4
                             </option>
 
                             <option
                                 value="5"
-                                <?= $c['livello'] == 5 ? 'selected' : '' ?>
-                                >
+                                <?= $c->livello == 5 ? 'selected' : '' ?>
+                            >
                                 5
                             </option>
 
@@ -283,7 +283,7 @@ include __DIR__ . '/../partials/back_button.php';
                     <!-- ELIMINA -->
 
                     <a
-                        href="/esg-balance/competenza.php?action=delete&id=<?= $c['id_competenza'] ?>"
+                        href="/esg-balance/competenza.php?action=delete&id=<?= $c->id_competenza ?>"
                         class="btn btn-danger btn-sm"
                         onclick="return confirm('Vuoi eliminare questa competenza?');"
                     >

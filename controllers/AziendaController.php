@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/AziendaRepository.php';
+require_once __DIR__ . '/../models/Azienda.php';
 require_once __DIR__ . '/../config/logger.php';
 
 class AziendaController {
@@ -57,9 +58,12 @@ class AziendaController {
 
             $logo = '';
 
-            if(isset($_FILES['logo'])) {
+            if(
+                isset($_FILES['logo']) &&
+                $_FILES['logo']['error'] === UPLOAD_ERR_OK
+            ) {
 
-                $nomeFile = time() . '_' . $_FILES['logo']['name'];
+                $nomeFile = time() . '_' . basename($_FILES['logo']['name']);
 
                 $path = 'uploads/loghi/' . $nomeFile;
 
@@ -73,21 +77,36 @@ class AziendaController {
                 $logo = $path;
             }
 
-            $this->repo->create(
+            /*
+            |--------------------------------------------------------------------------
+            | CREA MODEL AZIENDA
+            |--------------------------------------------------------------------------
+            */
 
+            $azienda = new Azienda(
+
+                null,
                 $nome,
                 $ragioneSociale,
                 $partitaIva,
                 $settore,
                 $numeroDipendenti,
                 $logo,
+                0,
                 $utente['id']
 
+            );
+
+            $this->repo->create(
+                $azienda
             );
 
             salvaEvento(
                 "Creata azienda: " . $nome
             );
+
+            $_SESSION['successo_azienda'] =
+                "Azienda creata correttamente.";
 
             header('Location: aziende.php');
 
@@ -105,13 +124,40 @@ class AziendaController {
 
         if(isset($_GET['id'])) {
 
-            $this->repo->delete(
-                $_GET['id']
+            $idAzienda = $_GET['id'];
+
+            $risultato = $this->repo->delete(
+                $idAzienda
             );
 
+            /*
+            |--------------------------------------------------------------------------
+            | AZIENDA NON ELIMINABILE
+            |--------------------------------------------------------------------------
+            */
+
+            if(!$risultato) {
+
+                $_SESSION['errore_azienda'] =
+                    "Impossibile eliminare l'azienda perché uno o più bilanci sono coinvolti in revisioni ESG.";
+
+                header('Location: aziende.php');
+
+                exit;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | ELIMINAZIONE RIUSCITA
+            |--------------------------------------------------------------------------
+            */
+
             salvaEvento(
-                "Eliminata azienda ID: " . $_GET['id']
+                "Eliminata azienda ID: " . $idAzienda
             );
+
+            $_SESSION['successo_azienda'] =
+                "Azienda eliminata correttamente.";
 
             header('Location: aziende.php');
 

@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/CompetenzaRepository.php';
+require_once __DIR__ . '/../models/Competenza.php';
 
 class CompetenzaController {
 
@@ -92,11 +93,19 @@ class CompetenzaController {
 
             /*
             |------------------------------------------------------------------
-            | Controllo livello
+            | Creazione model per validazione
             |------------------------------------------------------------------
             */
 
-            if($livello < 0 || $livello > 5) {
+            $competenza = new Competenza(
+                $utente['id'],
+                $idCompetenza,
+                $livello
+            );
+
+            if(!$competenza->isValid()) {
+
+                $_SESSION['errore_competenza'] = "Livello competenza non valido (0-5)";
 
                 header('Location: competenza.php');
 
@@ -116,6 +125,8 @@ class CompetenzaController {
                 $livello
 
             );
+
+            $_SESSION['successo_competenza'] = "Competenza aggiunta correttamente";
 
             header('Location: competenza.php');
 
@@ -159,11 +170,19 @@ class CompetenzaController {
 
             /*
             |------------------------------------------------------------------
-            | Controllo livello
+            | Creazione model per validazione
             |------------------------------------------------------------------
             */
 
-            if($livello < 0 || $livello > 5) {
+            $competenza = new Competenza(
+                $utente['id'],
+                $idCompetenza,
+                $livello
+            );
+
+            if(!$competenza->isValid()) {
+
+                $_SESSION['errore_competenza'] = "Livello competenza non valido (0-5)";
 
                 header('Location: competenza.php');
 
@@ -183,6 +202,8 @@ class CompetenzaController {
                 $livello
 
             );
+
+            $_SESSION['successo_competenza'] = "Competenza aggiornata correttamente";
 
             header('Location: competenza.php');
 

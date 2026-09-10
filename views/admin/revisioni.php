@@ -145,22 +145,22 @@ include __DIR__ . '/../partials/back_button.php';
         <tr>
 
             <td>
-                <?= $r['id_revisione'] ?>
+                <?= $r->id_revisione ?>
             </td>
 
             <td>
-                <?= $r['azienda'] ?>
+                <?= $r->azienda ?>
             </td>
 
             <td>
-                <?= $r['username'] ?>
+                <?= $r->username ?>
             </td>
 
             <td>
 
                 <a
 
-                    href="/esg-balance/revisioni.php?action=dettaglioAdmin&id=<?= $r['id_bilancio'] ?>"
+                    href="/esg-balance/revisioni.php?action=dettaglioAdmin&id=<?= $r->id_bilancio ?>"
 
                     class="btn btn-info btn-sm"
                 >

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/ProfiloResponsabile.php';
 
 class ProfiloResponsabileRepository {
 
@@ -41,7 +42,17 @@ class ProfiloResponsabileRepository {
 
         $stmt->execute([$idUtente]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if(!$row) {
+            return null;
+        }
+
+        return new ProfiloResponsabile(
+            $row['id_utente'],
+            $row['cv_pdf'],
+            $row['username']
+        );
     }
 
     /*

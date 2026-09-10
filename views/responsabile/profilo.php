@@ -1,6 +1,6 @@
 <?php
 
-/** @var array|false $profilo */
+/** @var ProfiloResponsabile|null $profilo */
 
 include __DIR__ . '/../partials/header.php';
 
@@ -27,7 +27,7 @@ include __DIR__ . '/../partials/back_button.php';
 
         <?php if(
             $profilo &&
-            !empty($profilo['cv_pdf'])
+            $profilo->hasCv()
         ) : ?>
 
             <div class="alert alert-success">
@@ -39,7 +39,7 @@ include __DIR__ . '/../partials/back_button.php';
             <div class="mb-4">
 
                 <a
-                    href="/esg-balance/<?= htmlspecialchars($profilo['cv_pdf']) ?>"
+                    href="/esg-balance/<?= htmlspecialchars($profilo->cv_pdf) ?>"
                     target="_blank"
                     class="btn btn-primary"
                 >
@@ -110,7 +110,7 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <?php if(
                     $profilo &&
-                    !empty($profilo['cv_pdf'])
+                    $profilo->hasCv()
                 ) : ?>
 
                     Sostituisci CV
@@ -127,7 +127,7 @@ include __DIR__ . '/../partials/back_button.php';
 
         <?php if(
             $profilo &&
-            !empty($profilo['cv_pdf'])
+            $profilo->hasCv()
         ) : ?>
 
             <hr>

@@ -6,6 +6,7 @@ include __DIR__ . '/../partials/header.php';
 
 $backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
@@ -13,6 +14,32 @@ include __DIR__ . '/../partials/back_button.php';
     Le mie aziende
 
 </h2>
+
+<?php if(isset($_SESSION['errore_azienda'])) : ?>
+
+    <div class="alert alert-danger">
+
+        <?= htmlspecialchars($_SESSION['errore_azienda']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['errore_azienda']); ?>
+
+<?php endif; ?>
+
+
+<?php if(isset($_SESSION['successo_azienda'])) : ?>
+
+    <div class="alert alert-success">
+
+        <?= htmlspecialchars($_SESSION['successo_azienda']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['successo_azienda']); ?>
+
+<?php endif; ?>
+
 
 <form
     method="POST"
@@ -24,7 +51,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Nome
+
         </label>
 
         <input
@@ -39,7 +68,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Ragione Sociale
+
         </label>
 
         <input
@@ -54,7 +85,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Partita IVA
+
         </label>
 
         <input
@@ -69,7 +102,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Settore
+
         </label>
 
         <input
@@ -84,13 +119,16 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Numero Dipendenti
+
         </label>
 
         <input
             type="number"
             name="numero_dipendenti"
             class="form-control"
+            min="0"
             required
         >
 
@@ -99,18 +137,24 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Logo
+
         </label>
 
         <input
             type="file"
             name="logo"
             class="form-control"
+            accept="image/*"
         >
 
     </div>
 
-    <button class="btn btn-success">
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
 
         Crea Azienda
 
@@ -143,26 +187,31 @@ include __DIR__ . '/../partials/back_button.php';
         <tr>
 
             <td>
-                <?= $a['id_azienda'] ?>
-            </td>
 
-            <td>
-                <?= $a['nome'] ?>
-            </td>
+                <?= $a->id_azienda ?>
 
-            <td>
-                <?= $a['settore'] ?>
             </td>
 
             <td>
 
-                <?php if($a['logo']) : ?>
+                <?= htmlspecialchars($a->nome) ?>
+
+            </td>
+
+            <td>
+
+                <?= htmlspecialchars($a->settore ?? '') ?>
+
+            </td>
+
+            <td>
+
+                <?php if(!empty($a->logo)) : ?>
 
                     <img
-
-                        src="/esg-balance/<?= $a['logo'] ?>"
-
+                        src="/esg-balance/<?= htmlspecialchars($a->logo) ?>"
                         width="80"
+                        alt="Logo <?= htmlspecialchars($a->nome) ?>"
                     >
 
                 <?php endif; ?>
@@ -172,10 +221,9 @@ include __DIR__ . '/../partials/back_button.php';
             <td>
 
                 <a
-
-                    href="/esg-balance/aziende.php?action=delete&id=<?= $a['id_azienda'] ?>"
-
+                    href="/esg-balance/aziende.php?action=delete&id=<?= $a->id_azienda ?>"
                     class="btn btn-danger btn-sm"
+                    onclick="return confirm('Vuoi davvero eliminare questa azienda?');"
                 >
 
                     Elimina
@@ -192,3 +240,8 @@ include __DIR__ . '/../partials/back_button.php';
 
 </table>
 
+<?php
+
+include __DIR__ . '/../partials/footer.php';
+
+?>

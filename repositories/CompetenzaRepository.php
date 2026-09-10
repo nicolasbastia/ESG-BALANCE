@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/Competenza.php';
 
 class CompetenzaRepository {
 
@@ -73,7 +74,19 @@ class CompetenzaRepository {
             $idUtente
         ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $competenze = [];
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+            $competenze[] = new Competenza(
+                $row['id_utente'],
+                $row['id_competenza'],
+                $row['livello'],
+                $row['nome']
+            );
+        }
+
+        return $competenze;
     }
 
     /*
@@ -90,7 +103,13 @@ class CompetenzaRepository {
 
     ) {
 
-        if($livello < 0 || $livello > 5) {
+        $competenza = new Competenza(
+            $idUtente,
+            $idCompetenza,
+            $livello
+        );
+
+        if(!$competenza->isValid()) {
 
             return false;
         }
@@ -126,7 +145,13 @@ class CompetenzaRepository {
 
     ) {
 
-        if($livello < 0 || $livello > 5) {
+        $competenza = new Competenza(
+            $idUtente,
+            $idCompetenza,
+            $livello
+        );
+
+        if(!$competenza->isValid()) {
 
             return false;
         }

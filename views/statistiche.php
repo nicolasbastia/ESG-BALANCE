@@ -82,7 +82,7 @@ include __DIR__ . '/partials/back_button.php';
                     Azienda più affidabile
                 </h5>
 
-                <?php if($aziendaPiuAffidabile) : ?>
+                <?php if(isset($aziendaPiuAffidabile) && $aziendaPiuAffidabile) : ?>
 
                     <h4>
                         <?= htmlspecialchars($aziendaPiuAffidabile['nome']) ?>

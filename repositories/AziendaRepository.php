@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/Azienda.php';
 
 class AziendaRepository {
 
@@ -15,7 +16,7 @@ class AziendaRepository {
 
     /*
     |--------------------------------------------------------------------------
-    | LISTA
+    | LISTA AZIENDE DEL RESPONSABILE
     |--------------------------------------------------------------------------
     */
 
@@ -23,7 +24,16 @@ class AziendaRepository {
 
         $sql = "
 
-            SELECT *
+            SELECT
+                id_azienda,
+                nome,
+                ragione_sociale,
+                partita_iva,
+                settore,
+                numero_dipendenti,
+                logo,
+                nr_bilanci,
+                id_responsabile
 
             FROM azienda
 
@@ -35,13 +45,36 @@ class AziendaRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idResponsabile]);
+        $stmt->execute([
+            $idResponsabile
+        ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $aziende = [];
+
+        foreach($rows as $row) {
+
+            $aziende[] = new Azienda(
+
+                $row['id_azienda'],
+                $row['nome'],
+                $row['ragione_sociale'],
+                $row['partita_iva'],
+                $row['settore'],
+                $row['numero_dipendenti'],
+                $row['logo'],
+                $row['nr_bilanci'],
+                $row['id_responsabile']
+
+            );
+        }
+
+        return $aziende;
     }
 
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | AFFIDABILITA AZIENDA DEL RESPONSABILE
     |--------------------------------------------------------------------------
@@ -61,7 +94,7 @@ class AziendaRepository {
             FROM vista_affidabilita_aziende v
 
             JOIN azienda a
-            ON v.id_azienda = a.id_azienda
+                ON v.id_azienda = a.id_azienda
 
             WHERE a.id_responsabile = ?
 
@@ -71,7 +104,9 @@ class AziendaRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idResponsabile]);
+        $stmt->execute([
+            $idResponsabile
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -112,17 +147,7 @@ class AziendaRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function create(
-
-        $nome,
-        $ragioneSociale,
-        $partitaIva,
-        $settore,
-        $numeroDipendenti,
-        $logo,
-        $idResponsabile
-
-    ) {
+    public function create(Azienda $azienda) {
 
         $sql = "
 
@@ -142,13 +167,13 @@ class AziendaRepository {
 
         $result = $stmt->execute([
 
-            $nome,
-            $ragioneSociale,
-            $partitaIva,
-            $settore,
-            $numeroDipendenti,
-            $logo,
-            $idResponsabile
+            $azienda->nome,
+            $azienda->ragione_sociale,
+            $azienda->partita_iva,
+            $azienda->settore,
+            $azienda->numero_dipendenti,
+            $azienda->logo,
+            $azienda->id_responsabile
 
         ]);
 
@@ -157,25 +182,71 @@ class AziendaRepository {
         return $result;
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO REVISIONI
+    |--------------------------------------------------------------------------
+    */
+
+    public function haRevisioni($idAzienda) {
+
+        $sql = "
+
+            SELECT COUNT(*)
+
+            FROM revisione r
+
+            JOIN bilancio b
+                ON r.id_bilancio = b.id_bilancio
+
+            WHERE b.id_azienda = ?
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            $idAzienda
+        ]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | DELETE
     |--------------------------------------------------------------------------
     */
 
-    public function delete($id) {
+    public function delete($idAzienda) {
 
-    $sql = "
-        CALL sp_elimina_azienda(?)
-    ";
+        /*
+        | Se esistono revisioni associate ai bilanci dell'azienda
+        | non permettiamo la cancellazione.
+        */
 
-    $stmt = $this->pdo->prepare($sql);
+        if($this->haRevisioni($idAzienda)) {
 
-    $result = $stmt->execute([$id]);
+            return false;
+        }
 
-    $stmt->closeCursor();
+        $sql = "
 
-    return $result;
+            CALL sp_elimina_azienda(?)
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idAzienda
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
     }
 }
 ?>
