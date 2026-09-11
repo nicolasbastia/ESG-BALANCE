@@ -5,9 +5,10 @@ session_start();
 require_once __DIR__ . '/../repositories/RevisioneRepository.php';
 require_once __DIR__ . '/../repositories/NotaRepository.php';
 require_once __DIR__ . '/../repositories/GiudizioRepository.php';
-require_once __DIR__ . '/../repositories/UtenteRepository.php';
+require_once __DIR__ . '/../repositories/RevisoreRepository.php';
 
 require_once __DIR__ . '/../models/Revisione.php';
+require_once __DIR__ . '/../models/NotaRevisione.php';
 require_once __DIR__ . '/../models/GiudizioRevisione.php';
 
 require_once __DIR__ . '/../config/logger.php';
@@ -15,18 +16,54 @@ require_once __DIR__ . '/../config/logger.php';
 class RevisioneController {
 
     private $repo;
-
     private $notaRepo;
-
     private $giudizioRepo;
 
     public function __construct() {
 
         $this->repo = new RevisioneRepository();
-
         $this->notaRepo = new NotaRepository();
-
         $this->giudizioRepo = new GiudizioRepository();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO AMMINISTRATORE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaAmministratore() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'amministratore'
+        ) {
+
+            header('Location: /esg-balance/index.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO REVISORE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaRevisore() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'revisore'
+        ) {
+
+            header('Location: /esg-balance/index.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
     }
 
     /*
@@ -36,6 +73,8 @@ class RevisioneController {
     */
 
     public function index() {
+
+        $this->verificaAmministratore();
 
         $bilanci = $this->repo->getBilanci();
 
@@ -54,13 +93,45 @@ class RevisioneController {
 
     public function assegna() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $this->verificaAmministratore();
+
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
+            header('Location: /esg-balance/revisioni.php');
+            exit;
+        }
+
+        $idBilancio = filter_input(
+            INPUT_POST,
+            'id_bilancio',
+            FILTER_VALIDATE_INT
+        );
+
+        $idRevisore = filter_input(
+            INPUT_POST,
+            'id_revisore',
+            FILTER_VALIDATE_INT
+        );
+
+        if(
+            !$idBilancio ||
+            !$idRevisore ||
+            $idBilancio <= 0 ||
+            $idRevisore <= 0
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "Bilancio o revisore non valido.";
+
+            header('Location: /esg-balance/revisioni.php');
+            exit;
+        }
+
+        try {
 
             $risultato = $this->repo->assegna(
-
-                $_POST['id_bilancio'],
-                $_POST['id_revisore']
-
+                $idBilancio,
+                $idRevisore
             );
 
             /*
@@ -74,8 +145,7 @@ class RevisioneController {
                 $_SESSION['errore_revisione'] =
                     "Questo revisore è già assegnato a questo bilancio.";
 
-                header('Location: revisioni.php');
-
+                header('Location: /esg-balance/revisioni.php');
                 exit;
             }
 
@@ -92,10 +162,14 @@ class RevisioneController {
             $_SESSION['successo_revisione'] =
                 "Revisore assegnato correttamente.";
 
-            header('Location: revisioni.php');
+        } catch(PDOException $e) {
 
-            exit;
+            $_SESSION['errore_revisione'] =
+                "Impossibile assegnare il revisore al bilancio.";
         }
+
+        header('Location: /esg-balance/revisioni.php');
+        exit;
     }
 
     /*
@@ -106,12 +180,10 @@ class RevisioneController {
 
     public function areaRevisore() {
 
-        $utente = $_SESSION['utente'];
+        $utente = $this->verificaRevisore();
 
         $revisioni = $this->repo->getRevisioniRevisore(
-
             $utente['id']
-
         );
 
         require __DIR__ . '/../views/revisore/revisioni.php';
@@ -125,7 +197,42 @@ class RevisioneController {
 
     public function dettaglio() {
 
-        $idBilancio = $_GET['id'];
+        $utente = $this->verificaRevisore();
+
+        $idBilancio = filter_input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idBilancio || $idBilancio <= 0) {
+
+            $_SESSION['errore_revisione'] =
+                "Bilancio non valido.";
+
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO ASSEGNAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            !$this->repo->isAssegnato(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "Non sei assegnato a questo bilancio.";
+
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -134,12 +241,8 @@ class RevisioneController {
         */
 
         $dettagli = $this->repo->getDettaglioBilancio(
-
             $idBilancio
-
         );
-
-        $utente = $_SESSION['utente'];
 
         /*
         |--------------------------------------------------------------------------
@@ -148,10 +251,8 @@ class RevisioneController {
         */
 
         $note = $this->notaRepo->getByRevisoreEBilancio(
-
             $utente['id'],
             $idBilancio
-
         );
 
         /*
@@ -161,10 +262,8 @@ class RevisioneController {
         */
 
         $giudizio = $this->giudizioRepo->getByBilancio(
-
             $idBilancio,
             $utente['id']
-
         );
 
         /*
@@ -184,22 +283,22 @@ class RevisioneController {
 
     public function dettaglioAdmin() {
 
-        $utente = $_SESSION['utente'];
+        $this->verificaAmministratore();
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO RUOLO
-        |--------------------------------------------------------------------------
-        */
+        $idBilancio = filter_input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
 
-        if($utente['ruolo'] !== 'amministratore') {
+        if(!$idBilancio || $idBilancio <= 0) {
 
-            header('Location: index.php');
+            $_SESSION['errore_revisione'] =
+                "Bilancio non valido.";
 
+            header('Location: /esg-balance/revisioni.php');
             exit;
         }
-
-        $idBilancio = $_GET['id'];
 
         /*
         |--------------------------------------------------------------------------
@@ -208,9 +307,7 @@ class RevisioneController {
         */
 
         $dettagli = $this->repo->getDettaglioBilancio(
-
             $idBilancio
-
         );
 
         /*
@@ -220,9 +317,7 @@ class RevisioneController {
         */
 
         $note = $this->notaRepo->getByBilancio(
-
             $idBilancio
-
         );
 
         /*
@@ -232,9 +327,7 @@ class RevisioneController {
         */
 
         $giudizi = $this->giudizioRepo->getTuttiByBilancio(
-
             $idBilancio
-
         );
 
         /*
@@ -254,53 +347,153 @@ class RevisioneController {
 
     public function creaNota() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $utente = $this->verificaRevisore();
 
-            $utente = $_SESSION['utente'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $idBilancio = $_POST['id_bilancio'];
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CONTROLLO REVISIONE CONCLUSA
-            |--------------------------------------------------------------------------
-            */
+        $idBilancio = filter_input(
+            INPUT_POST,
+            'id_bilancio',
+            FILTER_VALIDATE_INT
+        );
 
-            $giudizioEsistente =
-                $this->giudizioRepo->esisteGiudizio(
+        $idVoceBilancio = filter_input(
+            INPUT_POST,
+            'id_voce_bilancio',
+            FILTER_VALIDATE_INT
+        );
 
-                    $idBilancio,
-                    $utente['id']
+        $testo = trim($_POST['testo'] ?? '');
 
-                );
+        if(
+            !$idBilancio ||
+            !$idVoceBilancio ||
+            $idBilancio <= 0 ||
+            $idVoceBilancio <= 0
+        ) {
 
-            if($giudizioEsistente) {
+            $_SESSION['errore_revisione'] =
+                "Dati della nota non validi.";
 
-                $_SESSION['errore_revisione'] =
-                    "La revisione è già conclusa. Non è possibile aggiungere nuove note.";
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
-                header(
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO ASSEGNAZIONE
+        |--------------------------------------------------------------------------
+        */
 
-                    'Location: revisione_dettaglio.php?id=' .
-                    $idBilancio
+        if(
+            !$this->repo->isAssegnato(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
 
-                );
+            $_SESSION['errore_revisione'] =
+                "Non sei assegnato a questo bilancio.";
 
-                exit;
-            }
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CREA NOTA
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO VOCE DEL BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            !$this->repo->voceAppartieneAlBilancio(
+                $idVoceBilancio,
+                $idBilancio
+            )
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "La voce selezionata non appartiene a questo bilancio.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
+            );
+
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO TESTO
+        |--------------------------------------------------------------------------
+        */
+
+        if($testo === '') {
+
+            $_SESSION['errore_revisione'] =
+                "Il testo della nota non può essere vuoto.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
+            );
+
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO REVISIONE CONCLUSA
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            $this->giudizioRepo->esisteGiudizio(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "La revisione è già conclusa. Non è possibile aggiungere nuove note.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
+            );
+
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREA MODEL NOTA
+        |--------------------------------------------------------------------------
+        */
+
+        $nota = new NotaRevisione(
+            null,
+            $utente['id'],
+            $idVoceBilancio,
+            date('Y-m-d'),
+            $testo
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALVA NOTA
+        |--------------------------------------------------------------------------
+        */
+
+        try {
 
             $this->notaRepo->create(
-
-                $utente['id'],
-                $_POST['id_voce_bilancio'],
-                $_POST['testo']
-
+                $nota
             );
 
             salvaEvento(
@@ -310,15 +503,18 @@ class RevisioneController {
             $_SESSION['successo_revisione'] =
                 "Nota inserita correttamente.";
 
-            header(
+        } catch(PDOException $e) {
 
-                'Location: revisione_dettaglio.php?id=' .
-                $idBilancio
-
-            );
-
-            exit;
+            $_SESSION['errore_revisione'] =
+                "Impossibile inserire la nota.";
         }
+
+        header(
+            'Location: /esg-balance/revisione_dettaglio.php?id=' .
+            $idBilancio
+        );
+
+        exit;
     }
 
     /*
@@ -329,63 +525,152 @@ class RevisioneController {
 
     public function creaGiudizio() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $utente = $this->verificaRevisore();
 
-            $utente = $_SESSION['utente'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $idBilancio = $_POST['id_bilancio'];
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CONTROLLO GIUDIZIO GIA PRESENTE
-            |--------------------------------------------------------------------------
-            */
+        $idBilancio = filter_input(
+            INPUT_POST,
+            'id_bilancio',
+            FILTER_VALIDATE_INT
+        );
 
-            $giudizioEsistente =
-                $this->giudizioRepo->esisteGiudizio(
+        $esito = trim($_POST['esito'] ?? '');
 
-                    $idBilancio,
-                    $utente['id']
+        $rilievi = trim($_POST['rilievi'] ?? '');
 
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE BILANCIO
+        |--------------------------------------------------------------------------
+        */
 
-            if($giudizioEsistente) {
+        if(!$idBilancio || $idBilancio <= 0) {
 
-                $_SESSION['errore_revisione'] =
-                    "Hai già inviato il giudizio finale per questa revisione.";
+            $_SESSION['errore_revisione'] =
+                "Bilancio non valido.";
 
-                header(
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
 
-                    'Location: revisione_dettaglio.php?id=' .
-                    $idBilancio
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO ASSEGNAZIONE
+        |--------------------------------------------------------------------------
+        */
 
-                );
-
-                exit;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREA MODEL GIUDIZIO
-            |--------------------------------------------------------------------------
-            */
-
-            $giudizio = new GiudizioRevisione(
-
-                null,
+        if(
+            !$this->repo->isAssegnato(
                 $idBilancio,
-                $utente['id'],
-                $_POST['esito'],
-                date('Y-m-d'),
-                $_POST['rilievi']
+                $utente['id']
+            )
+        ) {
 
+            $_SESSION['errore_revisione'] =
+                "Non sei assegnato a questo bilancio.";
+
+            header('Location: /esg-balance/revisioni_revisore.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE ESITO
+        |--------------------------------------------------------------------------
+        */
+
+        $esitiConsentiti = [
+            'approvazione',
+            'approvazione con rilievi',
+            'respingimento'
+        ];
+
+        if(!in_array($esito, $esitiConsentiti, true)) {
+
+            $_SESSION['errore_revisione'] =
+                "Esito del giudizio non valido.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | SALVA GIUDIZIO
-            |--------------------------------------------------------------------------
-            */
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO RILIEVI
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            $esito === 'approvazione con rilievi' &&
+            $rilievi === ''
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "Inserisci i rilievi per l'approvazione con rilievi.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
+            );
+
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO GIUDIZIO GIA PRESENTE
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            $this->giudizioRepo->esisteGiudizio(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
+
+            $_SESSION['errore_revisione'] =
+                "Hai già inviato il giudizio finale per questa revisione.";
+
+            header(
+                'Location: /esg-balance/revisione_dettaglio.php?id=' .
+                $idBilancio
+            );
+
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREA MODEL GIUDIZIO
+        |--------------------------------------------------------------------------
+        */
+
+        $giudizio = new GiudizioRevisione(
+            null,
+            $idBilancio,
+            $utente['id'],
+            $esito,
+            date('Y-m-d'),
+            $rilievi !== '' ? $rilievi : null
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALVA GIUDIZIO
+        |--------------------------------------------------------------------------
+        */
+
+        try {
 
             $this->giudizioRepo->create(
                 $giudizio
@@ -397,12 +682,10 @@ class RevisioneController {
             |--------------------------------------------------------------------------
             */
 
-            $utenteRepo = new UtenteRepository();
+            $revisoreRepo = new RevisoreRepository();
 
-            $datiRevisore = $utenteRepo->getDatiRevisore(
-
+            $datiRevisore = $revisoreRepo->getByUtente(
                 $utente['id']
-
             );
 
             if($datiRevisore) {
@@ -430,15 +713,26 @@ class RevisioneController {
             $_SESSION['successo_revisione'] =
                 "Giudizio finale inviato correttamente. La revisione è ora conclusa.";
 
-            header(
+        } catch(PDOException $e) {
 
-                'Location: revisione_dettaglio.php?id=' .
-                $idBilancio
+            if($e->getCode() === '23000') {
 
-            );
+                $_SESSION['errore_revisione'] =
+                    "Hai già inviato il giudizio finale per questa revisione.";
 
-            exit;
+            } else {
+
+                $_SESSION['errore_revisione'] =
+                    "Impossibile salvare il giudizio finale.";
+            }
         }
+
+        header(
+            'Location: /esg-balance/revisione_dettaglio.php?id=' .
+            $idBilancio
+        );
+
+        exit;
     }
 }
 

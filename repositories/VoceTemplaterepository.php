@@ -27,7 +27,8 @@ class VoceTemplateRepository {
             SELECT
                 id_voce,
                 nome,
-                descrizione
+                descrizione,
+                id_amministratore
 
             FROM voce_template
 
@@ -47,7 +48,8 @@ class VoceTemplateRepository {
 
                 $row['id_voce'],
                 $row['nome'],
-                $row['descrizione']
+                $row['descrizione'],
+                $row['id_amministratore']
 
             );
         }
@@ -61,12 +63,7 @@ class VoceTemplateRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function create(
-
-        VoceTemplate $voce,
-        $idAmministratore
-
-    ) {
+    public function create(VoceTemplate $voce) {
 
         $sql = "
 
@@ -84,7 +81,7 @@ class VoceTemplateRepository {
 
             $voce->nome,
             $voce->descrizione,
-            $idAmministratore
+            $voce->id_amministratore
 
         ]);
 
@@ -153,4 +150,5 @@ class VoceTemplateRepository {
         return $result;
     }
 }
+
 ?>

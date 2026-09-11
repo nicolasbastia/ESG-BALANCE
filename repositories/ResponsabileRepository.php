@@ -1,9 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../models/ProfiloResponsabile.php';
+require_once __DIR__ . '/../models/Responsabile.php';
 
-class ProfiloResponsabileRepository {
+class ResponsabileRepository {
 
     private $pdo;
 
@@ -40,15 +40,18 @@ class ProfiloResponsabileRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idUtente]);
+        $stmt->execute([
+            $idUtente
+        ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if(!$row) {
+
             return null;
         }
 
-        return new ProfiloResponsabile(
+        return new Responsabile(
             $row['id_utente'],
             $row['cv_pdf'],
             $row['username']
@@ -61,23 +64,26 @@ class ProfiloResponsabileRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function updateCv($idUtente, $cvPdf) {
+    public function updateCv(
+        $idUtente,
+        $cvPdf
+    ) {
 
-            $sql = "
-                CALL sp_aggiorna_cv_responsabile(?, ?)
-            ";
+        $sql = "
+            CALL sp_aggiorna_cv_responsabile(?, ?)
+        ";
 
-            $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-            $result = $stmt->execute([
-                $idUtente,
-                $cvPdf
-            ]);
+        $result = $stmt->execute([
+            $idUtente,
+            $cvPdf
+        ]);
 
-            $stmt->closeCursor();
+        $stmt->closeCursor();
 
-            return $result;
-        }
+        return $result;
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -85,7 +91,7 @@ class ProfiloResponsabileRepository {
     |--------------------------------------------------------------------------
     */
 
-        public function deleteCv($idUtente) {
+    public function deleteCv($idUtente) {
 
         $sql = "
             CALL sp_elimina_cv_responsabile(?)
@@ -102,4 +108,5 @@ class ProfiloResponsabileRepository {
         return $result;
     }
 }
+
 ?>

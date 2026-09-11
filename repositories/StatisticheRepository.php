@@ -2,19 +2,20 @@
 
 require_once __DIR__ . '/../config/db.php';
 
-class StatisticheRepository {
-
+class StatisticheRepository
+{
     private $pdo;
 
-    public function __construct() {
-
+    public function __construct()
+    {
         global $pdo;
 
         $this->pdo = $pdo;
     }
 
-    public function getNumeroAziende() {
 
+    public function getNumeroAziende()
+    {
         $sql = "
             SELECT numero_aziende
             FROM vista_numero_aziende
@@ -22,11 +23,12 @@ class StatisticheRepository {
 
         $stmt = $this->pdo->query($sql);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int) $stmt->fetchColumn();
     }
 
-    public function getNumeroRevisori() {
 
+    public function getNumeroRevisori()
+    {
         $sql = "
             SELECT numero_revisori
             FROM vista_numero_revisori
@@ -34,11 +36,12 @@ class StatisticheRepository {
 
         $stmt = $this->pdo->query($sql);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int) $stmt->fetchColumn();
     }
 
-    public function getAziendaPiuAffidabile() {
 
+    public function getAziendaPiuAffidabile()
+    {
         $sql = "
             SELECT
                 id_azienda,
@@ -54,11 +57,14 @@ class StatisticheRepository {
 
         $stmt = $this->pdo->query($sql);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $azienda = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $azienda ?: null;
     }
 
-    public function getClassificaBilanci() {
 
+    public function getClassificaBilanci()
+    {
         $sql = "
             SELECT
                 id_bilancio,

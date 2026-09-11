@@ -10,14 +10,12 @@ class GiudizioRevisione {
     public $rilievi;
 
     public function __construct(
-
         $id_giudizio,
         $id_bilancio,
         $id_revisore,
         $esito,
         $data_giudizio,
         $rilievi
-
     ) {
 
         $this->id_giudizio = $id_giudizio;
@@ -28,4 +26,5 @@ class GiudizioRevisione {
         $this->rilievi = $rilievi;
     }
 }
+
 ?>

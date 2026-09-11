@@ -5,6 +5,7 @@ session_start();
 require_once __DIR__ . '/../repositories/BilancioRepository.php';
 require_once __DIR__ . '/../repositories/NotaRepository.php';
 require_once __DIR__ . '/../repositories/GiudizioRepository.php';
+require_once __DIR__ . '/../models/Bilancio.php';
 require_once __DIR__ . '/../config/logger.php';
 
 class BilancioController {
@@ -18,13 +19,91 @@ class BilancioController {
 
     /*
     |--------------------------------------------------------------------------
+    | CONTROLLO ACCESSO RESPONSABILE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaResponsabile() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'responsabile'
+        ) {
+
+            header('Location: login.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO AZIENDA DEL RESPONSABILE
+    |--------------------------------------------------------------------------
+    */
+
+    private function aziendaAppartieneAlResponsabile(
+        $idAzienda,
+        $idResponsabile
+    ) {
+
+        $aziende = $this->repo->getAziendeResponsabile(
+            $idResponsabile
+        );
+
+        foreach($aziende as $azienda) {
+
+            if(
+                (int) $azienda['id_azienda'] ===
+                (int) $idAzienda
+            ) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO BILANCIO DEL RESPONSABILE
+    |--------------------------------------------------------------------------
+    */
+
+    private function bilancioAppartieneAlResponsabile(
+        $idBilancio,
+        $idResponsabile
+    ) {
+
+        $bilanci = $this->repo->getByResponsabile(
+            $idResponsabile
+        );
+
+        foreach($bilanci as $bilancio) {
+
+            if(
+                (int) $bilancio->id_bilancio ===
+                (int) $idBilancio
+            ) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
     */
 
     public function index() {
 
-        $utente = $_SESSION['utente'];
+        $utente = $this->verificaResponsabile();
 
         $bilanci = $this->repo->getByResponsabile(
             $utente['id']
@@ -45,7 +124,48 @@ class BilancioController {
 
     public function dettaglio() {
 
-        $idBilancio = $_GET['id'];
+        $utente = $this->verificaResponsabile();
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO ID BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        $idBilancio = filter_input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idBilancio || $idBilancio <= 0) {
+
+            $_SESSION['errore_bilancio'] =
+                "Bilancio non valido.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO PROPRIETA BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            !$this->bilancioAppartieneAlResponsabile(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
+
+            $_SESSION['errore_bilancio'] =
+                "Non sei autorizzato a visualizzare questo bilancio.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -71,7 +191,7 @@ class BilancioController {
 
         /*
         |--------------------------------------------------------------------------
-        | GIUDIZIO
+        | GIUDIZI
         |--------------------------------------------------------------------------
         */
 
@@ -92,27 +212,106 @@ class BilancioController {
 
     public function create() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $utente = $this->verificaResponsabile();
 
-            $idAzienda = $_POST['id_azienda'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $dataCreazione = date('Y-m-d');
+            header('Location: bilanci.php');
+            exit;
+        }
 
-            $this->repo->create(
+        /*
+        |--------------------------------------------------------------------------
+        | ID AZIENDA
+        |--------------------------------------------------------------------------
+        */
 
+        $idAzienda = filter_input(
+            INPUT_POST,
+            'id_azienda',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idAzienda || $idAzienda <= 0) {
+
+            $_SESSION['errore_bilancio'] =
+                "Azienda non valida.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO PROPRIETA AZIENDA
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            !$this->aziendaAppartieneAlResponsabile(
                 $idAzienda,
-                $dataCreazione
+                $utente['id']
+            )
+        ) {
 
+            $_SESSION['errore_bilancio'] =
+                "Non sei autorizzato a creare un bilancio per questa azienda.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREA MODEL BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        $bilancio = new Bilancio(
+
+            null,
+            $idAzienda,
+            date('Y-m-d'),
+            'bozza'
+
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->create(
+                $bilancio
             );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_bilancio'] =
+                    "Impossibile creare il bilancio.";
+
+                header('Location: bilanci.php');
+                exit;
+            }
 
             salvaEvento(
                 "Creato bilancio azienda ID: " . $idAzienda
             );
 
-            header('Location: bilanci.php');
+            $_SESSION['successo_bilancio'] =
+                "Bilancio creato correttamente.";
 
-            exit;
+        } catch(PDOException $e) {
+
+            $_SESSION['errore_bilancio'] =
+                "Errore durante la creazione del bilancio.";
         }
+
+        header('Location: bilanci.php');
+        exit;
     }
 
     /*
@@ -123,20 +322,98 @@ class BilancioController {
 
     public function delete() {
 
-        if(isset($_GET['id'])) {
+        $utente = $this->verificaResponsabile();
 
-            $this->repo->delete(
-                $_GET['id']
-            );
+        /*
+        |--------------------------------------------------------------------------
+        | SOLO POST
+        |--------------------------------------------------------------------------
+        */
 
-            salvaEvento(
-                "Eliminato bilancio ID: " . $_GET['id']
-            );
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
             header('Location: bilanci.php');
-
             exit;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        $idBilancio = filter_input(
+            INPUT_POST,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idBilancio || $idBilancio <= 0) {
+
+            $_SESSION['errore_bilancio'] =
+                "Bilancio non valido.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO PROPRIETA BILANCIO
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            !$this->bilancioAppartieneAlResponsabile(
+                $idBilancio,
+                $utente['id']
+            )
+        ) {
+
+            $_SESSION['errore_bilancio'] =
+                "Non sei autorizzato a eliminare questo bilancio.";
+
+            header('Location: bilanci.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ELIMINAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->delete(
+                $idBilancio
+            );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_bilancio'] =
+                    "Impossibile eliminare il bilancio.";
+
+                header('Location: bilanci.php');
+                exit;
+            }
+
+            salvaEvento(
+                "Eliminato bilancio ID: " . $idBilancio
+            );
+
+            $_SESSION['successo_bilancio'] =
+                "Bilancio eliminato correttamente.";
+
+        } catch(PDOException $e) {
+
+            $_SESSION['errore_bilancio'] =
+                "Errore durante l'eliminazione del bilancio.";
+        }
+
+        header('Location: bilanci.php');
+        exit;
     }
 }
+
 ?>

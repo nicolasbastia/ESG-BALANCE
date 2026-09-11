@@ -1,5 +1,7 @@
 <?php
+
 include __DIR__ . '/../partials/header.php';
+
 ?>
 
 <h2 class="mb-4">
@@ -10,7 +12,7 @@ include __DIR__ . '/../partials/header.php';
 
     <div class="alert alert-danger">
 
-        <?= $errore ?>
+        <?= htmlspecialchars($errore) ?>
 
     </div>
 
@@ -28,6 +30,8 @@ include __DIR__ . '/../partials/header.php';
             type="text"
             name="username"
             class="form-control"
+            value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
+            autocomplete="username"
             required
         >
 
@@ -43,6 +47,7 @@ include __DIR__ . '/../partials/header.php';
             type="password"
             name="password"
             class="form-control"
+            autocomplete="current-password"
             required
         >
 
@@ -57,6 +62,18 @@ include __DIR__ . '/../partials/header.php';
 
 </form>
 
+<p class="mt-3">
+
+    Non hai un account?
+
+    <a href="/esg-balance/register.php">
+        Registrati
+    </a>
+
+</p>
+
 <?php
+
 include __DIR__ . '/../partials/footer.php';
+
 ?>

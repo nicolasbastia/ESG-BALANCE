@@ -17,11 +17,33 @@ class VoceTemplateController {
 
     /*
     |--------------------------------------------------------------------------
+    | CONTROLLO ACCESSO AMMINISTRATORE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaAmministratore() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'amministratore'
+        ) {
+
+            header('Location: login.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
     */
 
     public function index() {
+
+        $this->verificaAmministratore();
 
         $voci = $this->repo->getAll();
 
@@ -36,39 +58,76 @@ class VoceTemplateController {
 
     public function create() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $utente = $this->verificaAmministratore();
 
-            $utente = $_SESSION['utente'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $nome = $_POST['nome'];
-            $descrizione = $_POST['descrizione'];
+            header('Location: template.php');
+            exit;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CREAZIONE MODEL
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | DATI
+        |--------------------------------------------------------------------------
+        */
 
-            $voce = new VoceTemplate(
+        $nome = trim(
+            $_POST['nome'] ?? ''
+        );
 
-                null,
-                $nome,
-                $descrizione
+        $descrizione = trim(
+            $_POST['descrizione'] ?? ''
+        );
 
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        if($nome === '') {
+
+            $_SESSION['errore_template'] =
+                "Il nome della voce template è obbligatorio.";
+
+            header('Location: template.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAZIONE MODEL
+        |--------------------------------------------------------------------------
+        */
+
+        $voce = new VoceTemplate(
+            null,
+            $nome,
+            $descrizione !== '' ? $descrizione : null,
+            $utente['id']
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALVATAGGIO
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->create(
+                $voce
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | SALVATAGGIO
-            |--------------------------------------------------------------------------
-            */
+            if(!$risultato) {
 
-            $this->repo->create(
+                $_SESSION['errore_template'] =
+                    "Impossibile creare la voce template.";
 
-                $voce,
-                $utente['id']
-
-            );
+                header('Location: template.php');
+                exit;
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -83,10 +142,22 @@ class VoceTemplateController {
             $_SESSION['successo_template'] =
                 "Voce template creata correttamente.";
 
-            header('Location: template.php');
+        } catch(PDOException $e) {
 
-            exit;
+            if($e->getCode() === '23000') {
+
+                $_SESSION['errore_template'] =
+                    "Esiste già una voce template con questo nome.";
+
+            } else {
+
+                $_SESSION['errore_template'] =
+                    "Errore durante la creazione della voce template.";
+            }
         }
+
+        header('Location: template.php');
+        exit;
     }
 
     /*
@@ -97,20 +168,45 @@ class VoceTemplateController {
 
     public function delete() {
 
-        if(isset($_GET['id'])) {
+        $this->verificaAmministratore();
 
-            $idVoce = $_GET['id'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            /*
-            |--------------------------------------------------------------------------
-            | TENTATIVO ELIMINAZIONE
-            |--------------------------------------------------------------------------
-            */
+            header('Location: template.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID VOCE
+        |--------------------------------------------------------------------------
+        */
+
+        $idVoce = filter_input(
+            INPUT_POST,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idVoce || $idVoce <= 0) {
+
+            $_SESSION['errore_template'] =
+                "Voce template non valida.";
+
+            header('Location: template.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TENTATIVO ELIMINAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        try {
 
             $risultato = $this->repo->delete(
-
                 $idVoce
-
             );
 
             /*
@@ -125,7 +221,6 @@ class VoceTemplateController {
                     "Impossibile eliminare la voce: è già utilizzata in uno o più bilanci.";
 
                 header('Location: template.php');
-
                 exit;
             }
 
@@ -142,10 +237,15 @@ class VoceTemplateController {
             $_SESSION['successo_template'] =
                 "Voce template eliminata correttamente.";
 
-            header('Location: template.php');
+        } catch(PDOException $e) {
 
-            exit;
+            $_SESSION['errore_template'] =
+                "Errore durante l'eliminazione della voce template.";
         }
+
+        header('Location: template.php');
+        exit;
     }
 }
+
 ?>

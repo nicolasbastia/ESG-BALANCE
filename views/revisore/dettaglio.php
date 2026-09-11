@@ -1,12 +1,13 @@
 <?php
 
 /** @var array $dettagli */
-/** @var array $note */
+/** @var NotaRevisione[] $note */
 /** @var GiudizioRevisione|null $giudizio */
+/** @var int $idBilancio */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/revisioni_revisore.php';
+$backUrl = '/esg-balance/revisioni_revisore.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>
@@ -16,6 +17,11 @@ include __DIR__ . '/../partials/back_button.php';
     Dettaglio Revisione ESG
 
 </h2>
+
+
+<!-- ========================================================= -->
+<!-- MESSAGGI -->
+<!-- ========================================================= -->
 
 <?php if(isset($_SESSION['errore_revisione'])) : ?>
 
@@ -43,81 +49,105 @@ include __DIR__ . '/../partials/back_button.php';
 <?php endif; ?>
 
 
-<table class="table table-bordered">
+<!-- ========================================================= -->
+<!-- DATI BILANCIO -->
+<!-- ========================================================= -->
 
-    <thead>
+<?php if(empty($dettagli)) : ?>
 
-        <tr>
+    <div class="alert alert-info">
 
-            <th>Voce Bilancio</th>
-            <th>Valore Economico</th>
-            <th>Indicatore ESG</th>
-            <th>Valore ESG</th>
-            <th>Fonte</th>
-            <th>Data</th>
+        Questo bilancio non contiene ancora voci da revisionare.
 
-        </tr>
+    </div>
 
-    </thead>
+<?php else : ?>
 
-    <tbody>
+    <table class="table table-bordered">
 
-    <?php foreach($dettagli as $d) : ?>
+        <thead>
 
-        <tr>
+            <tr>
 
-            <td>
+                <th>Voce Bilancio</th>
+                <th>Valore Economico</th>
+                <th>Indicatore ESG</th>
+                <th>Valore ESG</th>
+                <th>Fonte</th>
+                <th>Data</th>
 
-                <?= htmlspecialchars($d['voce']) ?>
+            </tr>
 
-            </td>
+        </thead>
 
-            <td>
+        <tbody>
 
-                €
+        <?php foreach($dettagli as $d) : ?>
 
-                <?= number_format(
-                    $d['valore'],
-                    2,
-                    ',',
-                    '.'
-                ) ?>
+            <tr>
 
-            </td>
+                <td>
 
-            <td>
+                    <?= htmlspecialchars($d['voce']) ?>
 
-                <?= htmlspecialchars($d['indicatore'] ?? '-') ?>
+                </td>
 
-            </td>
+                <td>
 
-            <td>
+                    € <?= number_format(
+                        (float) $d['valore'],
+                        2,
+                        ',',
+                        '.'
+                    ) ?>
 
-                <?= htmlspecialchars($d['valore_indicatore'] ?? '-') ?>
+                </td>
 
-            </td>
+                <td>
 
-            <td>
+                    <?= htmlspecialchars($d['indicatore'] ?? '-') ?>
 
-                <?= htmlspecialchars($d['fonte'] ?? '-') ?>
+                </td>
 
-            </td>
+                <td>
 
-            <td>
+                    <?= htmlspecialchars(
+                        isset($d['valore_indicatore'])
+                            ? (string) $d['valore_indicatore']
+                            : '-'
+                    ) ?>
 
-                <?= htmlspecialchars($d['data_rilevazione'] ?? '-') ?>
+                </td>
 
-            </td>
+                <td>
 
-        </tr>
+                    <?= htmlspecialchars($d['fonte'] ?? '-') ?>
 
-    <?php endforeach; ?>
+                </td>
 
-    </tbody>
+                <td>
 
-</table>
+                    <?= htmlspecialchars($d['data_rilevazione'] ?? '-') ?>
+
+                </td>
+
+            </tr>
+
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>
+
 
 <hr>
+
+
+<!-- ========================================================= -->
+<!-- CREA NOTA -->
+<!-- ========================================================= -->
 
 <?php if(!$giudizio) : ?>
 
@@ -127,74 +157,96 @@ include __DIR__ . '/../partials/back_button.php';
 
     </h3>
 
-    <form
-        method="POST"
-        action="/esg-balance/revisioni_revisore.php?action=nota"
-    >
+    <?php if(empty($dettagli)) : ?>
 
-        <input
-            type="hidden"
-            name="id_bilancio"
-            value="<?= htmlspecialchars($_GET['id']) ?>"
+        <div class="alert alert-warning">
+
+            Non puoi inserire una nota perché il bilancio non contiene voci.
+
+        </div>
+
+    <?php else : ?>
+
+        <form
+            method="POST"
+            action="/esg-balance/revisioni_revisore.php?action=nota"
         >
 
-        <div class="mb-3">
-
-            <label class="form-label">
-
-                Voce Bilancio
-
-            </label>
-
-            <select
-                name="id_voce_bilancio"
-                class="form-select"
-                required
+            <input
+                type="hidden"
+                name="id_bilancio"
+                value="<?= htmlspecialchars((string) $idBilancio) ?>"
             >
 
-                <?php foreach($dettagli as $d) : ?>
+            <div class="mb-3">
 
-                    <option
-                        value="<?= $d['id_voce_bilancio'] ?>"
-                    >
+                <label class="form-label">
 
-                        <?= htmlspecialchars($d['voce']) ?>
+                    Voce Bilancio
+
+                </label>
+
+                <select
+                    name="id_voce_bilancio"
+                    class="form-select"
+                    required
+                >
+
+                    <option value="">
+
+                        Seleziona una voce
 
                     </option>
 
-                <?php endforeach; ?>
+                    <?php foreach($dettagli as $d) : ?>
 
-            </select>
+                        <option
+                            value="<?= htmlspecialchars(
+                                (string) $d['id_voce_bilancio']
+                            ) ?>"
+                        >
 
-        </div>
+                            <?= htmlspecialchars($d['voce']) ?>
 
-        <div class="mb-3">
+                        </option>
 
-            <label class="form-label">
+                    <?php endforeach; ?>
 
-                Nota
+                </select>
 
-            </label>
+            </div>
 
-            <textarea
-                name="testo"
-                class="form-control"
-                rows="4"
-                required
-            ></textarea>
 
-        </div>
+            <div class="mb-3">
 
-        <button
-            type="submit"
-            class="btn btn-warning"
-        >
+                <label class="form-label">
 
-            Salva Nota
+                    Nota
 
-        </button>
+                </label>
 
-    </form>
+                <textarea
+                    name="testo"
+                    class="form-control"
+                    rows="4"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-warning"
+            >
+
+                Salva Nota
+
+            </button>
+
+        </form>
+
+    <?php endif; ?>
 
 <?php else : ?>
 
@@ -207,7 +259,13 @@ include __DIR__ . '/../partials/back_button.php';
 
 <?php endif; ?>
 
+
 <hr>
+
+
+<!-- ========================================================= -->
+<!-- NOTE INSERITE -->
+<!-- ========================================================= -->
 
 <h3 class="mt-4">
 
@@ -247,19 +305,21 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <td>
 
-                    <?= htmlspecialchars($n['voce']) ?>
+                    <?= htmlspecialchars($n->voce ?? '') ?>
 
                 </td>
 
                 <td>
 
-                    <?= nl2br(htmlspecialchars($n['testo'])) ?>
+                    <?= nl2br(
+                        htmlspecialchars($n->testo)
+                    ) ?>
 
                 </td>
 
                 <td>
 
-                    <?= htmlspecialchars($n['data_nota']) ?>
+                    <?= htmlspecialchars($n->data_nota) ?>
 
                 </td>
 
@@ -273,7 +333,13 @@ include __DIR__ . '/../partials/back_button.php';
 
 <?php endif; ?>
 
+
 <hr>
+
+
+<!-- ========================================================= -->
+<!-- GIUDIZIO FINALE -->
+<!-- ========================================================= -->
 
 <?php if(!$giudizio) : ?>
 
@@ -291,7 +357,7 @@ include __DIR__ . '/../partials/back_button.php';
         <input
             type="hidden"
             name="id_bilancio"
-            value="<?= htmlspecialchars($_GET['id']) ?>"
+            value="<?= htmlspecialchars((string) $idBilancio) ?>"
         >
 
         <div class="mb-3">
@@ -330,6 +396,7 @@ include __DIR__ . '/../partials/back_button.php';
 
         </div>
 
+
         <div class="mb-3">
 
             <label class="form-label">
@@ -346,6 +413,7 @@ include __DIR__ . '/../partials/back_button.php';
 
         </div>
 
+
         <button
             type="submit"
             class="btn btn-success"
@@ -359,6 +427,10 @@ include __DIR__ . '/../partials/back_button.php';
 
 <?php endif; ?>
 
+
+<!-- ========================================================= -->
+<!-- GIUDIZIO SALVATO -->
+<!-- ========================================================= -->
 
 <?php if($giudizio) : ?>
 
@@ -396,11 +468,19 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <br>
 
-                <?= nl2br(
-                    htmlspecialchars(
-                        $giudizio->rilievi ?? ''
-                    )
-                ) ?>
+                <?php if(!empty($giudizio->rilievi)) : ?>
+
+                    <?= nl2br(
+                        htmlspecialchars($giudizio->rilievi)
+                    ) ?>
+
+                <?php else : ?>
+
+                    <span class="text-muted">
+                        Nessun rilievo.
+                    </span>
+
+                <?php endif; ?>
 
             </p>
 

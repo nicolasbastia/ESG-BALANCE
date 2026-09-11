@@ -1,12 +1,12 @@
 <?php
 
 /** @var array $dettagli */
-/** @var array $note */
+/** @var NotaRevisione[] $note */
 /** @var array $giudizi */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/revisioni.php';
+$backUrl = '/esg-balance/revisioni.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>
@@ -16,72 +16,109 @@ include __DIR__ . '/../partials/back_button.php';
 </h2>
 
 
+<!-- ========================================================= -->
 <!-- DATI DEL BILANCIO -->
+<!-- ========================================================= -->
 
 <h4 class="mb-3">
     Dati del Bilancio
 </h4>
 
-<table class="table table-bordered">
+<?php if(empty($dettagli)) : ?>
 
-    <thead>
+    <div class="alert alert-secondary">
 
-        <tr>
+        Il bilancio non contiene ancora voci.
 
-            <th>Voce Bilancio</th>
-            <th>Valore Economico</th>
-            <th>Indicatore ESG</th>
-            <th>Valore ESG</th>
-            <th>Fonte</th>
-            <th>Data Rilevazione</th>
+    </div>
 
-        </tr>
+<?php else : ?>
 
-    </thead>
+    <table class="table table-bordered">
 
-    <tbody>
+        <thead>
 
-    <?php foreach($dettagli as $d) : ?>
+            <tr>
 
-        <tr>
+                <th>Voce Bilancio</th>
+                <th>Valore Economico</th>
+                <th>Indicatore ESG</th>
+                <th>Valore ESG</th>
+                <th>Fonte</th>
+                <th>Data Rilevazione</th>
 
-            <td>
-                <?= htmlspecialchars($d['voce']) ?>
-            </td>
+            </tr>
 
-            <td>
-                <?= htmlspecialchars($d['valore']) ?>
-            </td>
+        </thead>
 
-            <td>
-                <?= htmlspecialchars($d['indicatore'] ?? '-') ?>
-            </td>
+        <tbody>
 
-            <td>
-                <?= htmlspecialchars($d['valore_indicatore'] ?? '-') ?>
-            </td>
+        <?php foreach($dettagli as $d) : ?>
 
-            <td>
-                <?= htmlspecialchars($d['fonte'] ?? '-') ?>
-            </td>
+            <tr>
 
-            <td>
-                <?= htmlspecialchars($d['data_rilevazione'] ?? '-') ?>
-            </td>
+                <td>
 
-        </tr>
+                    <?= htmlspecialchars($d['voce']) ?>
 
-    <?php endforeach; ?>
+                </td>
 
-    </tbody>
+                <td>
 
-</table>
+                    € <?= number_format(
+                        (float) $d['valore'],
+                        2,
+                        ',',
+                        '.'
+                    ) ?>
+
+                </td>
+
+                <td>
+
+                    <?= htmlspecialchars($d['indicatore'] ?? '-') ?>
+
+                </td>
+
+                <td>
+
+                    <?= htmlspecialchars(
+                        isset($d['valore_indicatore'])
+                            ? (string) $d['valore_indicatore']
+                            : '-'
+                    ) ?>
+
+                </td>
+
+                <td>
+
+                    <?= htmlspecialchars($d['fonte'] ?? '-') ?>
+
+                </td>
+
+                <td>
+
+                    <?= htmlspecialchars($d['data_rilevazione'] ?? '-') ?>
+
+                </td>
+
+            </tr>
+
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>
 
 
 <hr>
 
 
+<!-- ========================================================= -->
 <!-- NOTE DEI REVISORI -->
+<!-- ========================================================= -->
 
 <h4 class="mb-3">
     Note dei Revisori
@@ -119,19 +156,29 @@ include __DIR__ . '/../partials/back_button.php';
             <tr>
 
                 <td>
-                    <?= htmlspecialchars($n['revisore']) ?>
+
+                    <?= htmlspecialchars($n->revisore ?? '') ?>
+
                 </td>
 
                 <td>
-                    <?= htmlspecialchars($n['voce']) ?>
+
+                    <?= htmlspecialchars($n->voce ?? '') ?>
+
                 </td>
 
                 <td>
-                    <?= htmlspecialchars($n['testo']) ?>
+
+                    <?= nl2br(
+                        htmlspecialchars($n->testo)
+                    ) ?>
+
                 </td>
 
                 <td>
-                    <?= htmlspecialchars($n['data_nota']) ?>
+
+                    <?= htmlspecialchars($n->data_nota) ?>
+
                 </td>
 
             </tr>
@@ -148,7 +195,9 @@ include __DIR__ . '/../partials/back_button.php';
 <hr>
 
 
+<!-- ========================================================= -->
 <!-- GIUDIZI DEI REVISORI -->
+<!-- ========================================================= -->
 
 <h4 class="mb-3">
     Giudizi dei Revisori
@@ -186,19 +235,39 @@ include __DIR__ . '/../partials/back_button.php';
             <tr>
 
                 <td>
+
                     <?= htmlspecialchars($g['revisore']) ?>
+
                 </td>
 
                 <td>
+
                     <?= htmlspecialchars($g['esito']) ?>
+
                 </td>
 
                 <td>
-                    <?= htmlspecialchars($g['rilievi'] ?? '-') ?>
+
+                    <?php if(!empty($g['rilievi'])) : ?>
+
+                        <?= nl2br(
+                            htmlspecialchars($g['rilievi'])
+                        ) ?>
+
+                    <?php else : ?>
+
+                        <span class="text-muted">
+                            Nessun rilievo
+                        </span>
+
+                    <?php endif; ?>
+
                 </td>
 
                 <td>
+
                     <?= htmlspecialchars($g['data_giudizio']) ?>
+
                 </td>
 
             </tr>

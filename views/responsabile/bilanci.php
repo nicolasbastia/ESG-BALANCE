@@ -1,19 +1,39 @@
 <?php
 
-/** @var array $bilanci */
+/** @var Bilancio[] $bilanci */
 /** @var array $aziende */
 
 include __DIR__ . '/../partials/header.php';
 
 $backUrl = '/ESG-BALANCE/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
-
     Bilanci Aziendali
-
 </h2>
+
+<?php if(isset($_SESSION['errore_bilancio'])) : ?>
+
+    <div class="alert alert-danger">
+        <?= htmlspecialchars($_SESSION['errore_bilancio']) ?>
+    </div>
+
+    <?php unset($_SESSION['errore_bilancio']); ?>
+
+<?php endif; ?>
+
+<?php if(isset($_SESSION['successo_bilancio'])) : ?>
+
+    <div class="alert alert-success">
+        <?= htmlspecialchars($_SESSION['successo_bilancio']) ?>
+    </div>
+
+    <?php unset($_SESSION['successo_bilancio']); ?>
+
+<?php endif; ?>
+
 
 <form
     method="POST"
@@ -40,11 +60,9 @@ include __DIR__ . '/../partials/back_button.php';
             <?php foreach($aziende as $a) : ?>
 
                 <option
-                    value="<?= $a['id_azienda'] ?>"
+                    value="<?= htmlspecialchars((string) $a['id_azienda']) ?>"
                 >
-
-                    <?= $a['nome'] ?>
-
+                    <?= htmlspecialchars($a['nome']) ?>
                 </option>
 
             <?php endforeach; ?>
@@ -53,114 +71,120 @@ include __DIR__ . '/../partials/back_button.php';
 
     </div>
 
-    <button class="btn btn-success">
-
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
         Crea Bilancio
-
     </button>
 
 </form>
 
 <hr>
 
-<table class="table table-bordered">
+<?php if(empty($bilanci)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non sono presenti bilanci.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>ID</th>
-            <th>Azienda</th>
-            <th>Data</th>
-            <th>Stato</th>
-            <th>Azioni</th>
+    <table class="table table-bordered">
 
-        </tr>
+        <thead>
 
-    </thead>
+            <tr>
+                <th>ID</th>
+                <th>Azienda</th>
+                <th>Data</th>
+                <th>Stato</th>
+                <th>Azioni</th>
+            </tr>
 
-    <tbody>
+        </thead>
 
-    <?php foreach($bilanci as $b) : ?>
+        <tbody>
 
-        <tr>
+        <?php foreach($bilanci as $b) : ?>
 
-            <td>
-                <?= $b['id_bilancio'] ?>
-            </td>
+            <tr>
 
-            <td>
-                <?= $b['nome_azienda'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars((string) $b->id_bilancio) ?>
+                </td>
 
-            <td>
-                <?= $b['data_creazione'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars($b->nome_azienda ?? '') ?>
+                </td>
 
-            <td>
+                <td>
+                    <?= htmlspecialchars($b->data_creazione) ?>
+                </td>
 
-                <span class="badge bg-secondary">
+                <td>
 
-                    <?= $b['stato'] ?>
+                    <span class="badge bg-secondary">
+                        <?= htmlspecialchars($b->stato) ?>
+                    </span>
 
-                </span>
+                </td>
 
-            </td>
+                <td>
 
-        <td>
+                    <a
+                        href="/esg-balance/voci_bilancio.php?id=<?= htmlspecialchars((string) $b->id_bilancio) ?>"
+                        class="btn btn-primary btn-sm mb-1"
+                    >
+                        Gestisci Voci
+                    </a>
 
-            <a
+                    <a
+                        href="/esg-balance/esg_bilancio.php?id=<?= htmlspecialchars((string) $b->id_bilancio) ?>"
+                        class="btn btn-warning btn-sm mb-1"
+                    >
+                        ESG
+                    </a>
 
-                href="/esg-balance/voci_bilancio.php?id=<?= $b['id_bilancio'] ?>"
+                    <a
+                        href="/esg-balance/bilanci.php?action=dettaglio&id=<?= htmlspecialchars((string) $b->id_bilancio) ?>"
+                        class="btn btn-info btn-sm mb-1"
+                    >
+                        Dettaglio Revisione
+                    </a>
 
-                class="btn btn-primary btn-sm mb-1"
-            >
+                    <br>
 
-                Gestisci Voci
+                    <form
+                        method="POST"
+                        action="/esg-balance/bilanci.php?action=delete"
+                        class="d-inline"
+                        onsubmit="return confirm('Vuoi davvero eliminare questo bilancio?');"
+                    >
 
-            </a>
+                        <input
+                            type="hidden"
+                            name="id"
+                            value="<?= htmlspecialchars((string) $b->id_bilancio) ?>"
+                        >
 
-            <a
+                        <button
+                            type="submit"
+                            class="btn btn-danger btn-sm"
+                        >
+                            Elimina
+                        </button>
 
-                href="/esg-balance/esg_bilancio.php?id=<?= $b['id_bilancio'] ?>"
+                    </form>
 
-                class="btn btn-warning btn-sm mb-1"
-            >
+                </td>
 
-                ESG
+            </tr>
 
-            </a>
+        <?php endforeach; ?>
 
-            <a
+        </tbody>
 
-                href="/esg-balance/bilanci.php?action=dettaglio&id=<?= $b['id_bilancio'] ?>"
+    </table>
 
-                class="btn btn-info btn-sm mb-1"
-            >
-
-                Dettaglio Revisione
-
-            </a>
-
-            <br>
-
-            <a
-
-                href="/esg-balance/bilanci.php?action=delete&id=<?= $b['id_bilancio'] ?>"
-
-                class="btn btn-danger btn-sm"
-            >
-
-                Elimina
-
-            </a>
-
-        </td>
-
-        </tr>
-
-    <?php endforeach; ?>
-
-    </tbody>
-
-</table>
+<?php endif; ?>

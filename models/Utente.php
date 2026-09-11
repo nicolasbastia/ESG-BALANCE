@@ -2,7 +2,7 @@
 
 class Utente {
 
-    public $id;
+    public $id_utente;
     public $username;
     public $ruolo;
     public $codice_fiscale;
@@ -10,7 +10,7 @@ class Utente {
     public $luogo_nascita;
 
     public function __construct(
-        $id,
+        $id_utente,
         $username,
         $ruolo,
         $codice_fiscale = null,
@@ -18,7 +18,7 @@ class Utente {
         $luogo_nascita = null
     ) {
 
-        $this->id = $id;
+        $this->id_utente = $id_utente;
         $this->username = $username;
         $this->ruolo = $ruolo;
         $this->codice_fiscale = $codice_fiscale;

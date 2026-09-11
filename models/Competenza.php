@@ -29,4 +29,5 @@ class Competenza {
         return $this->livello >= 0 && $this->livello <= 5;
     }
 }
+
 ?>

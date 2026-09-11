@@ -73,7 +73,6 @@ class AziendaRepository {
         return $aziende;
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | AFFIDABILITA AZIENDA DEL RESPONSABILE
@@ -111,7 +110,6 @@ class AziendaRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | AFFIDABILITA TUTTE LE AZIENDE
@@ -139,7 +137,6 @@ class AziendaRepository {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -182,38 +179,6 @@ class AziendaRepository {
         return $result;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO REVISIONI
-    |--------------------------------------------------------------------------
-    */
-
-    public function haRevisioni($idAzienda) {
-
-        $sql = "
-
-            SELECT COUNT(*)
-
-            FROM revisione r
-
-            JOIN bilancio b
-                ON r.id_bilancio = b.id_bilancio
-
-            WHERE b.id_azienda = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([
-            $idAzienda
-        ]);
-
-        return $stmt->fetchColumn() > 0;
-    }
-
-
     /*
     |--------------------------------------------------------------------------
     | DELETE
@@ -221,16 +186,6 @@ class AziendaRepository {
     */
 
     public function delete($idAzienda) {
-
-        /*
-        | Se esistono revisioni associate ai bilanci dell'azienda
-        | non permettiamo la cancellazione.
-        */
-
-        if($this->haRevisioni($idAzienda)) {
-
-            return false;
-        }
 
         $sql = "
 
@@ -249,4 +204,5 @@ class AziendaRepository {
         return $result;
     }
 }
+
 ?>

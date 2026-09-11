@@ -25,7 +25,6 @@ class CompetenzaRepository {
         $sql = "
 
             SELECT
-
                 id_competenza,
                 nome
 
@@ -51,7 +50,6 @@ class CompetenzaRepository {
         $sql = "
 
             SELECT
-
                 cr.id_utente,
                 cr.id_competenza,
                 cr.livello,
@@ -79,12 +77,10 @@ class CompetenzaRepository {
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
             $competenze[] = new Competenza(
-
                 $row['id_utente'],
                 $row['id_competenza'],
                 $row['livello'],
                 $row['nome']
-
             );
         }
 
@@ -98,10 +94,8 @@ class CompetenzaRepository {
     */
 
     public function exists(
-
         $idUtente,
         $idCompetenza
-
     ) {
 
         $sql = "
@@ -111,7 +105,6 @@ class CompetenzaRepository {
             FROM competenza_revisore
 
             WHERE id_utente = ?
-
             AND id_competenza = ?
 
         ";
@@ -119,10 +112,8 @@ class CompetenzaRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-
             $idUtente,
             $idCompetenza
-
         ]);
 
         return $stmt->fetchColumn() > 0;
@@ -134,21 +125,7 @@ class CompetenzaRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function create(
-
-        $idUtente,
-        $idCompetenza,
-        $livello
-
-    ) {
-
-        $competenza = new Competenza(
-
-            $idUtente,
-            $idCompetenza,
-            $livello
-
-        );
+    public function create(Competenza $competenza) {
 
         /*
         |--------------------------------------------------------------------------
@@ -168,10 +145,8 @@ class CompetenzaRepository {
         */
 
         if($this->exists(
-
-            $idUtente,
-            $idCompetenza
-
+            $competenza->id_utente,
+            $competenza->id_competenza
         )) {
 
             return false;
@@ -196,11 +171,9 @@ class CompetenzaRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
-
-            $idUtente,
-            $idCompetenza,
-            $livello
-
+            $competenza->id_utente,
+            $competenza->id_competenza,
+            $competenza->livello
         ]);
 
         $stmt->closeCursor();
@@ -214,21 +187,7 @@ class CompetenzaRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function update(
-
-        $idUtente,
-        $idCompetenza,
-        $livello
-
-    ) {
-
-        $competenza = new Competenza(
-
-            $idUtente,
-            $idCompetenza,
-            $livello
-
-        );
+    public function update(Competenza $competenza) {
 
         if(!$competenza->isValid()) {
 
@@ -248,11 +207,9 @@ class CompetenzaRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
-
-            $idUtente,
-            $idCompetenza,
-            $livello
-
+            $competenza->id_utente,
+            $competenza->id_competenza,
+            $competenza->livello
         ]);
 
         $stmt->closeCursor();
@@ -267,10 +224,8 @@ class CompetenzaRepository {
     */
 
     public function delete(
-
         $idUtente,
         $idCompetenza
-
     ) {
 
         $sql = "
@@ -285,10 +240,8 @@ class CompetenzaRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
-
             $idUtente,
             $idCompetenza
-
         ]);
 
         $stmt->closeCursor();
@@ -296,4 +249,5 @@ class CompetenzaRepository {
         return $result;
     }
 }
+
 ?>

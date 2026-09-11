@@ -1,39 +1,32 @@
 <?php
 
-/** @var array $voci */
+/** @var VoceTemplate[] $voci */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
 include __DIR__ . '/../partials/back_button.php';
 
 ?>
 
 <h2 class="mb-4">
-
     Template Bilancio
-
 </h2>
 
 <?php if(isset($_SESSION['errore_template'])) : ?>
 
     <div class="alert alert-danger">
-
         <?= htmlspecialchars($_SESSION['errore_template']) ?>
-
     </div>
 
     <?php unset($_SESSION['errore_template']); ?>
 
 <?php endif; ?>
 
-
 <?php if(isset($_SESSION['successo_template'])) : ?>
 
     <div class="alert alert-success">
-
         <?= htmlspecialchars($_SESSION['successo_template']) ?>
-
     </div>
 
     <?php unset($_SESSION['successo_template']); ?>
@@ -50,9 +43,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Nome
-
         </label>
 
         <input
@@ -67,9 +58,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Descrizione
-
         </label>
 
         <textarea
@@ -84,75 +73,87 @@ include __DIR__ . '/../partials/back_button.php';
         type="submit"
         class="btn btn-success"
     >
-
         Aggiungi Voce
-
     </button>
 
 </form>
 
 <hr>
 
-<table class="table table-bordered">
+<?php if(empty($voci)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non sono ancora presenti voci nel template.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Descrizione</th>
-            <th>Azioni</th>
+    <table class="table table-bordered">
 
-        </tr>
+        <thead>
 
-    </thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrizione</th>
+                <th>Azioni</th>
+            </tr>
 
-    <tbody>
+        </thead>
 
-    <?php foreach($voci as $v) : ?>
+        <tbody>
 
-        <tr>
+        <?php foreach($voci as $v) : ?>
 
-            <td>
+            <tr>
 
-                <?= $v->id_voce ?>
+                <td>
+                    <?= htmlspecialchars((string) $v->id_voce) ?>
+                </td>
 
-            </td>
+                <td>
+                    <?= htmlspecialchars($v->nome) ?>
+                </td>
 
-            <td>
+                <td>
+                    <?= htmlspecialchars($v->descrizione ?? '') ?>
+                </td>
 
-                <?= htmlspecialchars($v->nome) ?>
+                <td>
 
-            </td>
+                    <form
+                        method="POST"
+                        action="/esg-balance/template.php?action=delete"
+                        class="d-inline"
+                        onsubmit="return confirm('Vuoi eliminare questa voce del template?');"
+                    >
 
-            <td>
+                        <input
+                            type="hidden"
+                            name="id"
+                            value="<?= htmlspecialchars((string) $v->id_voce) ?>"
+                        >
 
-                <?= htmlspecialchars($v->descrizione ?? '') ?>
+                        <button
+                            type="submit"
+                            class="btn btn-danger btn-sm"
+                        >
+                            Elimina
+                        </button>
 
-            </td>
+                    </form>
 
-            <td>
+                </td>
 
-                <a
-                    href="/esg-balance/template.php?action=delete&id=<?= $v->id_voce ?>"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Vuoi eliminare questa voce del template?');"
-                >
+            </tr>
 
-                    Elimina
+        <?php endforeach; ?>
 
-                </a>
+        </tbody>
 
-            </td>
+    </table>
 
-        </tr>
-
-    <?php endforeach; ?>
-
-    </tbody>
-
-</table>
+<?php endif; ?>
 
 <?php
 

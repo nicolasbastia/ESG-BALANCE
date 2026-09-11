@@ -14,12 +14,6 @@ switch($action) {
 
         break;
 
-    case 'dettaglio':
-
-        $controller->dettaglio();
-
-        break;
-
     case 'dettaglioAdmin':
 
         $controller->dettaglioAdmin();
@@ -32,4 +26,5 @@ switch($action) {
 
         break;
 }
+
 ?>

@@ -2,24 +2,35 @@
 
 class Bilancio {
 
-    public $id;
+    public $id_bilancio;
     public $id_azienda;
     public $data_creazione;
     public $stato;
 
+    /*
+    |--------------------------------------------------------------------------
+    | DATO AGGIUNTIVO DA JOIN
+    |--------------------------------------------------------------------------
+    */
+
+    public $nome_azienda;
+
     public function __construct(
 
-        $id,
+        $id_bilancio,
         $id_azienda,
         $data_creazione,
-        $stato
+        $stato,
+        $nome_azienda = null
 
     ) {
 
-        $this->id = $id;
+        $this->id_bilancio = $id_bilancio;
         $this->id_azienda = $id_azienda;
         $this->data_creazione = $data_creazione;
         $this->stato = $stato;
+        $this->nome_azienda = $nome_azienda;
     }
 }
+
 ?>

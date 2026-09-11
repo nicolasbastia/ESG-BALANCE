@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/VoceBilancio.php';
 
 class VoceBilancioRepository {
 
@@ -23,7 +24,11 @@ class VoceBilancioRepository {
 
         $sql = "
 
-            SELECT *
+            SELECT
+                id_voce,
+                nome,
+                descrizione,
+                id_amministratore
 
             FROM voce_template
 
@@ -42,56 +47,76 @@ class VoceBilancioRepository {
     |--------------------------------------------------------------------------
     */
 
-        public function getByBilancio($idBilancio) {
+    public function getByBilancio($idBilancio) {
 
-            $sql = "
+        $sql = "
 
-                SELECT
+            SELECT
+                vb.id_voce_bilancio,
+                vb.id_bilancio,
+                vb.id_voce,
+                vb.valore,
+                vt.nome AS nome_voce
 
-                    vb.id_voce,
-                    vb.valore,
-                    vt.nome
+            FROM voce_bilancio vb
 
-                FROM voce_bilancio vb
-
-                JOIN voce_template vt
+            JOIN voce_template vt
                 ON vb.id_voce = vt.id_voce
 
-                WHERE vb.id_bilancio = ?
+            WHERE vb.id_bilancio = ?
 
-                ORDER BY vt.nome
+            ORDER BY vt.nome
 
-            ";
+        ";
 
-            $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-            $stmt->execute([$idBilancio]);
+        $stmt->execute([
+            $idBilancio
+        ]);
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $voci = [];
+
+        foreach($rows as $row) {
+
+            $voci[] = new VoceBilancio(
+                $row['id_voce_bilancio'],
+                $row['id_bilancio'],
+                $row['id_voce'],
+                $row['valore'],
+                $row['nome_voce']
+            );
         }
+
+        return $voci;
+    }
 
     /*
     |--------------------------------------------------------------------------
-    | Salva valore (sostituisce insert/update)
+    | SALVA VALORE
     |--------------------------------------------------------------------------
     */
 
-        public function salvaValore(
-        $idBilancio,
-        $idVoce,
-        $valore
-    ) {
+    public function salvaValore(VoceBilancio $voceBilancio) {
 
         $sql = "
-            CALL sp_salva_voce_bilancio(?, ?, ?)
+
+            CALL sp_salva_voce_bilancio(
+                ?,
+                ?,
+                ?
+            )
+
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
-            $idBilancio,
-            $idVoce,
-            $valore
+            $voceBilancio->id_bilancio,
+            $voceBilancio->id_voce,
+            $voceBilancio->valore
         ]);
 
         $stmt->closeCursor();
@@ -99,4 +124,5 @@ class VoceBilancioRepository {
         return $result;
     }
 }
+
 ?>

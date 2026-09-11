@@ -1,21 +1,41 @@
 <?php
-/** @var array $indicatori */
+
+/** @var IndicatoreESG[] $indicatori */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
-
     Indicatori ESG
-
 </h2>
+
+<?php if(isset($_SESSION['errore_indicatore'])) : ?>
+
+    <div class="alert alert-danger">
+        <?= htmlspecialchars($_SESSION['errore_indicatore']) ?>
+    </div>
+
+    <?php unset($_SESSION['errore_indicatore']); ?>
+
+<?php endif; ?>
+
+<?php if(isset($_SESSION['successo_indicatore'])) : ?>
+
+    <div class="alert alert-success">
+        <?= htmlspecialchars($_SESSION['successo_indicatore']) ?>
+    </div>
+
+    <?php unset($_SESSION['successo_indicatore']); ?>
+
+<?php endif; ?>
 
 <form
     method="POST"
-    action="indicatori.php?action=create"
+    action="/esg-balance/indicatori.php?action=create"
     class="mb-5"
 >
 
@@ -162,9 +182,7 @@ include __DIR__ . '/../partials/back_button.php';
         type="submit"
         class="btn btn-success"
     >
-
         Aggiungi Indicatore
-
     </button>
 
 </form>
@@ -172,131 +190,149 @@ include __DIR__ . '/../partials/back_button.php';
 <hr>
 
 <h3 class="mb-3">
-
     Indicatori presenti
-
 </h3>
 
-<table class="table table-bordered">
+<?php if(empty($indicatori)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non sono ancora presenti indicatori ESG.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Rilevanza</th>
-            <th>Categoria</th>
-            <th>Dettagli specifici</th>
-            <th>Azioni</th>
+    <table class="table table-bordered">
 
-        </tr>
+        <thead>
 
-    </thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Rilevanza</th>
+                <th>Categoria</th>
+                <th>Dettagli specifici</th>
+                <th>Azioni</th>
+            </tr>
 
-    <tbody>
+        </thead>
 
-    <?php foreach($indicatori as $i) : ?>
+        <tbody>
 
-        <tr>
+        <?php foreach($indicatori as $i) : ?>
 
-            <td>
-                <?= $i['id_indicatore'] ?>
-            </td>
+            <tr>
 
-            <td>
-                <?= htmlspecialchars($i['nome']) ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars((string) $i->id_indicatore) ?>
+                </td>
 
-            <td>
-                <?= $i['rilevanza'] ?> / 10
-            </td>
+                <td>
+                    <?= htmlspecialchars($i->nome) ?>
+                </td>
 
-            <td>
+                <td>
+                    <?= htmlspecialchars((string) $i->rilevanza) ?> / 10
+                </td>
 
-                <?php if($i['categoria'] === 'ambientale') : ?>
+                <td>
 
-                    <span class="badge bg-success">
-                        Ambientale
-                    </span>
+                    <?php if($i->categoria === 'ambientale') : ?>
 
-                <?php elseif($i['categoria'] === 'sociale') : ?>
+                        <span class="badge bg-success">
+                            Ambientale
+                        </span>
 
-                    <span class="badge bg-primary">
-                        Sociale
-                    </span>
+                    <?php elseif($i->categoria === 'sociale') : ?>
 
-                <?php else : ?>
+                        <span class="badge bg-primary">
+                            Sociale
+                        </span>
 
-                    <span class="badge bg-secondary">
-                        Nessuna
-                    </span>
+                    <?php else : ?>
 
-                <?php endif; ?>
+                        <span class="badge bg-secondary">
+                            Nessuna
+                        </span>
 
-            </td>
+                    <?php endif; ?>
 
-            <td>
+                </td>
 
-                <?php if($i['categoria'] === 'ambientale') : ?>
+                <td>
 
-                    <strong>
-                        Codice normativa:
-                    </strong>
+                    <?php if($i->categoria === 'ambientale') : ?>
 
-                    <?= htmlspecialchars(
-                        $i['codice_normativa'] ?? ''
-                    ) ?>
+                        <strong>
+                            Codice normativa:
+                        </strong>
 
-                <?php elseif($i['categoria'] === 'sociale') : ?>
+                        <?= htmlspecialchars(
+                            $i->codice_normativa ?? ''
+                        ) ?>
 
-                    <strong>
-                        Ambito:
-                    </strong>
+                    <?php elseif($i->categoria === 'sociale') : ?>
 
-                    <?= htmlspecialchars(
-                        $i['ambito_sociale'] ?? ''
-                    ) ?>
+                        <strong>
+                            Ambito:
+                        </strong>
 
-                    <br>
+                        <?= htmlspecialchars(
+                            $i->ambito_sociale ?? ''
+                        ) ?>
 
-                    <strong>
-                        Frequenza:
-                    </strong>
+                        <br>
 
-                    <?= htmlspecialchars(
-                        $i['frequenza_rilevazione'] ?? ''
-                    ) ?>
+                        <strong>
+                            Frequenza:
+                        </strong>
 
-                <?php else : ?>
+                        <?= htmlspecialchars(
+                            $i->frequenza_rilevazione ?? ''
+                        ) ?>
 
-                    -
+                    <?php else : ?>
 
-                <?php endif; ?>
+                        -
 
-            </td>
+                    <?php endif; ?>
 
-            <td>
+                </td>
 
-                <a
-                    href="indicatori.php?action=delete&id=<?= $i['id_indicatore'] ?>"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Vuoi eliminare questo indicatore ESG?');"
-                >
+                <td>
 
-                    Elimina
+                    <form
+                        method="POST"
+                        action="/esg-balance/indicatori.php?action=delete"
+                        class="d-inline"
+                        onsubmit="return confirm('Vuoi eliminare questo indicatore ESG?');"
+                    >
 
-                </a>
+                        <input
+                            type="hidden"
+                            name="id"
+                            value="<?= htmlspecialchars((string) $i->id_indicatore) ?>"
+                        >
 
-            </td>
+                        <button
+                            type="submit"
+                            class="btn btn-danger btn-sm"
+                        >
+                            Elimina
+                        </button>
 
-        </tr>
+                    </form>
 
-    <?php endforeach; ?>
+                </td>
 
-    </tbody>
+            </tr>
 
-</table>
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>
 
 <script>
 
@@ -338,7 +374,6 @@ function aggiornaCampiCategoria() {
 
     frequenzaRilevazione.required = false;
 
-
     /*
     |--------------------------------------------------------------------------
     | AMBIENTALE
@@ -351,7 +386,6 @@ function aggiornaCampiCategoria() {
 
         codiceNormativa.required = true;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -374,7 +408,6 @@ categoria.addEventListener(
     'change',
     aggiornaCampiCategoria
 );
-
 
 aggiornaCampiCategoria();
 

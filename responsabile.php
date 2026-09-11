@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/controllers/ProfiloResponsabileController.php';
+require_once __DIR__ . '/controllers/ResponsabileController.php';
 
-$controller = new ProfiloResponsabileController();
+$controller = new ResponsabileController();
 
 $action = $_GET['action'] ?? 'index';
 

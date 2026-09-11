@@ -2,23 +2,44 @@
 
 class IndicatoreESG {
 
-    public $id;
+    /*
+    |--------------------------------------------------------------------------
+    | DATI BASE
+    |--------------------------------------------------------------------------
+    */
+
+    public $id_indicatore;
     public $nome;
     public $immagine;
     public $rilevanza;
 
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORIA
+    |--------------------------------------------------------------------------
+    */
+
     public $categoria;
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATI INDICATORE AMBIENTALE
+    |--------------------------------------------------------------------------
+    */
 
     public $codice_normativa;
 
-    public $ambito_sociale;
+    /*
+    |--------------------------------------------------------------------------
+    | DATI INDICATORE SOCIALE
+    |--------------------------------------------------------------------------
+    */
 
+    public $ambito_sociale;
     public $frequenza_rilevazione;
 
-
     public function __construct(
-
-        $id,
+        $id_indicatore,
         $nome,
         $immagine,
         $rilevanza,
@@ -26,15 +47,11 @@ class IndicatoreESG {
         $codice_normativa = null,
         $ambito_sociale = null,
         $frequenza_rilevazione = null
-
     ) {
 
-        $this->id = $id;
-
+        $this->id_indicatore = $id_indicatore;
         $this->nome = $nome;
-
         $this->immagine = $immagine;
-
         $this->rilevanza = $rilevanza;
 
         $this->categoria = $categoria;
@@ -42,8 +59,8 @@ class IndicatoreESG {
         $this->codice_normativa = $codice_normativa;
 
         $this->ambito_sociale = $ambito_sociale;
-
         $this->frequenza_rilevazione = $frequenza_rilevazione;
     }
 }
+
 ?>

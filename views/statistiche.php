@@ -1,8 +1,13 @@
 <?php
 
+/** @var int $numeroAziende */
+/** @var int $numeroRevisori */
+/** @var array|null $aziendaPiuAffidabile */
+/** @var array $classificaBilanci */
+
 include __DIR__ . '/partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
 include __DIR__ . '/partials/back_button.php';
 
 ?>
@@ -37,7 +42,7 @@ include __DIR__ . '/partials/back_button.php';
                 </h5>
 
                 <h2>
-                    <?= $numeroAziende['numero_aziende'] ?? 0 ?>
+                    <?= htmlspecialchars((string) $numeroAziende) ?>
                 </h2>
 
             </div>
@@ -60,7 +65,7 @@ include __DIR__ . '/partials/back_button.php';
                 </h5>
 
                 <h2>
-                    <?= $numeroRevisori['numero_revisori'] ?? 0 ?>
+                    <?= htmlspecialchars((string) $numeroRevisori) ?>
                 </h2>
 
             </div>
@@ -82,7 +87,7 @@ include __DIR__ . '/partials/back_button.php';
                     Azienda più affidabile
                 </h5>
 
-                <?php if(isset($aziendaPiuAffidabile) && $aziendaPiuAffidabile) : ?>
+                <?php if(!empty($aziendaPiuAffidabile)) : ?>
 
                     <h4>
                         <?= htmlspecialchars($aziendaPiuAffidabile['nome']) ?>
@@ -93,14 +98,25 @@ include __DIR__ . '/partials/back_button.php';
                     </p>
 
                     <h2>
-                        <?= $aziendaPiuAffidabile['percentuale_affidabilita'] ?>%
+                        <?= htmlspecialchars(
+                            (string) $aziendaPiuAffidabile['percentuale_affidabilita']
+                        ) ?>%
                     </h2>
 
                     <p class="text-muted">
+
                         Bilanci approvati senza rilievi:
-                        <?= $aziendaPiuAffidabile['bilanci_approvati'] ?>
+
+                        <?= htmlspecialchars(
+                            (string) $aziendaPiuAffidabile['bilanci_approvati']
+                        ) ?>
+
                         /
-                        <?= $aziendaPiuAffidabile['bilanci_conclusi'] ?>
+
+                        <?= htmlspecialchars(
+                            (string) $aziendaPiuAffidabile['bilanci_conclusi']
+                        ) ?>
+
                     </p>
 
                 <?php else : ?>
@@ -128,8 +144,10 @@ include __DIR__ . '/partials/back_button.php';
 </h3>
 
 <p class="text-muted">
+
     I bilanci sono ordinati in base al numero totale di indicatori ESG
     collegati alle singole voci contabili.
+
 </p>
 
 
@@ -142,11 +160,8 @@ include __DIR__ . '/partials/back_button.php';
             <tr>
 
                 <th>Posizione</th>
-
                 <th>ID Bilancio</th>
-
                 <th>Azienda</th>
-
                 <th>Numero indicatori ESG</th>
 
             </tr>
@@ -164,11 +179,11 @@ include __DIR__ . '/partials/back_button.php';
                 <tr>
 
                     <td>
-                        <?= $posizione ?>
+                        <?= htmlspecialchars((string) $posizione) ?>
                     </td>
 
                     <td>
-                        <?= $bilancio['id_bilancio'] ?>
+                        <?= htmlspecialchars((string) $bilancio['id_bilancio']) ?>
                     </td>
 
                     <td>
@@ -176,7 +191,9 @@ include __DIR__ . '/partials/back_button.php';
                     </td>
 
                     <td>
-                        <?= $bilancio['totale_indicatori_esg'] ?>
+                        <?= htmlspecialchars(
+                            (string) $bilancio['totale_indicatori_esg']
+                        ) ?>
                     </td>
 
                 </tr>
@@ -203,7 +220,9 @@ include __DIR__ . '/partials/back_button.php';
 
 </div>
 
-</div>
 
-</body>
-</html>
+<?php
+
+include __DIR__ . '/partials/footer.php';
+
+?>

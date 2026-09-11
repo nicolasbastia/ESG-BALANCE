@@ -4,14 +4,14 @@ session_start();
 
 if(!isset($_SESSION['utente'])) {
 
-    header('Location: login.php');
-
+    header('Location: /esg-balance/login.php');
     exit;
 }
 
 $utente = $_SESSION['utente'];
 
 include __DIR__ . '/views/partials/header.php';
+
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -21,15 +21,20 @@ include __DIR__ . '/views/partials/header.php';
         <h1>
 
             Benvenuto
-            <?= $utente['username'] ?>
+            <?= htmlspecialchars($utente['username']) ?>
 
         </h1>
 
         <p class="text-muted">
 
             Ruolo:
+
             <strong>
-                <?= ucfirst($utente['ruolo']) ?>
+
+                <?= htmlspecialchars(
+                    ucfirst($utente['ruolo'])
+                ) ?>
+
             </strong>
 
         </p>
@@ -39,7 +44,7 @@ include __DIR__ . '/views/partials/header.php';
     <div>
 
         <a
-            href="logout.php"
+            href="/esg-balance/logout.php"
             class="btn btn-danger"
         >
 
@@ -51,15 +56,12 @@ include __DIR__ . '/views/partials/header.php';
 
 </div>
 
-<div class="alert alert-success">
-
-    Login effettuato correttamente.
-
-</div>
 
 <hr>
 
+
 <div class="row">
+
 
 <?php
 
@@ -69,7 +71,8 @@ include __DIR__ . '/views/partials/header.php';
 |--------------------------------------------------------------------------
 */
 
-if($utente['ruolo'] == 'amministratore') :
+if($utente['ruolo'] === 'amministratore') :
+
 ?>
 
     <!-- INDICATORI ESG -->
@@ -81,19 +84,15 @@ if($utente['ruolo'] == 'amministratore') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Indicatori ESG
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestione completa degli indicatori ESG.
-
                 </p>
 
                 <a
-                    href="indicatori.php"
+                    href="/esg-balance/indicatori.php"
                     class="btn btn-primary"
                 >
 
@@ -106,6 +105,7 @@ if($utente['ruolo'] == 'amministratore') :
         </div>
 
     </div>
+
 
     <!-- TEMPLATE BILANCIO -->
 
@@ -116,19 +116,15 @@ if($utente['ruolo'] == 'amministratore') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Template Bilancio
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestione voci contabili del template.
-
                 </p>
 
                 <a
-                    href="template.php"
+                    href="/esg-balance/template.php"
                     class="btn btn-primary"
                 >
 
@@ -141,6 +137,7 @@ if($utente['ruolo'] == 'amministratore') :
         </div>
 
     </div>
+
 
     <!-- REVISIONI -->
 
@@ -151,19 +148,15 @@ if($utente['ruolo'] == 'amministratore') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Revisioni ESG
-
                 </h5>
 
                 <p class="card-text">
-
                     Assegnazione revisori ai bilanci.
-
                 </p>
 
                 <a
-                    href="revisioni.php"
+                    href="/esg-balance/revisioni.php"
                     class="btn btn-primary"
                 >
 
@@ -176,12 +169,11 @@ if($utente['ruolo'] == 'amministratore') :
         </div>
 
     </div>
-    
+
 <?php endif; ?>
 
 
 <?php
-
 
 /*
 |--------------------------------------------------------------------------
@@ -189,8 +181,10 @@ if($utente['ruolo'] == 'amministratore') :
 |--------------------------------------------------------------------------
 */
 
-if($utente['ruolo'] == 'responsabile') :
+if($utente['ruolo'] === 'responsabile') :
+
 ?>
+
     <!-- PROFILO RESPONSABILE -->
 
     <div class="col-md-4 mb-4">
@@ -200,19 +194,15 @@ if($utente['ruolo'] == 'responsabile') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Il mio profilo
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestisci il Curriculum Vitae in formato PDF.
-
                 </p>
 
                 <a
-                    href="/esg-balance/profilo_responsabile.php"
+                    href="/esg-balance/responsabile.php"
                     class="btn btn-primary"
                 >
 
@@ -225,6 +215,8 @@ if($utente['ruolo'] == 'responsabile') :
         </div>
 
     </div>
+
+
     <!-- AZIENDE -->
 
     <div class="col-md-4 mb-4">
@@ -234,19 +226,15 @@ if($utente['ruolo'] == 'responsabile') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Aziende
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestione aziende registrate.
-
                 </p>
 
                 <a
-                    href="aziende.php"
+                    href="/esg-balance/aziende.php"
                     class="btn btn-primary"
                 >
 
@@ -260,6 +248,7 @@ if($utente['ruolo'] == 'responsabile') :
 
     </div>
 
+
     <!-- BILANCI -->
 
     <div class="col-md-4 mb-4">
@@ -269,19 +258,15 @@ if($utente['ruolo'] == 'responsabile') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Bilanci
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestione bilanci aziendali ESG.
-
                 </p>
 
                 <a
-                    href="bilanci.php"
+                    href="/esg-balance/bilanci.php"
                     class="btn btn-primary"
                 >
 
@@ -297,6 +282,7 @@ if($utente['ruolo'] == 'responsabile') :
 
 <?php endif; ?>
 
+
 <?php
 
 /*
@@ -305,21 +291,42 @@ if($utente['ruolo'] == 'responsabile') :
 |--------------------------------------------------------------------------
 */
 
-if($utente['ruolo'] == 'revisore') :
+if($utente['ruolo'] === 'revisore') :
+
 ?>
-    <!-- Pulsante competenze-->
-    <div class="mb-4">
 
-        <a
-            href="/esg-balance/competenza.php"
-            class="btn btn-success"
-        >
+    <!-- COMPETENZE -->
 
-            Le mie competenze
+    <div class="col-md-4 mb-4">
 
-        </a>
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Le mie competenze
+                </h5>
+
+                <p class="card-text">
+                    Gestisci le competenze ESG e i relativi livelli.
+                </p>
+
+                <a
+                    href="/esg-balance/competenza.php"
+                    class="btn btn-success"
+                >
+
+                    Gestisci competenze
+
+                </a>
+
+            </div>
+
+        </div>
 
     </div>
+
+
     <!-- NUMERO REVISIONI -->
 
     <div class="col-md-4 mb-4">
@@ -333,7 +340,11 @@ if($utente['ruolo'] == 'revisore') :
                 </h5>
 
                 <h2>
-                    <?= $utente['numero_revisioni'] ?? 0 ?>
+
+                    <?= htmlspecialchars(
+                        (string) ($utente['numero_revisioni'] ?? 0)
+                    ) ?>
+
                 </h2>
 
             </div>
@@ -341,6 +352,7 @@ if($utente['ruolo'] == 'revisore') :
         </div>
 
     </div>
+
 
     <!-- INDICE AFFIDABILITA -->
 
@@ -355,7 +367,11 @@ if($utente['ruolo'] == 'revisore') :
                 </h5>
 
                 <h2>
-                    <?= $utente['indice_affidabilita'] ?? 0 ?>
+
+                    <?= htmlspecialchars(
+                        (string) ($utente['indice_affidabilita'] ?? 0)
+                    ) ?>%
+
                 </h2>
 
             </div>
@@ -363,6 +379,7 @@ if($utente['ruolo'] == 'revisore') :
         </div>
 
     </div>
+
 
     <!-- REVISIONI -->
 
@@ -373,19 +390,15 @@ if($utente['ruolo'] == 'revisore') :
             <div class="card-body">
 
                 <h5 class="card-title">
-
                     Revisioni ESG
-
                 </h5>
 
                 <p class="card-text">
-
                     Gestione note e giudizi revisori.
-
                 </p>
 
                 <a
-                    href="revisioni_revisore.php"
+                    href="/esg-balance/revisioni_revisore.php"
                     class="btn btn-primary"
                 >
 
@@ -419,10 +432,12 @@ if($utente['ruolo'] == 'revisore') :
             </p>
 
             <a
-                href="statistiche.php"
+                href="/esg-balance/statistiche.php"
                 class="btn btn-primary"
             >
+
                 Visualizza
+
             </a>
 
         </div>
@@ -431,8 +446,12 @@ if($utente['ruolo'] == 'revisore') :
 
 </div>
 
+
 </div>
 
+
 <?php
+
 include __DIR__ . '/views/partials/footer.php';
+
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-class ProfiloResponsabile {
+class Responsabile {
 
     public $id_utente;
     public $cv_pdf;
@@ -49,11 +49,15 @@ class ProfiloResponsabile {
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
 
-        $mime = finfo_file($finfo, $filePath);
+        $mime = finfo_file(
+            $finfo,
+            $filePath
+        );
 
         finfo_close($finfo);
 
         return $mime === 'application/pdf';
     }
 }
+
 ?>

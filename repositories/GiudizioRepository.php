@@ -36,17 +36,19 @@ class GiudizioRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([
-
+        $result = $stmt->execute([
             $giudizio->id_bilancio,
             $giudizio->id_revisore,
             $giudizio->esito,
             $giudizio->data_giudizio,
             $giudizio->rilievi
-
         ]);
 
         $stmt->closeCursor();
+
+        if(!$result) {
+            return false;
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -63,9 +65,7 @@ class GiudizioRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-
             $giudizio->id_revisore
-
         ]);
 
         $stmt->closeCursor();
@@ -80,10 +80,8 @@ class GiudizioRepository {
     */
 
     public function getByBilancio(
-
         $idBilancio,
         $idRevisore
-
     ) {
 
         $sql = "
@@ -99,7 +97,6 @@ class GiudizioRepository {
             FROM giudizio_revisore
 
             WHERE id_bilancio = ?
-
             AND id_revisore = ?
 
             LIMIT 1
@@ -109,10 +106,8 @@ class GiudizioRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-
             $idBilancio,
             $idRevisore
-
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -123,14 +118,12 @@ class GiudizioRepository {
         }
 
         return new GiudizioRevisione(
-
             $row['id_giudizio'],
             $row['id_bilancio'],
             $row['id_revisore'],
             $row['esito'],
             $row['data_giudizio'],
             $row['rilievi']
-
         );
     }
 
@@ -141,10 +134,8 @@ class GiudizioRepository {
     */
 
     public function esisteGiudizio(
-
         $idBilancio,
         $idRevisore
-
     ) {
 
         $sql = "
@@ -154,7 +145,6 @@ class GiudizioRepository {
             FROM giudizio_revisore
 
             WHERE id_bilancio = ?
-
             AND id_revisore = ?
 
         ";
@@ -162,10 +152,8 @@ class GiudizioRepository {
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-
             $idBilancio,
             $idRevisore
-
         ]);
 
         return $stmt->fetchColumn() > 0;
@@ -182,8 +170,12 @@ class GiudizioRepository {
         $sql = "
 
             SELECT
-
-                g.*,
+                g.id_giudizio,
+                g.id_bilancio,
+                g.id_revisore,
+                g.esito,
+                g.data_giudizio,
+                g.rilievi,
                 u.username AS revisore
 
             FROM giudizio_revisore g
@@ -209,4 +201,5 @@ class GiudizioRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 ?>

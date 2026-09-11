@@ -1,11 +1,12 @@
 <?php
 
-/** @var array $revisioni */
+/** @var Revisione[] $revisioni */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
@@ -15,66 +16,133 @@ include __DIR__ . '/../partials/back_button.php';
 </h2>
 
 
-<table class="table table-bordered">
+<?php if(isset($_SESSION['errore_revisione'])) : ?>
 
-    <thead>
+    <div class="alert alert-danger">
 
-        <tr>
+        <?= htmlspecialchars($_SESSION['errore_revisione']) ?>
 
-            <th>ID Revisione</th>
-            <th>Azienda</th>
-            <th>Stato Bilancio</th>
-            <th>Azioni</th>
+    </div>
 
-        </tr>
+    <?php unset($_SESSION['errore_revisione']); ?>
 
-    </thead>
+<?php endif; ?>
 
-    <tbody>
 
-    <?php foreach($revisioni as $r) : ?>
+<?php if(isset($_SESSION['successo_revisione'])) : ?>
 
-        <tr>
+    <div class="alert alert-success">
 
-            <td>
-                <?= $r->id_revisione ?>
-            </td>
+        <?= htmlspecialchars($_SESSION['successo_revisione']) ?>
 
-            <td>
-                <?= $r->azienda ?>
-            </td>
+    </div>
 
-            <td>
+    <?php unset($_SESSION['successo_revisione']); ?>
 
-                <span class="badge bg-warning">
+<?php endif; ?>
 
-                    <?= $r->stato ?>
 
-                </span>
+<?php if(empty($revisioni)) : ?>
 
-            </td>
+    <div class="alert alert-info">
 
-            <td>
+        Non hai revisioni assegnate.
 
-                <a
-                    href="/esg-balance/revisione_dettaglio.php?id=<?= $r->id_bilancio ?>"
-                    class="btn btn-primary btn-sm"
-                >
+    </div>
 
-                    Apri Revisione
+<?php else : ?>
 
-                </a>
+    <table class="table table-bordered">
 
-            </td>
+        <thead>
 
-        </tr>
+            <tr>
 
-    <?php endforeach; ?>
+                <th>ID Revisione</th>
+                <th>Azienda</th>
+                <th>Stato Revisione</th>
+                <th>Azioni</th>
 
-    </tbody>
+            </tr>
 
-</table>
+        </thead>
+
+        <tbody>
+
+        <?php foreach($revisioni as $r) : ?>
+
+            <tr>
+
+                <td>
+
+                    <?= htmlspecialchars((string) $r->id_revisione) ?>
+
+                </td>
+
+                <td>
+
+                    <?= htmlspecialchars($r->azienda ?? '') ?>
+
+                </td>
+
+                <td>
+
+                    <?php if($r->stato === 'conclusa') : ?>
+
+                        <span class="badge bg-success">
+
+                            Conclusa
+
+                        </span>
+
+                    <?php else : ?>
+
+                        <span class="badge bg-warning text-dark">
+
+                            <?= htmlspecialchars(
+                                ucfirst($r->stato ?? 'assegnata')
+                            ) ?>
+
+                        </span>
+
+                    <?php endif; ?>
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="/esg-balance/revisione_dettaglio.php?id=<?= htmlspecialchars((string) $r->id_bilancio) ?>"
+                        class="btn btn-primary btn-sm"
+                    >
+
+                        <?php if($r->stato === 'conclusa') : ?>
+
+                            Visualizza Revisione
+
+                        <?php else : ?>
+
+                            Apri Revisione
+
+                        <?php endif; ?>
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>
+
 
 <?php
+
 include __DIR__ . '/../partials/footer.php';
+
 ?>

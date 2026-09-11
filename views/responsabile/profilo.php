@@ -1,10 +1,11 @@
 <?php
 
-/** @var ProfiloResponsabile|null $profilo */
+/** @var Responsabile|null $profilo */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
+
 include __DIR__ . '/../partials/back_button.php';
 
 ?>
@@ -14,6 +15,32 @@ include __DIR__ . '/../partials/back_button.php';
     Il mio profilo
 
 </h2>
+
+<?php if(isset($_SESSION['errore_cv'])) : ?>
+
+    <div class="alert alert-danger">
+
+        <?= htmlspecialchars($_SESSION['errore_cv']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['errore_cv']); ?>
+
+<?php endif; ?>
+
+
+<?php if(isset($_SESSION['successo_cv'])) : ?>
+
+    <div class="alert alert-success">
+
+        <?= htmlspecialchars($_SESSION['successo_cv']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['successo_cv']); ?>
+
+<?php endif; ?>
+
 
 <div class="card shadow-sm">
 
@@ -72,9 +99,10 @@ include __DIR__ . '/../partials/back_button.php';
 
         <?php endif; ?>
 
+
         <form
             method="POST"
-            action="/esg-balance/profilo_responsabile.php?action=upload"
+            action="/esg-balance/responsabile.php?action=upload"
             enctype="multipart/form-data"
             class="mb-4"
         >
@@ -98,6 +126,7 @@ include __DIR__ . '/../partials/back_button.php';
                 <div class="form-text">
 
                     È consentito esclusivamente il formato PDF.
+                    Dimensione massima: 5 MB.
 
                 </div>
 
@@ -125,6 +154,7 @@ include __DIR__ . '/../partials/back_button.php';
 
         </form>
 
+
         <?php if(
             $profilo &&
             $profilo->hasCv()
@@ -132,15 +162,22 @@ include __DIR__ . '/../partials/back_button.php';
 
             <hr>
 
-            <a
-                href="/esg-balance/profilo_responsabile.php?action=delete"
-                class="btn btn-danger"
-                onclick="return confirm('Vuoi eliminare il Curriculum Vitae?');"
+            <form
+                method="POST"
+                action="/esg-balance/responsabile.php?action=delete"
+                onsubmit="return confirm('Vuoi eliminare il Curriculum Vitae?');"
             >
 
-                Elimina CV
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
 
-            </a>
+                    Elimina CV
+
+                </button>
+
+            </form>
 
         <?php endif; ?>
 

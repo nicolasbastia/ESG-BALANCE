@@ -3,29 +3,79 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/UtenteRepository.php';
-require_once __DIR__ . '/../models/Revisore.php';
+require_once __DIR__ . '/../repositories/RevisoreRepository.php';
 
 class AuthController {
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
 
     public function login() {
 
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            $username = $_POST['username'];
-            $password = $_POST['password'];
+            /*
+            |--------------------------------------------------------------------------
+            | RECUPERO DATI FORM
+            |--------------------------------------------------------------------------
+            */
 
-            $repo = new UtenteRepository();
+            $username = trim($_POST['username'] ?? '');
+            $password = $_POST['password'] ?? '';
 
-            $utente = $repo->login(
+            /*
+            |--------------------------------------------------------------------------
+            | CONTROLLO CAMPI
+            |--------------------------------------------------------------------------
+            */
+
+            if(
+                $username === '' ||
+                $password === ''
+            ) {
+
+                $errore = "Inserisci username e password.";
+
+                require __DIR__ . '/../views/auth/login.php';
+
+                return;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOGIN
+            |--------------------------------------------------------------------------
+            */
+
+            $utenteRepo = new UtenteRepository();
+
+            $utente = $utenteRepo->login(
                 $username,
                 $password
             );
 
             if($utente) {
 
+                /*
+                |--------------------------------------------------------------------------
+                | RIGENERA ID SESSIONE
+                |--------------------------------------------------------------------------
+                */
+
+                session_regenerate_id(true);
+
+                /*
+                |--------------------------------------------------------------------------
+                | DATI UTENTE IN SESSIONE
+                |--------------------------------------------------------------------------
+                */
+
                 $_SESSION['utente'] = [
 
-                    'id' => $utente->id,
+                    'id' => $utente->id_utente,
                     'username' => $utente->username,
                     'ruolo' => $utente->ruolo
 
@@ -39,8 +89,10 @@ class AuthController {
 
                 if($utente->isRevisore()) {
 
-                    $datiRevisore = $repo->getDatiRevisore(
-                        $utente->id
+                    $revisoreRepo = new RevisoreRepository();
+
+                    $datiRevisore = $revisoreRepo->getByUtente(
+                        $utente->id_utente
                     );
 
                     if($datiRevisore) {
@@ -56,15 +108,24 @@ class AuthController {
                     }
                 }
 
-                header('Location: index.php');
+                /*
+                |--------------------------------------------------------------------------
+                | REDIRECT DASHBOARD
+                |--------------------------------------------------------------------------
+                */
+
+                header('Location: /esg-balance/index.php');
 
                 exit;
             }
 
-            else {
+            /*
+            |--------------------------------------------------------------------------
+            | CREDENZIALI ERRATE
+            |--------------------------------------------------------------------------
+            */
 
-                $errore = "Credenziali non valide";
-            }
+            $errore = "Credenziali non valide";
         }
 
         require __DIR__ . '/../views/auth/login.php';

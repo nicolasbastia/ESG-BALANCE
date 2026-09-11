@@ -18,7 +18,7 @@ class Revisore {
     }
 
     /**
-     * Calcola l'affidabilità come percentuale
+     * Restituisce l'affidabilità come percentuale
      * @return float|null
      */
     public function getAffidabilitaPercentuale() {
@@ -27,11 +27,11 @@ class Revisore {
             return null;
         }
 
-        return $this->indice_affidabilita;
+        return (float) $this->indice_affidabilita;
     }
 
     /**
-     * Verifica se il revisore è affidabile (indice > 80%)
+     * Verifica se il revisore è affidabile
      * @return bool
      */
     public function isAffidabile() {
@@ -40,11 +40,11 @@ class Revisore {
             return false;
         }
 
-        return $this->indice_affidabilita > 80;
+        return $this->indice_affidabilita >= 80;
     }
 
     /**
-     * Ritorna il livello di affidabilità (basso, medio, alto)
+     * Restituisce il livello di affidabilità
      * @return string
      */
     public function getLivelloAffidabilita() {
@@ -55,11 +55,13 @@ class Revisore {
 
         if ($this->indice_affidabilita >= 80) {
             return 'alto';
-        } elseif ($this->indice_affidabilita >= 60) {
-            return 'medio';
-        } else {
-            return 'basso';
         }
+
+        if ($this->indice_affidabilita >= 60) {
+            return 'medio';
+        }
+
+        return 'basso';
     }
 }
 ?>

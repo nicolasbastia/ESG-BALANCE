@@ -14,16 +14,17 @@ switch($action) {
 
         break;
 
-    default:
-
-        $controller->areaRevisore();
-
-        break;
-        
     case 'giudizio':
 
         $controller->creaGiudizio();
 
         break;
+
+    default:
+
+        $controller->areaRevisore();
+
+        break;
 }
+
 ?>

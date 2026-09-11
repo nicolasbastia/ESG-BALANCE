@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/Bilancio.php';
 
 class BilancioRepository {
 
@@ -15,7 +16,7 @@ class BilancioRepository {
 
     /*
     |--------------------------------------------------------------------------
-    | LISTA BILANCI
+    | LISTA BILANCI DEL RESPONSABILE
     |--------------------------------------------------------------------------
     */
 
@@ -24,14 +25,15 @@ class BilancioRepository {
         $sql = "
 
             SELECT
-
-                b.*,
-                a.nome AS nome_azienda
+                b.id_bilancio,
+                b.id_azienda,
+                b.data_creazione,
+                b.stato
 
             FROM bilancio b
 
             JOIN azienda a
-            ON b.id_azienda = a.id_azienda
+                ON b.id_azienda = a.id_azienda
 
             WHERE a.id_responsabile = ?
 
@@ -41,14 +43,32 @@ class BilancioRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idResponsabile]);
+        $stmt->execute([
+            $idResponsabile
+        ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $bilanci = [];
+
+        foreach($rows as $row) {
+
+            $bilanci[] = new Bilancio(
+
+                $row['id_bilancio'],
+                $row['id_azienda'],
+                $row['data_creazione'],
+                $row['stato']
+
+            );
+        }
+
+        return $bilanci;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | LISTA AZIENDE RESPONSABILE
+    | LISTA AZIENDE DEL RESPONSABILE
     |--------------------------------------------------------------------------
     */
 
@@ -56,7 +76,16 @@ class BilancioRepository {
 
         $sql = "
 
-            SELECT *
+            SELECT
+                id_azienda,
+                nome,
+                ragione_sociale,
+                partita_iva,
+                settore,
+                numero_dipendenti,
+                logo,
+                nr_bilanci,
+                id_responsabile
 
             FROM azienda
 
@@ -68,7 +97,9 @@ class BilancioRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idResponsabile]);
+        $stmt->execute([
+            $idResponsabile
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -84,7 +115,6 @@ class BilancioRepository {
         $sql = "
 
             SELECT
-
                 vb.id_voce_bilancio,
                 vt.nome AS voce,
                 vb.valore,
@@ -96,13 +126,13 @@ class BilancioRepository {
             FROM voce_bilancio vb
 
             JOIN voce_template vt
-            ON vb.id_voce = vt.id_voce
+                ON vb.id_voce = vt.id_voce
 
             LEFT JOIN voce_indicatore vi
-            ON vb.id_voce_bilancio = vi.id_voce_bilancio
+                ON vb.id_voce_bilancio = vi.id_voce_bilancio
 
             LEFT JOIN indicatore_esg ie
-            ON vi.id_indicatore = ie.id_indicatore
+                ON vi.id_indicatore = ie.id_indicatore
 
             WHERE vb.id_bilancio = ?
 
@@ -112,7 +142,9 @@ class BilancioRepository {
 
         $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute([$idBilancio]);
+        $stmt->execute([
+            $idBilancio
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -123,12 +155,7 @@ class BilancioRepository {
     |--------------------------------------------------------------------------
     */
 
-    public function create(
-
-    $idAzienda,
-    $dataCreazione
-
-    ) {
+    public function create(Bilancio $bilancio) {
 
         $sql = "
 
@@ -143,8 +170,8 @@ class BilancioRepository {
 
         $result = $stmt->execute([
 
-            $idAzienda,
-            $dataCreazione
+            $bilancio->id_azienda,
+            $bilancio->data_creazione
 
         ]);
 
@@ -155,23 +182,28 @@ class BilancioRepository {
 
     /*
     |--------------------------------------------------------------------------
-    | DELETE
+    | DELETE BILANCIO
     |--------------------------------------------------------------------------
     */
 
-        public function delete($id) {
+    public function delete($idBilancio) {
 
         $sql = "
+
             CALL sp_elimina_bilancio(?)
+
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
-        $result = $stmt->execute([$id]);
+        $result = $stmt->execute([
+            $idBilancio
+        ]);
 
         $stmt->closeCursor();
 
         return $result;
     }
 }
+
 ?>

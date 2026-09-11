@@ -1,6 +1,6 @@
 <?php
 
-$backUrl = $backUrl ?? '/ESG-BALANCE/index.php';
+$backUrl = $backUrl ?? '/esg-balance/index.php';
 
 ?>
 
@@ -16,5 +16,7 @@ $backUrl = $backUrl ?? '/ESG-BALANCE/index.php';
 </div>
 
 <?php
+
 unset($backUrl);
+
 ?>

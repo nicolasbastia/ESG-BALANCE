@@ -2,196 +2,238 @@
 
 /** @var array $voci */
 /** @var array $indicatori */
-/** @var array $collegamenti */
+/** @var VoceIndicatore[] $collegamenti */
 /** @var int|string $idBilancio */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/bilanci.php';
+$backUrl = '/esg-balance/bilanci.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
-
     Collegamenti ESG Bilancio
-
 </h2>
 
-<form
-    method="POST"
-    action="/esg-balance/esg_bilancio.php?action=create"
-    class="mb-5"
->
+<?php if(isset($_SESSION['errore_esg'])) : ?>
 
-    <input
-        type="hidden"
-        name="id_bilancio"
-        value="<?= $idBilancio ?>"
+    <div class="alert alert-danger">
+        <?= htmlspecialchars($_SESSION['errore_esg']) ?>
+    </div>
+
+    <?php unset($_SESSION['errore_esg']); ?>
+
+<?php endif; ?>
+
+<?php if(isset($_SESSION['successo_esg'])) : ?>
+
+    <div class="alert alert-success">
+        <?= htmlspecialchars($_SESSION['successo_esg']) ?>
+    </div>
+
+    <?php unset($_SESSION['successo_esg']); ?>
+
+<?php endif; ?>
+
+
+<?php if(empty($voci)) : ?>
+
+    <div class="alert alert-warning">
+        Prima di collegare un indicatore ESG devi inserire almeno una voce nel bilancio.
+    </div>
+
+<?php else : ?>
+
+    <form
+        method="POST"
+        action="/esg-balance/esg_bilancio.php?action=create"
+        class="mb-5"
     >
 
-    <div class="mb-3">
-
-        <label class="form-label">
-            Voce Bilancio
-        </label>
-
-        <select
-            name="id_voce_bilancio"
-            class="form-select"
-            required
+        <input
+            type="hidden"
+            name="id_bilancio"
+            value="<?= htmlspecialchars((string) $idBilancio) ?>"
         >
 
-            <?php foreach($voci as $v) : ?>
+        <div class="mb-3">
 
-                <option value="<?= $v['id_voce_bilancio'] ?>">
+            <label class="form-label">
+                Voce Bilancio
+            </label>
 
-                    <?= $v['nome'] ?>
+            <select
+                name="id_voce_bilancio"
+                class="form-select"
+                required
+            >
 
+                <option value="">
+                    Seleziona voce
                 </option>
 
-            <?php endforeach; ?>
+                <?php foreach($voci as $v) : ?>
 
-        </select>
+                    <option
+                        value="<?= htmlspecialchars((string) $v['id_voce_bilancio']) ?>"
+                    >
+                        <?= htmlspecialchars($v['nome']) ?>
+                    </option>
 
-    </div>
+                <?php endforeach; ?>
 
-    <div class="mb-3">
+            </select>
 
-        <label class="form-label">
-            Indicatore ESG
-        </label>
+        </div>
 
-        <select
-            name="id_indicatore"
-            class="form-select"
-            required
-        >
+        <div class="mb-3">
 
-            <?php foreach($indicatori as $i) : ?>
+            <label class="form-label">
+                Indicatore ESG
+            </label>
 
-                <option
-                    value="<?= $i['id_indicatore'] ?>"
-                >
+            <select
+                name="id_indicatore"
+                class="form-select"
+                required
+            >
 
-                    <?= $i['nome'] ?>
-
+                <option value="">
+                    Seleziona indicatore
                 </option>
 
-            <?php endforeach; ?>
+                <?php foreach($indicatori as $i) : ?>
 
-        </select>
+                    <option
+                        value="<?= htmlspecialchars((string) $i['id_indicatore']) ?>"
+                    >
+                        <?= htmlspecialchars($i['nome']) ?>
+                    </option>
 
-    </div>
+                <?php endforeach; ?>
 
-    <div class="mb-3">
+            </select>
 
-        <label class="form-label">
-            Valore ESG
-        </label>
+        </div>
 
-        <input
-            type="number"
-            step="0.01"
-            name="valore"
-            class="form-control"
-            required
+        <div class="mb-3">
+
+            <label class="form-label">
+                Valore ESG
+            </label>
+
+            <input
+                type="number"
+                step="0.01"
+                name="valore"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Fonte
+            </label>
+
+            <input
+                type="text"
+                name="fonte"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Data rilevazione
+            </label>
+
+            <input
+                type="date"
+                name="data_rilevazione"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-success"
         >
+            Collega Indicatore
+        </button>
 
-    </div>
+    </form>
 
-    <div class="mb-3">
-
-        <label class="form-label">
-            Fonte
-        </label>
-
-        <input
-            type="text"
-            name="fonte"
-            class="form-control"
-            required
-        >
-
-    </div>
-
-    <div class="mb-3">
-
-        <label class="form-label">
-            Data rilevazione
-        </label>
-
-        <input
-            type="date"
-            name="data_rilevazione"
-            class="form-control"
-            required
-        >
-
-    </div>
-
-    <button class="btn btn-success">
-
-        Collega Indicatore
-
-    </button>
-
-</form>
+<?php endif; ?>
 
 <hr>
 
 <h3>
-
     Indicatori Collegati
-
 </h3>
 
-<table class="table table-bordered">
+<?php if(empty($collegamenti)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non sono ancora presenti indicatori ESG collegati.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>Voce</th>
-            <th>Indicatore</th>
-            <th>Valore ESG</th>
-            <th>Fonte</th>
-            <th>Data</th>
+    <table class="table table-bordered">
 
-        </tr>
+        <thead>
 
-    </thead>
+            <tr>
+                <th>Voce</th>
+                <th>Indicatore</th>
+                <th>Valore ESG</th>
+                <th>Fonte</th>
+                <th>Data</th>
+            </tr>
 
-    <tbody>
+        </thead>
 
-    <?php foreach($collegamenti as $c) : ?>
+        <tbody>
 
-        <tr>
+        <?php foreach($collegamenti as $c) : ?>
 
-            <td>
-                <?= $c['nome_voce'] ?>
-            </td>
+            <tr>
 
-            <td>
-                <?= $c['nome_indicatore'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars($c->nome_voce ?? '') ?>
+                </td>
 
-            <td>
-                <?= $c['valore_indicatore'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars($c->nome_indicatore ?? '') ?>
+                </td>
 
-            <td>
-                <?= $c['fonte'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars((string) $c->valore_indicatore) ?>
+                </td>
 
-            <td>
-                <?= $c['data_rilevazione'] ?>
-            </td>
+                <td>
+                    <?= htmlspecialchars($c->fonte ?? '') ?>
+                </td>
 
-        </tr>
+                <td>
+                    <?= htmlspecialchars($c->data_rilevazione ?? '') ?>
+                </td>
 
-    <?php endforeach; ?>
+            </tr>
 
-    </tbody>
+        <?php endforeach; ?>
 
-</table>
+        </tbody>
 
+    </table>
+
+<?php endif; ?>

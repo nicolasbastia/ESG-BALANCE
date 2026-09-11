@@ -17,13 +17,33 @@ class AziendaController {
 
     /*
     |--------------------------------------------------------------------------
+    | CONTROLLO ACCESSO RESPONSABILE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaResponsabile() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'responsabile'
+        ) {
+
+            header('Location: login.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
     */
 
     public function index() {
 
-        $utente = $_SESSION['utente'];
+        $utente = $this->verificaResponsabile();
 
         $aziende = $this->repo->getByResponsabile(
             $utente['id']
@@ -40,66 +60,205 @@ class AziendaController {
 
     public function create() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $utente = $this->verificaResponsabile();
 
-            $utente = $_SESSION['utente'];
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $nome = $_POST['nome'];
-            $ragioneSociale = $_POST['ragione_sociale'];
-            $partitaIva = $_POST['partita_iva'];
-            $settore = $_POST['settore'];
-            $numeroDipendenti = $_POST['numero_dipendenti'];
+            header('Location: aziende.php');
+            exit;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | UPLOAD LOGO
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | DATI FORM
+        |--------------------------------------------------------------------------
+        */
 
-            $logo = '';
+        $nome = trim($_POST['nome'] ?? '');
+        $ragioneSociale = trim($_POST['ragione_sociale'] ?? '');
+        $partitaIva = trim($_POST['partita_iva'] ?? '');
+        $settore = trim($_POST['settore'] ?? '');
+        $numeroDipendenti = $_POST['numero_dipendenti'] ?? '';
 
-            if(
-                isset($_FILES['logo']) &&
-                $_FILES['logo']['error'] === UPLOAD_ERR_OK
-            ) {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE DATI
+        |--------------------------------------------------------------------------
+        */
 
-                $nomeFile = time() . '_' . basename($_FILES['logo']['name']);
+        if(
+            $nome === '' ||
+            $ragioneSociale === '' ||
+            $partitaIva === '' ||
+            $settore === ''
+        ) {
 
-                $path = 'uploads/loghi/' . $nomeFile;
+            $_SESSION['errore_azienda'] =
+                "Compila tutti i campi obbligatori.";
 
-                move_uploaded_file(
+            header('Location: aziende.php');
+            exit;
+        }
 
-                    $_FILES['logo']['tmp_name'],
-                    $path
+        if(
+            $numeroDipendenti === '' ||
+            filter_var(
+                $numeroDipendenti,
+                FILTER_VALIDATE_INT
+            ) === false ||
+            (int) $numeroDipendenti < 0
+        ) {
 
-                );
+            $_SESSION['errore_azienda'] =
+                "Il numero dei dipendenti deve essere un numero valido.";
 
-                $logo = $path;
+            header('Location: aziende.php');
+            exit;
+        }
+
+        $numeroDipendenti = (int) $numeroDipendenti;
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPLOAD LOGO
+        |--------------------------------------------------------------------------
+        */
+
+        $logo = '';
+
+        if(
+            isset($_FILES['logo']) &&
+            $_FILES['logo']['error'] !== UPLOAD_ERR_NO_FILE
+        ) {
+
+            if($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+
+                $_SESSION['errore_azienda'] =
+                    "Errore durante il caricamento del logo.";
+
+                header('Location: aziende.php');
+                exit;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | CREA MODEL AZIENDA
+            | CONTROLLO TIPO FILE
             |--------------------------------------------------------------------------
             */
 
-            $azienda = new Azienda(
+            $tipiConsentiti = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp'
+            ];
 
-                null,
-                $nome,
-                $ragioneSociale,
-                $partitaIva,
-                $settore,
-                $numeroDipendenti,
-                $logo,
-                0,
-                $utente['id']
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
 
+            $mimeType = $finfo->file(
+                $_FILES['logo']['tmp_name']
             );
 
-            $this->repo->create(
+            if(!isset($tipiConsentiti[$mimeType])) {
+
+                $_SESSION['errore_azienda'] =
+                    "Il logo deve essere un'immagine JPG, PNG o WEBP.";
+
+                header('Location: aziende.php');
+                exit;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CARTELLA UPLOAD
+            |--------------------------------------------------------------------------
+            */
+
+            $directoryAssoluta =
+                __DIR__ . '/../uploads/loghi/';
+
+            if(!is_dir($directoryAssoluta)) {
+
+                mkdir(
+                    $directoryAssoluta,
+                    0775,
+                    true
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOME FILE UNIVOCO
+            |--------------------------------------------------------------------------
+            */
+
+            $nomeFile =
+                uniqid('logo_', true) .
+                '.' .
+                $tipiConsentiti[$mimeType];
+
+            $pathAssoluto =
+                $directoryAssoluta . $nomeFile;
+
+            $pathDatabase =
+                'uploads/loghi/' . $nomeFile;
+
+            if(
+                !move_uploaded_file(
+                    $_FILES['logo']['tmp_name'],
+                    $pathAssoluto
+                )
+            ) {
+
+                $_SESSION['errore_azienda'] =
+                    "Impossibile salvare il logo.";
+
+                header('Location: aziende.php');
+                exit;
+            }
+
+            $logo = $pathDatabase;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAZIONE MODEL
+        |--------------------------------------------------------------------------
+        */
+
+        $azienda = new Azienda(
+
+            null,
+            $nome,
+            $ragioneSociale,
+            $partitaIva,
+            $settore,
+            $numeroDipendenti,
+            $logo,
+            0,
+            $utente['id']
+
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAZIONE AZIENDA
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->create(
                 $azienda
             );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_azienda'] =
+                    "Impossibile creare l'azienda.";
+
+                header('Location: aziende.php');
+                exit;
+            }
 
             salvaEvento(
                 "Creata azienda: " . $nome
@@ -108,10 +267,28 @@ class AziendaController {
             $_SESSION['successo_azienda'] =
                 "Azienda creata correttamente.";
 
-            header('Location: aziende.php');
+        } catch(PDOException $e) {
 
-            exit;
+            /*
+            |--------------------------------------------------------------------------
+            | VINCOLI UNIQUE
+            |--------------------------------------------------------------------------
+            */
+
+            if($e->getCode() === '23000') {
+
+                $_SESSION['errore_azienda'] =
+                    "Esiste già un'azienda con questa ragione sociale o partita IVA.";
+
+            } else {
+
+                $_SESSION['errore_azienda'] =
+                    "Errore durante la creazione dell'azienda.";
+            }
         }
+
+        header('Location: aziende.php');
+        exit;
     }
 
     /*
@@ -122,35 +299,96 @@ class AziendaController {
 
     public function delete() {
 
-        if(isset($_GET['id'])) {
+        $utente = $this->verificaResponsabile();
 
-            $idAzienda = $_GET['id'];
+        /*
+        |--------------------------------------------------------------------------
+        | SOLO POST
+        |--------------------------------------------------------------------------
+        */
+
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
+            header('Location: aziende.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID AZIENDA
+        |--------------------------------------------------------------------------
+        */
+
+        $idAzienda = filter_input(
+            INPUT_POST,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idAzienda || $idAzienda <= 0) {
+
+            $_SESSION['errore_azienda'] =
+                "Azienda non valida.";
+
+            header('Location: aziende.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO CHE L'AZIENDA APPARTENGA AL RESPONSABILE
+        |--------------------------------------------------------------------------
+        */
+
+        $aziendeResponsabile =
+            $this->repo->getByResponsabile(
+                $utente['id']
+            );
+
+        $aziendaTrovata = false;
+
+        foreach($aziendeResponsabile as $azienda) {
+
+            if(
+                (int) $azienda->id_azienda ===
+                (int) $idAzienda
+            ) {
+
+                $aziendaTrovata = true;
+
+                break;
+            }
+        }
+
+        if(!$aziendaTrovata) {
+
+            $_SESSION['errore_azienda'] =
+                "Non sei autorizzato a eliminare questa azienda.";
+
+            header('Location: aziende.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ELIMINAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        try {
 
             $risultato = $this->repo->delete(
                 $idAzienda
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | AZIENDA NON ELIMINABILE
-            |--------------------------------------------------------------------------
-            */
-
             if(!$risultato) {
 
                 $_SESSION['errore_azienda'] =
-                    "Impossibile eliminare l'azienda perché uno o più bilanci sono coinvolti in revisioni ESG.";
+                    "Impossibile eliminare l'azienda.";
 
                 header('Location: aziende.php');
-
                 exit;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | ELIMINAZIONE RIUSCITA
-            |--------------------------------------------------------------------------
-            */
 
             salvaEvento(
                 "Eliminata azienda ID: " . $idAzienda
@@ -159,10 +397,15 @@ class AziendaController {
             $_SESSION['successo_azienda'] =
                 "Azienda eliminata correttamente.";
 
-            header('Location: aziende.php');
+        } catch(PDOException $e) {
 
-            exit;
+            $_SESSION['errore_azienda'] =
+                "Errore durante l'eliminazione dell'azienda.";
         }
+
+        header('Location: aziende.php');
+        exit;
     }
 }
+
 ?>

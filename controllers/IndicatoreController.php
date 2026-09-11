@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../repositories/IndicatoreRepository.php';
+require_once __DIR__ . '/../models/IndicatoreESG.php';
 require_once __DIR__ . '/../config/logger.php';
 
 class IndicatoreController {
@@ -16,11 +17,33 @@ class IndicatoreController {
 
     /*
     |--------------------------------------------------------------------------
+    | CONTROLLO ACCESSO AMMINISTRATORE
+    |--------------------------------------------------------------------------
+    */
+
+    private function verificaAmministratore() {
+
+        if(
+            !isset($_SESSION['utente']) ||
+            $_SESSION['utente']['ruolo'] !== 'amministratore'
+        ) {
+
+            header('Location: login.php');
+            exit;
+        }
+
+        return $_SESSION['utente'];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
     */
 
     public function index() {
+
+        $this->verificaAmministratore();
 
         $indicatori = $this->repo->getAll();
 
@@ -35,118 +58,195 @@ class IndicatoreController {
 
     public function create() {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $this->verificaAmministratore();
 
-            $nome = $_POST['nome'] ?? '';
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
-            $immagine = $_POST['immagine'] ?? null;
+            header('Location: indicatori.php');
+            exit;
+        }
 
-            $rilevanza = $_POST['rilevanza'] ?? 0;
+        /*
+        |--------------------------------------------------------------------------
+        | DATI BASE
+        |--------------------------------------------------------------------------
+        */
 
-            $categoria = $_POST['categoria'] ?? 'nessuna';
+        $nome = trim(
+            $_POST['nome'] ?? ''
+        );
 
-            /*
-            |--------------------------------------------------------------------------
-            | CAMPI AMBIENTALI
-            |--------------------------------------------------------------------------
-            */
+        $immagine = trim(
+            $_POST['immagine'] ?? ''
+        );
 
-            $codiceNormativa = null;
+        $rilevanza = filter_input(
+            INPUT_POST,
+            'rilevanza',
+            FILTER_VALIDATE_INT
+        );
 
-            if($categoria === 'ambientale') {
+        $categoria = trim(
+            $_POST['categoria'] ?? 'nessuna'
+        );
 
-                $codiceNormativa =
-                    $_POST['codice_normativa'] ?? null;
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE CATEGORIA
+        |--------------------------------------------------------------------------
+        */
 
-            /*
-            |--------------------------------------------------------------------------
-            | CAMPI SOCIALI
-            |--------------------------------------------------------------------------
-            */
+        $categorieValide = [
+            'nessuna',
+            'ambientale',
+            'sociale'
+        ];
 
-            $ambitoSociale = null;
+        if(!in_array($categoria, $categorieValide, true)) {
 
-            $frequenzaRilevazione = null;
+            $_SESSION['errore_indicatore'] =
+                "Categoria non valida.";
 
-            if($categoria === 'sociale') {
+            header('Location: indicatori.php');
+            exit;
+        }
 
-                $ambitoSociale =
-                    $_POST['ambito_sociale'] ?? null;
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDAZIONE BASE
+        |--------------------------------------------------------------------------
+        */
 
-                $frequenzaRilevazione =
-                    $_POST['frequenza_rilevazione'] ?? null;
-            }
+        if($nome === '') {
 
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDAZIONE BASE
-            |--------------------------------------------------------------------------
-            */
+            $_SESSION['errore_indicatore'] =
+                "Il nome dell'indicatore è obbligatorio.";
 
-            if(
-                empty($nome) ||
-                $rilevanza < 0 ||
-                $rilevanza > 10
-            ) {
+            header('Location: indicatori.php');
+            exit;
+        }
 
-                header('Location: indicatori.php');
+        if(
+            $rilevanza === false ||
+            $rilevanza < 0 ||
+            $rilevanza > 10
+        ) {
 
-                exit;
-            }
+            $_SESSION['errore_indicatore'] =
+                "La rilevanza deve essere compresa tra 0 e 10.";
 
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDAZIONE AMBIENTALE
-            |--------------------------------------------------------------------------
-            */
+            header('Location: indicatori.php');
+            exit;
+        }
 
-            if(
-                $categoria === 'ambientale' &&
-                empty($codiceNormativa)
-            ) {
+        /*
+        |--------------------------------------------------------------------------
+        | CAMPI SPECIFICI
+        |--------------------------------------------------------------------------
+        */
 
-                header('Location: indicatori.php');
+        $codiceNormativa = null;
+        $ambitoSociale = null;
+        $frequenzaRilevazione = null;
 
-                exit;
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIENTALE
+        |--------------------------------------------------------------------------
+        */
 
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDAZIONE SOCIALE
-            |--------------------------------------------------------------------------
-            */
+        if($categoria === 'ambientale') {
 
-            if(
-                $categoria === 'sociale' &&
-                (
-                    empty($ambitoSociale) ||
-                    empty($frequenzaRilevazione)
-                )
-            ) {
-
-                header('Location: indicatori.php');
-
-                exit;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE
-            |--------------------------------------------------------------------------
-            */
-
-            $this->repo->create(
-
-                $nome,
-                $immagine,
-                $rilevanza,
-                $categoria,
-                $codiceNormativa,
-                $ambitoSociale,
-                $frequenzaRilevazione
-
+            $codiceNormativa = trim(
+                $_POST['codice_normativa'] ?? ''
             );
+
+            if($codiceNormativa === '') {
+
+                $_SESSION['errore_indicatore'] =
+                    "Inserisci il codice della normativa ambientale.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SOCIALE
+        |--------------------------------------------------------------------------
+        */
+
+        if($categoria === 'sociale') {
+
+            $ambitoSociale = trim(
+                $_POST['ambito_sociale'] ?? ''
+            );
+
+            $frequenzaRilevazione = trim(
+                $_POST['frequenza_rilevazione'] ?? ''
+            );
+
+            if(
+                $ambitoSociale === '' ||
+                $frequenzaRilevazione === ''
+            ) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Compila tutti i campi dell'indicatore sociale.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALIZZAZIONE IMMAGINE
+        |--------------------------------------------------------------------------
+        */
+
+        if($immagine === '') {
+            $immagine = null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAZIONE MODEL
+        |--------------------------------------------------------------------------
+        */
+
+        $indicatore = new IndicatoreESG(
+            null,
+            $nome,
+            $immagine,
+            $rilevanza,
+            $categoria,
+            $codiceNormativa,
+            $ambitoSociale,
+            $frequenzaRilevazione
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALVATAGGIO
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->create(
+                $indicatore
+            );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Impossibile creare l'indicatore ESG.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
 
             salvaEvento(
                 "Creato indicatore ESG: " .
@@ -155,10 +255,25 @@ class IndicatoreController {
                 $categoria
             );
 
-            header('Location: indicatori.php');
+            $_SESSION['successo_indicatore'] =
+                "Indicatore ESG creato correttamente.";
 
-            exit;
+        } catch(PDOException $e) {
+
+            if($e->getCode() === '23000') {
+
+                $_SESSION['errore_indicatore'] =
+                    "Esiste già un indicatore ESG con questo nome.";
+
+            } else {
+
+                $_SESSION['errore_indicatore'] =
+                    "Errore durante la creazione dell'indicatore ESG.";
+            }
         }
+
+        header('Location: indicatori.php');
+        exit;
     }
 
     /*
@@ -169,20 +284,73 @@ class IndicatoreController {
 
     public function delete() {
 
-        if(isset($_GET['id'])) {
+        $this->verificaAmministratore();
 
-            $this->repo->delete(
-                $_GET['id']
-            );
-
-            salvaEvento(
-                "Eliminato indicatore ESG ID: " . $_GET['id']
-            );
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
             header('Location: indicatori.php');
-
             exit;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID INDICATORE
+        |--------------------------------------------------------------------------
+        */
+
+        $idIndicatore = filter_input(
+            INPUT_POST,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+
+        if(!$idIndicatore || $idIndicatore <= 0) {
+
+            $_SESSION['errore_indicatore'] =
+                "Indicatore non valido.";
+
+            header('Location: indicatori.php');
+            exit;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ELIMINAZIONE
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $risultato = $this->repo->delete(
+                $idIndicatore
+            );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Impossibile eliminare l'indicatore ESG.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+
+            salvaEvento(
+                "Eliminato indicatore ESG ID: " .
+                $idIndicatore
+            );
+
+            $_SESSION['successo_indicatore'] =
+                "Indicatore ESG eliminato correttamente.";
+
+        } catch(PDOException $e) {
+
+            $_SESSION['errore_indicatore'] =
+                "Errore durante l'eliminazione dell'indicatore ESG.";
+        }
+
+        header('Location: indicatori.php');
+        exit;
     }
 }
+
 ?>

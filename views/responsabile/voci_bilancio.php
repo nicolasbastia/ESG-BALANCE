@@ -2,18 +2,38 @@
 
 /** @var array $template */
 /** @var array $valori */
+/** @var int $idBilancio */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/bilanci.php';
+$backUrl = '/esg-balance/bilanci.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
-
     Voci Bilancio
-
 </h2>
+
+<?php if(isset($_SESSION['errore_bilancio'])) : ?>
+
+    <div class="alert alert-danger">
+        <?= htmlspecialchars($_SESSION['errore_bilancio']) ?>
+    </div>
+
+    <?php unset($_SESSION['errore_bilancio']); ?>
+
+<?php endif; ?>
+
+<?php if(isset($_SESSION['successo_bilancio'])) : ?>
+
+    <div class="alert alert-success">
+        <?= htmlspecialchars($_SESSION['successo_bilancio']) ?>
+    </div>
+
+    <?php unset($_SESSION['successo_bilancio']); ?>
+
+<?php endif; ?>
 
 <form
     method="POST"
@@ -23,7 +43,7 @@ include __DIR__ . '/../partials/back_button.php';
     <input
         type="hidden"
         name="id_bilancio"
-        value="<?= $_GET['id'] ?>"
+        value="<?= htmlspecialchars((string) $idBilancio) ?>"
     >
 
     <table class="table table-bordered">
@@ -31,10 +51,8 @@ include __DIR__ . '/../partials/back_button.php';
         <thead>
 
             <tr>
-
                 <th>Voce</th>
                 <th>Valore</th>
-
             </tr>
 
         </thead>
@@ -43,20 +61,27 @@ include __DIR__ . '/../partials/back_button.php';
 
         <?php foreach($template as $t) : ?>
 
+            <?php
+                $idVoce = (int) $t['id_voce'];
+
+                $valoreCorrente =
+                    isset($valori[$idVoce])
+                        ? $valori[$idVoce]
+                        : '';
+            ?>
+
             <tr>
 
                 <td>
 
                     <strong>
-                        <?= $t['nome'] ?>
+                        <?= htmlspecialchars($t['nome']) ?>
                     </strong>
 
                     <br>
 
                     <small class="text-muted">
-
-                        <?= $t['descrizione'] ?>
-
+                        <?= htmlspecialchars($t['descrizione'] ?? '') ?>
                     </small>
 
                 </td>
@@ -66,8 +91,8 @@ include __DIR__ . '/../partials/back_button.php';
                     <input
                         type="number"
                         step="0.01"
-                        name="valori[<?= $t['id_voce'] ?>]"
-                        value="<?= isset($valori[(int)$t['id_voce']]) ? $valori[(int)$t['id_voce']] : '' ?>"
+                        name="valori[<?= htmlspecialchars((string) $idVoce) ?>]"
+                        value="<?= htmlspecialchars((string) $valoreCorrente) ?>"
                         class="form-control"
                     >
 
@@ -81,10 +106,11 @@ include __DIR__ . '/../partials/back_button.php';
 
     </table>
 
-    <button class="btn btn-success">
-
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
         Salva Bilancio
-
     </button>
 
 </form>
@@ -92,57 +118,62 @@ include __DIR__ . '/../partials/back_button.php';
 <hr>
 
 <h3 class="mt-4">
-
     Riepilogo Bilancio
-
 </h3>
 
-<table class="table table-striped">
+<?php if(empty($valori)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non sono ancora presenti valori salvati.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>Voce</th>
-            <th>Valore Salvato</th>
+    <table class="table table-striped">
 
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-    <?php foreach($template as $t) : ?>
-
-        <?php if(isset($valori[(int)$t['id_voce']])) : ?>
+        <thead>
 
             <tr>
-
-                <td>
-                    <?= $t['nome'] ?>
-                </td>
-
-                <td>
-
-                    €
-                    <?= number_format(
-
-                        $valori[(int)$t['id_voce']],
-                        2,
-                        ',',
-                        '.'
-
-                    ) ?>
-
-                </td>
-
+                <th>Voce</th>
+                <th>Valore Salvato</th>
             </tr>
 
-        <?php endif; ?>
+        </thead>
 
-    <?php endforeach; ?>
+        <tbody>
 
-    </tbody>
+        <?php foreach($template as $t) : ?>
 
-</table>
+            <?php
+                $idVoce = (int) $t['id_voce'];
+            ?>
 
+            <?php if(isset($valori[$idVoce])) : ?>
+
+                <tr>
+
+                    <td>
+                        <?= htmlspecialchars($t['nome']) ?>
+                    </td>
+
+                    <td>
+                        €
+                        <?= number_format(
+                            (float) $valori[$idVoce],
+                            2,
+                            ',',
+                            '.'
+                        ) ?>
+                    </td>
+
+                </tr>
+
+            <?php endif; ?>
+
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>

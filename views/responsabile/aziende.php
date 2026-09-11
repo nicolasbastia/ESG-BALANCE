@@ -10,17 +10,13 @@ include __DIR__ . '/../partials/back_button.php';
 ?>
 
 <h2 class="mb-4">
-
     Le mie aziende
-
 </h2>
 
 <?php if(isset($_SESSION['errore_azienda'])) : ?>
 
     <div class="alert alert-danger">
-
         <?= htmlspecialchars($_SESSION['errore_azienda']) ?>
-
     </div>
 
     <?php unset($_SESSION['errore_azienda']); ?>
@@ -31,9 +27,7 @@ include __DIR__ . '/../partials/back_button.php';
 <?php if(isset($_SESSION['successo_azienda'])) : ?>
 
     <div class="alert alert-success">
-
         <?= htmlspecialchars($_SESSION['successo_azienda']) ?>
-
     </div>
 
     <?php unset($_SESSION['successo_azienda']); ?>
@@ -51,9 +45,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Nome
-
         </label>
 
         <input
@@ -68,9 +60,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Ragione Sociale
-
         </label>
 
         <input
@@ -85,9 +75,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Partita IVA
-
         </label>
 
         <input
@@ -102,9 +90,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Settore
-
         </label>
 
         <input
@@ -119,9 +105,7 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Numero Dipendenti
-
         </label>
 
         <input
@@ -137,16 +121,14 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
-
             Logo
-
         </label>
 
         <input
             type="file"
             name="logo"
             class="form-control"
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         >
 
     </div>
@@ -155,90 +137,102 @@ include __DIR__ . '/../partials/back_button.php';
         type="submit"
         class="btn btn-success"
     >
-
         Crea Azienda
-
     </button>
 
 </form>
 
 <hr>
 
-<table class="table table-bordered">
+<?php if(empty($aziende)) : ?>
 
-    <thead>
+    <div class="alert alert-info">
+        Non hai ancora registrato nessuna azienda.
+    </div>
 
-        <tr>
+<?php else : ?>
 
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Settore</th>
-            <th>Logo</th>
-            <th>Azioni</th>
+    <table class="table table-bordered">
 
-        </tr>
+        <thead>
 
-    </thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Settore</th>
+                <th>Logo</th>
+                <th>Azioni</th>
+            </tr>
 
-    <tbody>
+        </thead>
 
-    <?php foreach($aziende as $a) : ?>
+        <tbody>
 
-        <tr>
+        <?php foreach($aziende as $a) : ?>
 
-            <td>
+            <tr>
 
-                <?= $a->id_azienda ?>
+                <td>
+                    <?= htmlspecialchars((string) $a->id_azienda) ?>
+                </td>
 
-            </td>
+                <td>
+                    <?= htmlspecialchars($a->nome) ?>
+                </td>
 
-            <td>
+                <td>
+                    <?= htmlspecialchars($a->settore ?? '') ?>
+                </td>
 
-                <?= htmlspecialchars($a->nome) ?>
+                <td>
 
-            </td>
+                    <?php if(!empty($a->logo)) : ?>
 
-            <td>
+                        <img
+                            src="/esg-balance/<?= htmlspecialchars($a->logo) ?>"
+                            width="80"
+                            alt="Logo <?= htmlspecialchars($a->nome) ?>"
+                        >
 
-                <?= htmlspecialchars($a->settore ?? '') ?>
+                    <?php endif; ?>
 
-            </td>
+                </td>
 
-            <td>
+                <td>
 
-                <?php if(!empty($a->logo)) : ?>
-
-                    <img
-                        src="/esg-balance/<?= htmlspecialchars($a->logo) ?>"
-                        width="80"
-                        alt="Logo <?= htmlspecialchars($a->nome) ?>"
+                    <form
+                        method="POST"
+                        action="/esg-balance/aziende.php?action=delete"
+                        class="d-inline"
+                        onsubmit="return confirm('Vuoi davvero eliminare questa azienda?');"
                     >
 
-                <?php endif; ?>
+                        <input
+                            type="hidden"
+                            name="id"
+                            value="<?= htmlspecialchars((string) $a->id_azienda) ?>"
+                        >
 
-            </td>
+                        <button
+                            type="submit"
+                            class="btn btn-danger btn-sm"
+                        >
+                            Elimina
+                        </button>
 
-            <td>
+                    </form>
 
-                <a
-                    href="/esg-balance/aziende.php?action=delete&id=<?= $a->id_azienda ?>"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Vuoi davvero eliminare questa azienda?');"
-                >
+                </td>
 
-                    Elimina
+            </tr>
 
-                </a>
+        <?php endforeach; ?>
 
-            </td>
+        </tbody>
 
-        </tr>
+    </table>
 
-    <?php endforeach; ?>
-
-    </tbody>
-
-</table>
+<?php endif; ?>
 
 <?php
 

@@ -2,12 +2,13 @@
 
 /** @var array $bilanci */
 /** @var array $revisori */
-/** @var array $revisioni */
+/** @var Revisione[] $revisioni */
 
 include __DIR__ . '/../partials/header.php';
 
-$backUrl = '/ESG-BALANCE/index.php';
+$backUrl = '/esg-balance/index.php';
 include __DIR__ . '/../partials/back_button.php';
+
 ?>
 
 <h2 class="mb-4">
@@ -16,6 +17,10 @@ include __DIR__ . '/../partials/back_button.php';
 
 </h2>
 
+
+<!-- ========================================================= -->
+<!-- MESSAGGI -->
+<!-- ========================================================= -->
 
 <?php if(isset($_SESSION['errore_revisione'])) : ?>
 
@@ -43,6 +48,10 @@ include __DIR__ . '/../partials/back_button.php';
 <?php endif; ?>
 
 
+<!-- ========================================================= -->
+<!-- ASSEGNA REVISIONE -->
+<!-- ========================================================= -->
+
 <form
     method="POST"
     action="/esg-balance/revisioni.php?action=assegna"
@@ -52,7 +61,9 @@ include __DIR__ . '/../partials/back_button.php';
     <div class="mb-3">
 
         <label class="form-label">
+
             Bilancio
+
         </label>
 
         <select
@@ -61,15 +72,21 @@ include __DIR__ . '/../partials/back_button.php';
             required
         >
 
+            <option value="">
+
+                Seleziona bilancio
+
+            </option>
+
             <?php foreach($bilanci as $b) : ?>
 
                 <option
-                    value="<?= $b['id_bilancio'] ?>"
+                    value="<?= htmlspecialchars((string) $b['id_bilancio']) ?>"
                 >
 
-                    <?= $b['azienda'] ?>
+                    <?= htmlspecialchars($b['azienda']) ?>
                     -
-                    <?= $b['data_creazione'] ?>
+                    <?= htmlspecialchars($b['data_creazione']) ?>
 
                 </option>
 
@@ -79,10 +96,13 @@ include __DIR__ . '/../partials/back_button.php';
 
     </div>
 
+
     <div class="mb-3">
 
         <label class="form-label">
+
             Revisore ESG
+
         </label>
 
         <select
@@ -91,13 +111,19 @@ include __DIR__ . '/../partials/back_button.php';
             required
         >
 
+            <option value="">
+
+                Seleziona revisore
+
+            </option>
+
             <?php foreach($revisori as $r) : ?>
 
                 <option
-                    value="<?= $r['id_utente'] ?>"
+                    value="<?= htmlspecialchars((string) $r['id_utente']) ?>"
                 >
 
-                    <?= $r['username'] ?>
+                    <?= htmlspecialchars($r['username']) ?>
 
                 </option>
 
@@ -107,7 +133,11 @@ include __DIR__ . '/../partials/back_button.php';
 
     </div>
 
-    <button class="btn btn-success">
+
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
 
         Assegna Revisore
 
@@ -115,7 +145,13 @@ include __DIR__ . '/../partials/back_button.php';
 
 </form>
 
+
 <hr>
+
+
+<!-- ========================================================= -->
+<!-- REVISIONI ASSEGNATE -->
+<!-- ========================================================= -->
 
 <h3>
 
@@ -123,58 +159,107 @@ include __DIR__ . '/../partials/back_button.php';
 
 </h3>
 
-<table class="table table-bordered">
 
-    <thead>
+<?php if(empty($revisioni)) : ?>
 
-        <tr>
+    <div class="alert alert-info">
 
-            <th>ID</th>
-            <th>Azienda</th>
-            <th>Revisore</th>
-            <th>Azioni</th>
+        Non ci sono ancora revisioni assegnate.
 
-        </tr>
+    </div>
 
-    </thead>
+<?php else : ?>
 
-    <tbody>
+    <table class="table table-bordered">
 
-    <?php foreach($revisioni as $r) : ?>
+        <thead>
 
-        <tr>
+            <tr>
 
-            <td>
-                <?= $r->id_revisione ?>
-            </td>
+                <th>ID</th>
+                <th>Azienda</th>
+                <th>Revisore</th>
+                <th>Stato</th>
+                <th>Azioni</th>
 
-            <td>
-                <?= $r->azienda ?>
-            </td>
+            </tr>
 
-            <td>
-                <?= $r->username ?>
-            </td>
+        </thead>
 
-            <td>
+        <tbody>
 
-                <a
+        <?php foreach($revisioni as $r) : ?>
 
-                    href="/esg-balance/revisioni.php?action=dettaglioAdmin&id=<?= $r->id_bilancio ?>"
+            <tr>
 
-                    class="btn btn-info btn-sm"
-                >
+                <td>
 
-                    Dettaglio Revisione
+                    <?= htmlspecialchars((string) $r->id_revisione) ?>
 
-                </a>
+                </td>
 
-            </td>
+                <td>
 
-        </tr>
+                    <?= htmlspecialchars($r->azienda ?? '') ?>
 
-    <?php endforeach; ?>
+                </td>
 
-    </tbody>
+                <td>
 
-</table>
+                    <?= htmlspecialchars($r->username ?? '') ?>
+
+                </td>
+
+                <td>
+
+                    <?php if($r->stato === 'conclusa') : ?>
+
+                        <span class="badge bg-success">
+
+                            Conclusa
+
+                        </span>
+
+                    <?php else : ?>
+
+                        <span class="badge bg-warning text-dark">
+
+                            <?= htmlspecialchars(
+                                ucfirst($r->stato ?? 'assegnata')
+                            ) ?>
+
+                        </span>
+
+                    <?php endif; ?>
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="/esg-balance/revisioni.php?action=dettaglioAdmin&id=<?= htmlspecialchars((string) $r->id_bilancio) ?>"
+                        class="btn btn-info btn-sm"
+                    >
+
+                        Dettaglio Revisione
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+        <?php endforeach; ?>
+
+        </tbody>
+
+    </table>
+
+<?php endif; ?>
+
+
+<?php
+
+include __DIR__ . '/../partials/footer.php';
+
+?>

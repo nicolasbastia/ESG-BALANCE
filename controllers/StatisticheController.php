@@ -2,21 +2,22 @@
 
 require_once __DIR__ . '/../repositories/StatisticheRepository.php';
 
-class StatisticheController {
-
+class StatisticheController
+{
     private $repo;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->repo = new StatisticheRepository();
     }
 
-    public function index() {
-
+    public function index()
+    {
         session_start();
 
         if(!isset($_SESSION['utente'])) {
 
-            header('Location: login.php');
+            header('Location: /esg-balance/login.php');
             exit;
         }
 
