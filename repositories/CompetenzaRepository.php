@@ -60,7 +60,7 @@ class CompetenzaRepository {
             FROM competenza_revisore cr
 
             JOIN competenza c
-            ON cr.id_competenza = c.id_competenza
+                ON cr.id_competenza = c.id_competenza
 
             WHERE cr.id_utente = ?
 
@@ -79,14 +79,53 @@ class CompetenzaRepository {
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
             $competenze[] = new Competenza(
+
                 $row['id_utente'],
                 $row['id_competenza'],
                 $row['livello'],
                 $row['nome']
+
             );
         }
 
         return $competenze;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROLLO COMPETENZA GIA PRESENTE
+    |--------------------------------------------------------------------------
+    */
+
+    public function exists(
+
+        $idUtente,
+        $idCompetenza
+
+    ) {
+
+        $sql = "
+
+            SELECT COUNT(*)
+
+            FROM competenza_revisore
+
+            WHERE id_utente = ?
+
+            AND id_competenza = ?
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+
+            $idUtente,
+            $idCompetenza
+
+        ]);
+
+        return $stmt->fetchColumn() > 0;
     }
 
     /*
@@ -104,26 +143,64 @@ class CompetenzaRepository {
     ) {
 
         $competenza = new Competenza(
+
             $idUtente,
             $idCompetenza,
             $livello
+
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO LIVELLO
+        |--------------------------------------------------------------------------
+        */
 
         if(!$competenza->isValid()) {
 
             return false;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | CONTROLLO DUPLICATO
+        |--------------------------------------------------------------------------
+        */
+
+        if($this->exists(
+
+            $idUtente,
+            $idCompetenza
+
+        )) {
+
+            return false;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSERIMENTO
+        |--------------------------------------------------------------------------
+        */
+
         $sql = "
-            CALL sp_aggiungi_competenza_revisore(?, ?, ?)
+
+            CALL sp_aggiungi_competenza_revisore(
+                ?,
+                ?,
+                ?
+            )
+
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
+
             $idUtente,
             $idCompetenza,
             $livello
+
         ]);
 
         $stmt->closeCursor();
@@ -146,9 +223,11 @@ class CompetenzaRepository {
     ) {
 
         $competenza = new Competenza(
+
             $idUtente,
             $idCompetenza,
             $livello
+
         );
 
         if(!$competenza->isValid()) {
@@ -157,15 +236,23 @@ class CompetenzaRepository {
         }
 
         $sql = "
-            CALL sp_modifica_competenza_revisore(?, ?, ?)
+
+            CALL sp_modifica_competenza_revisore(
+                ?,
+                ?,
+                ?
+            )
+
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
+
             $idUtente,
             $idCompetenza,
             $livello
+
         ]);
 
         $stmt->closeCursor();
@@ -187,14 +274,21 @@ class CompetenzaRepository {
     ) {
 
         $sql = "
-            CALL sp_elimina_competenza_revisore(?, ?)
+
+            CALL sp_elimina_competenza_revisore(
+                ?,
+                ?
+            )
+
         ";
 
         $stmt = $this->pdo->prepare($sql);
 
         $result = $stmt->execute([
+
             $idUtente,
             $idCompetenza
+
         ]);
 
         $stmt->closeCursor();

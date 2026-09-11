@@ -18,6 +18,36 @@ include __DIR__ . '/../partials/back_button.php';
 
 
 <!-- ========================================================= -->
+<!-- MESSAGGI -->
+<!-- ========================================================= -->
+
+<?php if(isset($_SESSION['errore_competenza'])) : ?>
+
+    <div class="alert alert-danger">
+
+        <?= htmlspecialchars($_SESSION['errore_competenza']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['errore_competenza']); ?>
+
+<?php endif; ?>
+
+
+<?php if(isset($_SESSION['successo_competenza'])) : ?>
+
+    <div class="alert alert-success">
+
+        <?= htmlspecialchars($_SESSION['successo_competenza']) ?>
+
+    </div>
+
+    <?php unset($_SESSION['successo_competenza']); ?>
+
+<?php endif; ?>
+
+
+<!-- ========================================================= -->
 <!-- AGGIUNGI COMPETENZA -->
 <!-- ========================================================= -->
 
@@ -92,27 +122,39 @@ include __DIR__ . '/../partials/back_button.php';
                 >
 
                     <option value="0">
+
                         0 - Nessuna esperienza
+
                     </option>
 
                     <option value="1">
+
                         1 - Base
+
                     </option>
 
                     <option value="2">
+
                         2 - Principiante
+
                     </option>
 
                     <option value="3">
+
                         3 - Intermedio
+
                     </option>
 
                     <option value="4">
+
                         4 - Avanzato
+
                     </option>
 
                     <option value="5">
+
                         5 - Esperto
+
                     </option>
 
                 </select>
@@ -203,7 +245,9 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <td>
 
+                    <!-- ================================================= -->
                     <!-- MODIFICA LIVELLO -->
+                    <!-- ================================================= -->
 
                     <form
                         method="POST"
@@ -228,42 +272,54 @@ include __DIR__ . '/../partials/back_button.php';
                                 value="0"
                                 <?= $c->livello == 0 ? 'selected' : '' ?>
                             >
+
                                 0
+
                             </option>
 
                             <option
                                 value="1"
                                 <?= $c->livello == 1 ? 'selected' : '' ?>
                             >
+
                                 1
+
                             </option>
 
                             <option
                                 value="2"
                                 <?= $c->livello == 2 ? 'selected' : '' ?>
                             >
+
                                 2
+
                             </option>
 
                             <option
                                 value="3"
                                 <?= $c->livello == 3 ? 'selected' : '' ?>
                             >
+
                                 3
+
                             </option>
 
                             <option
                                 value="4"
                                 <?= $c->livello == 4 ? 'selected' : '' ?>
                             >
+
                                 4
+
                             </option>
 
                             <option
                                 value="5"
                                 <?= $c->livello == 5 ? 'selected' : '' ?>
                             >
+
                                 5
+
                             </option>
 
                         </select>
@@ -280,7 +336,9 @@ include __DIR__ . '/../partials/back_button.php';
                     </form>
 
 
+                    <!-- ================================================= -->
                     <!-- ELIMINA -->
+                    <!-- ================================================= -->
 
                     <a
                         href="/esg-balance/competenza.php?action=delete&id=<?= $c->id_competenza ?>"

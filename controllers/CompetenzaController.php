@@ -24,12 +24,6 @@ class CompetenzaController {
 
     public function index() {
 
-        /*
-        |----------------------------------------------------------------------
-        | Controllo accesso
-        |----------------------------------------------------------------------
-        */
-
         if(
             !isset($_SESSION['utente']) ||
             $_SESSION['utente']['ruolo'] !== 'revisore'
@@ -41,12 +35,6 @@ class CompetenzaController {
         }
 
         $utente = $_SESSION['utente'];
-
-        /*
-        |----------------------------------------------------------------------
-        | Recuperiamo le competenze
-        |----------------------------------------------------------------------
-        */
 
         $competenze = $this->repo->getAll();
 
@@ -67,12 +55,6 @@ class CompetenzaController {
 
     public function create() {
 
-        /*
-        |----------------------------------------------------------------------
-        | Controllo accesso
-        |----------------------------------------------------------------------
-        */
-
         if(
             !isset($_SESSION['utente']) ||
             $_SESSION['utente']['ruolo'] !== 'revisore'
@@ -105,7 +87,8 @@ class CompetenzaController {
 
             if(!$competenza->isValid()) {
 
-                $_SESSION['errore_competenza'] = "Livello competenza non valido (0-5)";
+                $_SESSION['errore_competenza'] =
+                    "Livello competenza non valido (0-5).";
 
                 header('Location: competenza.php');
 
@@ -118,7 +101,7 @@ class CompetenzaController {
             |------------------------------------------------------------------
             */
 
-            $this->repo->create(
+            $risultato = $this->repo->create(
 
                 $utente['id'],
                 $idCompetenza,
@@ -126,7 +109,30 @@ class CompetenzaController {
 
             );
 
-            $_SESSION['successo_competenza'] = "Competenza aggiunta correttamente";
+            /*
+            |------------------------------------------------------------------
+            | Competenza già presente
+            |------------------------------------------------------------------
+            */
+
+            if(!$risultato) {
+
+                $_SESSION['errore_competenza'] =
+                    "Hai già dichiarato questa competenza. Puoi modificarne il livello.";
+
+                header('Location: competenza.php');
+
+                exit;
+            }
+
+            /*
+            |------------------------------------------------------------------
+            | Inserimento riuscito
+            |------------------------------------------------------------------
+            */
+
+            $_SESSION['successo_competenza'] =
+                "Competenza aggiunta correttamente.";
 
             header('Location: competenza.php');
 
@@ -144,12 +150,6 @@ class CompetenzaController {
 
     public function update() {
 
-        /*
-        |----------------------------------------------------------------------
-        | Controllo accesso
-        |----------------------------------------------------------------------
-        */
-
         if(
             !isset($_SESSION['utente']) ||
             $_SESSION['utente']['ruolo'] !== 'revisore'
@@ -168,12 +168,6 @@ class CompetenzaController {
 
             $livello = $_POST['livello'];
 
-            /*
-            |------------------------------------------------------------------
-            | Creazione model per validazione
-            |------------------------------------------------------------------
-            */
-
             $competenza = new Competenza(
                 $utente['id'],
                 $idCompetenza,
@@ -182,20 +176,15 @@ class CompetenzaController {
 
             if(!$competenza->isValid()) {
 
-                $_SESSION['errore_competenza'] = "Livello competenza non valido (0-5)";
+                $_SESSION['errore_competenza'] =
+                    "Livello competenza non valido (0-5).";
 
                 header('Location: competenza.php');
 
                 exit;
             }
 
-            /*
-            |------------------------------------------------------------------
-            | Aggiornamento
-            |------------------------------------------------------------------
-            */
-
-            $this->repo->update(
+            $risultato = $this->repo->update(
 
                 $utente['id'],
                 $idCompetenza,
@@ -203,7 +192,18 @@ class CompetenzaController {
 
             );
 
-            $_SESSION['successo_competenza'] = "Competenza aggiornata correttamente";
+            if(!$risultato) {
+
+                $_SESSION['errore_competenza'] =
+                    "Impossibile aggiornare la competenza.";
+
+                header('Location: competenza.php');
+
+                exit;
+            }
+
+            $_SESSION['successo_competenza'] =
+                "Competenza aggiornata correttamente.";
 
             header('Location: competenza.php');
 
@@ -221,12 +221,6 @@ class CompetenzaController {
 
     public function delete() {
 
-        /*
-        |----------------------------------------------------------------------
-        | Controllo accesso
-        |----------------------------------------------------------------------
-        */
-
         if(
             !isset($_SESSION['utente']) ||
             $_SESSION['utente']['ruolo'] !== 'revisore'
@@ -243,12 +237,25 @@ class CompetenzaController {
 
             $idCompetenza = $_GET['id'];
 
-            $this->repo->delete(
+            $risultato = $this->repo->delete(
 
                 $utente['id'],
                 $idCompetenza
 
             );
+
+            if(!$risultato) {
+
+                $_SESSION['errore_competenza'] =
+                    "Impossibile eliminare la competenza.";
+
+                header('Location: competenza.php');
+
+                exit;
+            }
+
+            $_SESSION['successo_competenza'] =
+                "Competenza eliminata correttamente.";
 
             header('Location: competenza.php');
 
