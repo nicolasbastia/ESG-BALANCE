@@ -10,14 +10,3 @@ $controller = new AuthController();
 $controller->login();
 
 ?>
-<p class="mt-3">
-
-    Non hai un account?
-
-    <a href="register.php">
-
-        Registrati
-
-    </a>
-
-</p>
