@@ -8,6 +8,11 @@ include __DIR__ . '/../partials/header.php';
     Registrazione Utente
 </h2>
 
+<?php
+$backUrl = '/esg-balance/login.php';
+include __DIR__ . '/../partials/back_button.php';
+?>
+
 <?php if(isset($errore)) : ?>
 
     <div class="alert alert-danger">
