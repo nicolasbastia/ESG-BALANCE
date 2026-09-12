@@ -738,7 +738,7 @@ CREATE PROCEDURE sp_crea_indicatore_esg(
     IN p_rilevanza INT,
     IN p_categoria VARCHAR(20),
     IN p_codice_normativa VARCHAR(100),
-    IN p_ambito_sociale VARCHAR(100),
+    IN p_ambito_sociale VARCHAR(150),
     IN p_frequenza_rilevazione VARCHAR(100)
 )
 BEGIN
