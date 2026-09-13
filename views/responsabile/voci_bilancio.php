@@ -94,6 +94,7 @@ include __DIR__ . '/../partials/back_button.php';
                         name="valori[<?= htmlspecialchars((string) $idVoce) ?>]"
                         value="<?= htmlspecialchars((string) $valoreCorrente) ?>"
                         class="form-control"
+                        required
                     >
 
                 </td>

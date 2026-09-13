@@ -164,6 +164,8 @@ CREATE TABLE voce_bilancio (
 
     valore DECIMAL(15,2) NOT NULL,
 
+    UNIQUE (id_bilancio, id_voce),
+
     FOREIGN KEY (id_bilancio)
     REFERENCES bilancio(id_bilancio)
     ON DELETE CASCADE,

@@ -222,6 +222,8 @@ END$$
 
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS sp_inserisci_giudizio;
+
 DELIMITER $$
 
 CREATE PROCEDURE sp_inserisci_giudizio(
@@ -236,18 +238,27 @@ CREATE PROCEDURE sp_inserisci_giudizio(
 
 BEGIN
 
-    INSERT INTO giudizio_revisore(
+    IF NOT EXISTS (
+        SELECT 1
+        FROM revisione
+        WHERE id_bilancio = p_id_bilancio
+          AND id_revisore = p_id_revisore
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+            'Il revisore non è assegnato a questo bilancio';
+    END IF;
 
+    INSERT INTO giudizio_revisore (
         id_bilancio,
         id_revisore,
         esito,
         data_giudizio,
         rilievi
-
+        
     )
 
-    VALUES(
-
+    VALUES (
         p_id_bilancio,
         p_id_revisore,
         p_esito,
