@@ -170,6 +170,38 @@ if($utente['ruolo'] === 'amministratore') :
 
     </div>
 
+
+    <!-- UTENTI -->
+
+    <div class="col-md-4 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Competenze e CV utenti
+                </h5>
+
+                <p class="card-text">
+                    Visualizza le competenze dei revisori e i CV dei responsabili aziendali.
+                </p>
+
+                <a
+                    href="/esg-balance/admin_utenti.php"
+                    class="btn btn-primary"
+                >
+
+                    Visualizza
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 <?php endif; ?>
 
 
