@@ -18,11 +18,6 @@ class VoceIndicatoreController {
         $this->bilancioRepo = new BilancioRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ACCESSO RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
 
     private function verificaResponsabile() {
 
@@ -38,11 +33,7 @@ class VoceIndicatoreController {
         return $_SESSION['utente'];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO BILANCIO DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
+    /* CONTROLLi */
 
     private function bilancioAppartieneAlResponsabile(
         $idBilancio,
@@ -67,12 +58,6 @@ class VoceIndicatoreController {
         return false;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO VOCE APPARTENENTE AL BILANCIO
-    |--------------------------------------------------------------------------
-    */
-
     private function voceAppartieneAlBilancio(
         $idVoceBilancio,
         $idBilancio
@@ -95,12 +80,6 @@ class VoceIndicatoreController {
 
         return false;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
 
     public function index() {
 
@@ -148,11 +127,6 @@ class VoceIndicatoreController {
         require __DIR__ . '/../views/responsabile/esg_bilancio.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
 
     public function create() {
 
@@ -164,11 +138,6 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | ID BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $idBilancio = filter_input(
             INPUT_POST,
@@ -176,11 +145,6 @@ class VoceIndicatoreController {
             FILTER_VALIDATE_INT
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | ID VOCE BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $idVoceBilancio = filter_input(
             INPUT_POST,
@@ -188,11 +152,6 @@ class VoceIndicatoreController {
             FILTER_VALIDATE_INT
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | ID INDICATORE
-        |--------------------------------------------------------------------------
-        */
 
         $idIndicatore = filter_input(
             INPUT_POST,
@@ -216,11 +175,7 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO BILANCIO
-        |--------------------------------------------------------------------------
-        */
+        /* CONTROLLI */
 
         if(
             !$this->bilancioAppartieneAlResponsabile(
@@ -236,11 +191,6 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO VOCE
-        |--------------------------------------------------------------------------
-        */
 
         if(
             !$this->voceAppartieneAlBilancio(
@@ -259,11 +209,6 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | ALTRI DATI
-        |--------------------------------------------------------------------------
-        */
 
         $valore = trim(
             $_POST['valore'] ?? ''
@@ -277,11 +222,6 @@ class VoceIndicatoreController {
             $_POST['data_rilevazione'] ?? ''
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE VALORE
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $valore === '' ||
@@ -298,11 +238,6 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE DATA
-        |--------------------------------------------------------------------------
-        */
 
         if($dataRilevazione === '') {
 
@@ -316,11 +251,7 @@ class VoceIndicatoreController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREAZIONE MODEL
-        |--------------------------------------------------------------------------
-        */
+        /* CREAZIONE MODEL */
 
         $voceIndicatore = new VoceIndicatore(
             $idVoceBilancio,
@@ -330,11 +261,6 @@ class VoceIndicatoreController {
             $dataRilevazione
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | SALVATAGGIO
-        |--------------------------------------------------------------------------
-        */
 
         try {
 

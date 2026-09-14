@@ -17,12 +17,6 @@ class BilancioController {
         $this->repo = new BilancioRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ACCESSO RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
-
     private function verificaResponsabile() {
 
         if(
@@ -36,12 +30,6 @@ class BilancioController {
 
         return $_SESSION['utente'];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO AZIENDA DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
 
     private function aziendaAppartieneAlResponsabile(
         $idAzienda,
@@ -66,12 +54,6 @@ class BilancioController {
         return false;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO BILANCIO DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
-
     private function bilancioAppartieneAlResponsabile(
         $idBilancio,
         $idResponsabile
@@ -95,12 +77,6 @@ class BilancioController {
         return false;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
-
     public function index() {
 
         $utente = $this->verificaResponsabile();
@@ -116,21 +92,12 @@ class BilancioController {
         require __DIR__ . '/../views/responsabile/bilanci.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETTAGLIO
-    |--------------------------------------------------------------------------
-    */
+    /*DETTAGLIO*/
 
     public function dettaglio() {
 
         $utente = $this->verificaResponsabile();
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ID BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $idBilancio = filter_input(
             INPUT_GET,
@@ -147,12 +114,6 @@ class BilancioController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO PROPRIETA BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
         if(
             !$this->bilancioAppartieneAlResponsabile(
                 $idBilancio,
@@ -167,33 +128,17 @@ class BilancioController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATI BILANCIO
-        |--------------------------------------------------------------------------
-        */
+        /*DATI BILANCIO*/
 
         $dettagli = $this->repo->getDettaglioBilancio(
             $idBilancio
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | NOTE
-        |--------------------------------------------------------------------------
-        */
 
         $notaRepo = new NotaRepository();
 
         $note = $notaRepo->getByBilancio(
             $idBilancio
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | GIUDIZI
-        |--------------------------------------------------------------------------
-        */
 
         $giudizioRepo = new GiudizioRepository();
 
@@ -204,12 +149,6 @@ class BilancioController {
         require __DIR__ . '/../views/responsabile/dettaglio.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-
     public function create() {
 
         $utente = $this->verificaResponsabile();
@@ -219,12 +158,6 @@ class BilancioController {
             header('Location: bilanci.php');
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ID AZIENDA
-        |--------------------------------------------------------------------------
-        */
 
         $idAzienda = filter_input(
             INPUT_POST,
@@ -241,12 +174,6 @@ class BilancioController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO PROPRIETA AZIENDA
-        |--------------------------------------------------------------------------
-        */
-
         if(
             !$this->aziendaAppartieneAlResponsabile(
                 $idAzienda,
@@ -261,11 +188,7 @@ class BilancioController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREA MODEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
+        /*CREAZIONE MODEL BILANCIO*/
 
         $bilancio = new Bilancio(
 
@@ -275,12 +198,6 @@ class BilancioController {
             'bozza'
 
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | CREAZIONE
-        |--------------------------------------------------------------------------
-        */
 
         try {
 
@@ -314,33 +231,17 @@ class BilancioController {
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
+    /*DELETE*/
 
     public function delete() {
 
         $utente = $this->verificaResponsabile();
-
-        /*
-        |--------------------------------------------------------------------------
-        | SOLO POST
-        |--------------------------------------------------------------------------
-        */
 
         if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
             header('Location: bilanci.php');
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ID BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $idBilancio = filter_input(
             INPUT_POST,
@@ -357,12 +258,6 @@ class BilancioController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO PROPRIETA BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
         if(
             !$this->bilancioAppartieneAlResponsabile(
                 $idBilancio,
@@ -376,12 +271,6 @@ class BilancioController {
             header('Location: bilanci.php');
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINAZIONE
-        |--------------------------------------------------------------------------
-        */
 
         try {
 

@@ -12,10 +12,6 @@ class AdminUtentiController {
         $this->repo = new AdminUtentiRepository();
     }
 
-    /**
-     * Controlla che l'utente sia autenticato
-     * e che abbia ruolo amministratore.
-     */
     private function checkAccess() {
 
         if(
@@ -27,9 +23,6 @@ class AdminUtentiController {
         }
     }
 
-    /**
-     * Pagina principale di consultazione utenti.
-     */
     public function index() {
 
         $this->checkAccess();

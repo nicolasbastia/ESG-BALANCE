@@ -26,12 +26,6 @@ class RevisioneController {
         $this->giudizioRepo = new GiudizioRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO AMMINISTRATORE
-    |--------------------------------------------------------------------------
-    */
-
     private function verificaAmministratore() {
 
         if(
@@ -45,12 +39,6 @@ class RevisioneController {
 
         return $_SESSION['utente'];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO REVISORE
-    |--------------------------------------------------------------------------
-    */
 
     private function verificaRevisore() {
 
@@ -66,12 +54,6 @@ class RevisioneController {
         return $_SESSION['utente'];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX ADMIN
-    |--------------------------------------------------------------------------
-    */
-
     public function index() {
 
         $this->verificaAmministratore();
@@ -85,11 +67,7 @@ class RevisioneController {
         require __DIR__ . '/../views/admin/revisioni.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ASSEGNA REVISIONE
-    |--------------------------------------------------------------------------
-    */
+    /*ASSEGNA REVISIONE*/
 
     public function assegna() {
 
@@ -134,12 +112,6 @@ class RevisioneController {
                 $idRevisore
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | ASSEGNAZIONE GIA ESISTENTE
-            |--------------------------------------------------------------------------
-            */
-
             if(!$risultato) {
 
                 $_SESSION['errore_revisione'] =
@@ -148,12 +120,6 @@ class RevisioneController {
                 header('Location: /esg-balance/revisioni.php');
                 exit;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | ASSEGNAZIONE RIUSCITA
-            |--------------------------------------------------------------------------
-            */
 
             salvaEvento(
                 "Assegnato revisore ESG"
@@ -172,11 +138,7 @@ class RevisioneController {
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | AREA REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /*AREA REVISORE*/
 
     public function areaRevisore() {
 
@@ -189,11 +151,7 @@ class RevisioneController {
         require __DIR__ . '/../views/revisore/revisioni.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETTAGLIO REVISIONE REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /*DETTAGLIO REVISIONE REVISORE*/
 
     public function dettaglio() {
 
@@ -214,12 +172,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ASSEGNAZIONE
-        |--------------------------------------------------------------------------
-        */
-
         if(
             !$this->repo->isAssegnato(
                 $idBilancio,
@@ -234,52 +186,27 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATI DEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
         $dettagli = $this->repo->getDettaglioBilancio(
             $idBilancio
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | NOTE DEL REVISORE PER QUESTO BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $note = $this->notaRepo->getByRevisoreEBilancio(
             $utente['id'],
             $idBilancio
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | GIUDIZIO DEL REVISORE PER QUESTO BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $giudizio = $this->giudizioRepo->getByBilancio(
             $idBilancio,
             $utente['id']
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW REVISORE
-        |--------------------------------------------------------------------------
-        */
 
         require __DIR__ . '/../views/revisore/dettaglio.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETTAGLIO REVISIONE ADMIN
-    |--------------------------------------------------------------------------
-    */
+    /* DETTAGLIO REVISIONE ADMIN*/
 
     public function dettaglioAdmin() {
 
@@ -300,50 +227,25 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATI DEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
-
         $dettagli = $this->repo->getDettaglioBilancio(
             $idBilancio
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TUTTE LE NOTE DEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $note = $this->notaRepo->getByBilancio(
             $idBilancio
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | TUTTI I GIUDIZI DEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         $giudizi = $this->giudizioRepo->getTuttiByBilancio(
             $idBilancio
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW ADMIN - SOLA LETTURA
-        |--------------------------------------------------------------------------
-        */
+ 
 
         require __DIR__ . '/../views/admin/dettaglio_revisione.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREA NOTA
-    |--------------------------------------------------------------------------
-    */
+    /*CREA NOTA*/
 
     public function creaNota() {
 
@@ -383,11 +285,7 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ASSEGNAZIONE
-        |--------------------------------------------------------------------------
-        */
+        /* CONTROLLI */
 
         if(
             !$this->repo->isAssegnato(
@@ -403,11 +301,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO VOCE DEL BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         if(
             !$this->repo->voceAppartieneAlBilancio(
@@ -427,11 +320,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO TESTO
-        |--------------------------------------------------------------------------
-        */
 
         if($testo === '') {
 
@@ -446,11 +334,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO REVISIONE CONCLUSA
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $this->giudizioRepo->esisteGiudizio(
@@ -470,11 +353,7 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREA MODEL NOTA
-        |--------------------------------------------------------------------------
-        */
+        /* CREA MODEL NOTA */
 
         $nota = new NotaRevisione(
             null,
@@ -484,11 +363,7 @@ class RevisioneController {
             $testo
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | SALVA NOTA
-        |--------------------------------------------------------------------------
-        */
+        /* SALVA NOTA */
 
         try {
 
@@ -517,11 +392,7 @@ class RevisioneController {
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREA GIUDIZIO
-    |--------------------------------------------------------------------------
-    */
+    /* CREA GIUDIZIO*/
 
     public function creaGiudizio() {
 
@@ -543,11 +414,6 @@ class RevisioneController {
 
         $rilievi = trim($_POST['rilievi'] ?? '');
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE BILANCIO
-        |--------------------------------------------------------------------------
-        */
 
         if(!$idBilancio || $idBilancio <= 0) {
 
@@ -558,11 +424,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ASSEGNAZIONE
-        |--------------------------------------------------------------------------
-        */
 
         if(
             !$this->repo->isAssegnato(
@@ -577,12 +438,6 @@ class RevisioneController {
             header('Location: /esg-balance/revisioni_revisore.php');
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE ESITO
-        |--------------------------------------------------------------------------
-        */
 
         $esitiConsentiti = [
             'approvazione',
@@ -603,12 +458,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO RILIEVI
-        |--------------------------------------------------------------------------
-        */
-
         if(
             $esito === 'approvazione con rilievi' &&
             $rilievi === ''
@@ -625,11 +474,6 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO GIUDIZIO GIA PRESENTE
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $this->giudizioRepo->esisteGiudizio(
@@ -649,11 +493,7 @@ class RevisioneController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREA MODEL GIUDIZIO
-        |--------------------------------------------------------------------------
-        */
+        /* CREA MODEL GIUDIZIO*/
 
         $giudizio = new GiudizioRevisione(
             null,
@@ -664,11 +504,6 @@ class RevisioneController {
             $rilievi !== '' ? $rilievi : null
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | SALVA GIUDIZIO
-        |--------------------------------------------------------------------------
-        */
 
         try {
 
@@ -676,11 +511,7 @@ class RevisioneController {
                 $giudizio
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | AGGIORNA DATI REVISORE IN SESSIONE
-            |--------------------------------------------------------------------------
-            */
+            /*AGGIORNA DATI REVISORE IN SESSIONE*/
 
             $revisoreRepo = new RevisoreRepository();
 
@@ -700,11 +531,7 @@ class RevisioneController {
                     $datiRevisore->getLivelloAffidabilita();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | LOGGER
-            |--------------------------------------------------------------------------
-            */
+            /*LOGGER*/
 
             salvaEvento(
                 "Creato giudizio revisione ESG"

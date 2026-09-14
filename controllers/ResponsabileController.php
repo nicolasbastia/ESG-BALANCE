@@ -15,12 +15,6 @@ class ResponsabileController {
         $this->repo = new ResponsabileRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ACCESSO
-    |--------------------------------------------------------------------------
-    */
-
     private function checkAccess() {
 
         if(
@@ -33,11 +27,6 @@ class ResponsabileController {
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
 
     public function index() {
 
@@ -52,12 +41,6 @@ class ResponsabileController {
         require __DIR__ . '/../views/responsabile/profilo.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPLOAD / SOSTITUZIONE CV
-    |--------------------------------------------------------------------------
-    */
-
     public function uploadCv() {
 
         $this->checkAccess();
@@ -68,11 +51,7 @@ class ResponsabileController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO FILE
-        |--------------------------------------------------------------------------
-        */
+        /* CONTROLLI*/
 
         if(
             !isset($_FILES['cv_pdf']) ||
@@ -87,11 +66,6 @@ class ResponsabileController {
 
         $file = $_FILES['cv_pdf'];
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO DIMENSIONE
-        |--------------------------------------------------------------------------
-        */
 
         $maxSize = 5 * 1024 * 1024; // 5 MB
 
@@ -104,11 +78,6 @@ class ResponsabileController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ESTENSIONE
-        |--------------------------------------------------------------------------
-        */
 
         if(!Responsabile::isValidCvExtension($file['name'])) {
 
@@ -119,11 +88,6 @@ class ResponsabileController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO MIME
-        |--------------------------------------------------------------------------
-        */
 
         if(!Responsabile::isValidCvMimeType($file['tmp_name'])) {
 
@@ -136,21 +100,10 @@ class ResponsabileController {
 
         $utente = $_SESSION['utente'];
 
-        /*
-        |--------------------------------------------------------------------------
-        | RECUPERA EVENTUALE CV PRECEDENTE
-        |--------------------------------------------------------------------------
-        */
 
         $profilo = $this->repo->getByUtente(
             $utente['id']
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | GENERA NOME FILE
-        |--------------------------------------------------------------------------
-        */
 
         $nomeFile =
             'cv_' .
@@ -180,11 +133,7 @@ class ResponsabileController {
             'uploads/cv/' .
             $nomeFile;
 
-        /*
-        |--------------------------------------------------------------------------
-        | SALVA NUOVO FILE
-        |--------------------------------------------------------------------------
-        */
+        /* SALVA NUOVO FILE */
 
         if(
             !move_uploaded_file(
@@ -200,11 +149,7 @@ class ResponsabileController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | AGGIORNA DATABASE
-        |--------------------------------------------------------------------------
-        */
+        /* AGGIORNA DATABASE */
 
         try {
 
@@ -215,11 +160,7 @@ class ResponsabileController {
 
         } catch(Throwable $e) {
 
-            /*
-            |----------------------------------------------------------------------
-            | SE IL DB FALLISCE, ELIMINA IL NUOVO FILE
-            |----------------------------------------------------------------------
-            */
+            /* SE IL DB FALLISCE, ELIMINA IL NUOVO FILE*/
 
             if(file_exists($destinazione)) {
 
@@ -232,12 +173,6 @@ class ResponsabileController {
             header('Location: /esg-balance/responsabile.php');
             exit;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINA VECCHIO FILE SOLO DOPO UPDATE DB
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $profilo &&
@@ -270,21 +205,11 @@ class ResponsabileController {
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ELIMINA CV
-    |--------------------------------------------------------------------------
-    */
+    /* ELIMINA CV */
 
     public function deleteCv() {
 
         $this->checkAccess();
-
-        /*
-        |--------------------------------------------------------------------------
-        | SOLO POST
-        |--------------------------------------------------------------------------
-        */
 
         if($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
@@ -303,12 +228,6 @@ class ResponsabileController {
             $profilo->hasCv()
         ) {
 
-            /*
-            |----------------------------------------------------------------------
-            | PRIMA AGGIORNA DATABASE
-            |----------------------------------------------------------------------
-            */
-
             try {
 
                 $this->repo->deleteCv(
@@ -323,12 +242,6 @@ class ResponsabileController {
                 header('Location: /esg-balance/responsabile.php');
                 exit;
             }
-
-            /*
-            |----------------------------------------------------------------------
-            | POI ELIMINA FILE FISICO
-            |----------------------------------------------------------------------
-            */
 
             $filePath =
                 __DIR__ .

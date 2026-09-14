@@ -15,12 +15,6 @@ class AziendaController {
         $this->repo = new AziendaRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ACCESSO RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
-
     private function verificaResponsabile() {
 
         if(
@@ -35,12 +29,6 @@ class AziendaController {
         return $_SESSION['utente'];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
-
     public function index() {
 
         $utente = $this->verificaResponsabile();
@@ -52,11 +40,6 @@ class AziendaController {
         require __DIR__ . '/../views/responsabile/aziende.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
 
     public function create() {
 
@@ -68,23 +51,13 @@ class AziendaController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATI FORM
-        |--------------------------------------------------------------------------
-        */
+        /*DATI FORM*/
 
         $nome = trim($_POST['nome'] ?? '');
         $ragioneSociale = trim($_POST['ragione_sociale'] ?? '');
         $partitaIva = trim($_POST['partita_iva'] ?? '');
         $settore = trim($_POST['settore'] ?? '');
         $numeroDipendenti = $_POST['numero_dipendenti'] ?? '';
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE DATI
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $nome === '' ||
@@ -118,11 +91,7 @@ class AziendaController {
 
         $numeroDipendenti = (int) $numeroDipendenti;
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPLOAD LOGO
-        |--------------------------------------------------------------------------
-        */
+        /*UPLOAD LOGO*/
 
         $logo = '';
 
@@ -140,11 +109,6 @@ class AziendaController {
                 exit;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CONTROLLO TIPO FILE
-            |--------------------------------------------------------------------------
-            */
 
             $tipiConsentiti = [
                 'image/jpeg' => 'jpg',
@@ -167,11 +131,7 @@ class AziendaController {
                 exit;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CARTELLA UPLOAD
-            |--------------------------------------------------------------------------
-            */
+            /*CARTELLA UPLOAD*/
 
             $directoryAssoluta =
                 __DIR__ . '/../uploads/loghi/';
@@ -185,11 +145,6 @@ class AziendaController {
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | NOME FILE UNIVOCO
-            |--------------------------------------------------------------------------
-            */
 
             $nomeFile =
                 uniqid('logo_', true) .

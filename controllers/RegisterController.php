@@ -11,22 +11,13 @@ class RegisterController {
         $this->repo = new RegisterRepository();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORM REGISTRAZIONE
-    |--------------------------------------------------------------------------
-    */
+    /*FORM REGISTRAZIONE*/
 
     public function index() {
 
         require __DIR__ . '/../views/auth/register.php';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REGISTRAZIONE
-    |--------------------------------------------------------------------------
-    */
 
     public function register() {
 
@@ -36,11 +27,6 @@ class RegisterController {
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | RECUPERO DATI
-        |--------------------------------------------------------------------------
-        */
 
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -53,11 +39,7 @@ class RegisterController {
 
         $emails = $_POST['emails'] ?? [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE CAMPI OBBLIGATORI
-        |--------------------------------------------------------------------------
-        */
+        /* VALIDAZIONE CAMPI OBBLIGATORI*/
 
         if(
             $username === '' ||
@@ -75,12 +57,6 @@ class RegisterController {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE RUOLO
-        |--------------------------------------------------------------------------
-        */
-
         $ruoliValidi = [
             'amministratore',
             'revisore',
@@ -96,12 +72,6 @@ class RegisterController {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE PASSWORD
-        |--------------------------------------------------------------------------
-        */
-
         if(strlen($password) < 8) {
 
             $errore = "La password deve contenere almeno 8 caratteri.";
@@ -110,12 +80,6 @@ class RegisterController {
 
             return;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE CODICE FISCALE
-        |--------------------------------------------------------------------------
-        */
 
         if(strlen($codiceFiscale) !== 16) {
 
@@ -126,11 +90,6 @@ class RegisterController {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAZIONE EMAIL
-        |--------------------------------------------------------------------------
-        */
 
         $emailsValide = [];
 
@@ -152,11 +111,7 @@ class RegisterController {
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | EVITA EMAIL DUPLICATE NELLO STESSO FORM
-            |--------------------------------------------------------------------------
-            */
+            /*EVITA EMAIL DUPLICATE NELLO STESSO FORM*/
 
             if(!in_array($email, $emailsValide, true)) {
 
@@ -164,11 +119,6 @@ class RegisterController {
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | ALMENO UNA EMAIL
-        |--------------------------------------------------------------------------
-        */
 
         if(empty($emailsValide)) {
 
@@ -179,11 +129,7 @@ class RegisterController {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATI DA PASSARE AL REPOSITORY
-        |--------------------------------------------------------------------------
-        */
+        /*DATI DA PASSARE AL REPOSITORY*/
 
         $data = [
 
@@ -197,11 +143,6 @@ class RegisterController {
 
         ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREAZIONE UTENTE
-        |--------------------------------------------------------------------------
-        */
 
         try {
 
@@ -213,11 +154,7 @@ class RegisterController {
 
         } catch(PDOException $e) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | VINCOLI UNIQUE DATABASE
-            |--------------------------------------------------------------------------
-            */
+            /*VINCOLI UNIQUE DATABASE */
 
             if($e->getCode() === '23000') {
 
