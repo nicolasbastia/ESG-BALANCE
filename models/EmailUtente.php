@@ -17,10 +17,6 @@ class EmailUtente {
         $this->email = $email;
     }
 
-    /**
-     * Valida il formato email
-     * @return bool
-     */
     public function isValidEmail() {
 
         return filter_var($this->email, FILTER_VALIDATE_EMAIL) !== false;

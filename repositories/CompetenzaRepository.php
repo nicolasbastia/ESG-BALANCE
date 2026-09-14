@@ -14,11 +14,7 @@ class CompetenzaRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA COMPETENZE DISPONIBILI
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA COMPETENZE DISPONIBILI */
 
     public function getAll() {
 
@@ -39,11 +35,110 @@ class CompetenzaRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | COMPETENZE DEL REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /* AGGIUNGI COMPETENZA */
+
+    public function create(Competenza $competenza) {
+
+
+        if(!$competenza->isValid()) {
+
+            return false;
+        }
+
+
+        if($this->exists(
+            $competenza->id_utente,
+            $competenza->id_competenza
+        )) {
+
+            return false;
+        }
+
+
+        $sql = "
+
+            CALL sp_aggiungi_competenza_revisore(
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $competenza->id_utente,
+            $competenza->id_competenza,
+            $competenza->livello
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    /* MODIFICA LIVELLO */
+
+    public function update(Competenza $competenza) {
+
+        if(!$competenza->isValid()) {
+
+            return false;
+        }
+
+        $sql = "
+
+            CALL sp_modifica_competenza_revisore(
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $competenza->id_utente,
+            $competenza->id_competenza,
+            $competenza->livello
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    /* ELIMINA COMPETENZA */
+
+    public function delete(
+        $idUtente,
+        $idCompetenza
+    ) {
+
+        $sql = "
+
+            CALL sp_elimina_competenza_revisore(
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idUtente,
+            $idCompetenza
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    /* COMPETENZE DEL REVISORE */
 
     public function getByRevisore($idUtente) {
 
@@ -87,11 +182,7 @@ class CompetenzaRepository {
         return $competenze;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO COMPETENZA GIA PRESENTE
-    |--------------------------------------------------------------------------
-    */
+    /* CONTROLLO COMPETENZA GIA PRESENTE */
 
     public function exists(
         $idUtente,
@@ -119,135 +210,7 @@ class CompetenzaRepository {
         return $stmt->fetchColumn() > 0;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | AGGIUNGI COMPETENZA
-    |--------------------------------------------------------------------------
-    */
 
-    public function create(Competenza $competenza) {
-
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO LIVELLO
-        |--------------------------------------------------------------------------
-        */
-
-        if(!$competenza->isValid()) {
-
-            return false;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO DUPLICATO
-        |--------------------------------------------------------------------------
-        */
-
-        if($this->exists(
-            $competenza->id_utente,
-            $competenza->id_competenza
-        )) {
-
-            return false;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | INSERIMENTO
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            CALL sp_aggiungi_competenza_revisore(
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $competenza->id_utente,
-            $competenza->id_competenza,
-            $competenza->livello
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | MODIFICA LIVELLO
-    |--------------------------------------------------------------------------
-    */
-
-    public function update(Competenza $competenza) {
-
-        if(!$competenza->isValid()) {
-
-            return false;
-        }
-
-        $sql = "
-
-            CALL sp_modifica_competenza_revisore(
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $competenza->id_utente,
-            $competenza->id_competenza,
-            $competenza->livello
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ELIMINA COMPETENZA
-    |--------------------------------------------------------------------------
-    */
-
-    public function delete(
-        $idUtente,
-        $idCompetenza
-    ) {
-
-        $sql = "
-
-            CALL sp_elimina_competenza_revisore(
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $idUtente,
-            $idCompetenza
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
 }
 
 ?>

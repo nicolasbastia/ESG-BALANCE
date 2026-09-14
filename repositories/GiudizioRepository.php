@@ -14,11 +14,6 @@ class GiudizioRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
 
     public function create(GiudizioRevisione $giudizio) {
 
@@ -50,12 +45,6 @@ class GiudizioRepository {
             return false;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | AGGIORNA AFFIDABILITA REVISORE
-        |--------------------------------------------------------------------------
-        */
-
         $sql = "
 
             CALL sp_aggiorna_affidabilita_revisore(?)
@@ -73,11 +62,7 @@ class GiudizioRepository {
         return true;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GET BY BILANCIO E REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /* RECUPERA IL GIUDIZIO DI UN REVISORE PER UN BILANCIO */
 
     public function getByBilancio(
         $idBilancio,
@@ -127,11 +112,7 @@ class GiudizioRepository {
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ESISTENZA GIUDIZIO
-    |--------------------------------------------------------------------------
-    */
+    /* CONTROLLO ESISTENZA GIUDIZIO */
 
     public function esisteGiudizio(
         $idBilancio,
@@ -159,11 +140,7 @@ class GiudizioRepository {
         return $stmt->fetchColumn() > 0;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | TUTTI I GIUDIZI DEL BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* TUTTI I GIUDIZI DEL BILANCIO */
 
     public function getTuttiByBilancio($idBilancio) {
 

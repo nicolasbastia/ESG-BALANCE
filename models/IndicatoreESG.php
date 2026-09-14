@@ -2,42 +2,23 @@
 
 class IndicatoreESG {
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATI BASE
-    |--------------------------------------------------------------------------
-    */
-
     public $id_indicatore;
     public $nome;
     public $immagine;
     public $rilevanza;
 
-    /*
-    |--------------------------------------------------------------------------
-    | CATEGORIA
-    |--------------------------------------------------------------------------
-    */
-
     public $categoria;
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATI INDICATORE AMBIENTALE
-    |--------------------------------------------------------------------------
-    */
+    /* DATI INDICATORE AMBIENTALE */
 
     public $codice_normativa;
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATI INDICATORE SOCIALE
-    |--------------------------------------------------------------------------
-    */
+    /* DATI INDICATORE SOCIALE  */
 
     public $ambito_sociale;
     public $frequenza_rilevazione;
 
+    
     public function __construct(
         $id_indicatore,
         $nome,

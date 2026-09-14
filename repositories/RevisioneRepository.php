@@ -14,11 +14,7 @@ class RevisioneRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | BILANCI
-    |--------------------------------------------------------------------------
-    */
+    /* BILANCI */
 
     public function getBilanci() {
 
@@ -45,11 +41,7 @@ class RevisioneRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REVISORI
-    |--------------------------------------------------------------------------
-    */
+    /* REVISORI */
 
     public function getRevisori() {
 
@@ -73,11 +65,7 @@ class RevisioneRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO ASSEGNAZIONE
-    |--------------------------------------------------------------------------
-    */
+    /* CONTROLLO ASSEGNAZIONE */
 
     public function isAssegnato(
         $idBilancio,
@@ -105,11 +93,7 @@ class RevisioneRepository {
         return $stmt->fetchColumn() > 0;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROLLO VOCE APPARTENENTE AL BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* CONTROLLO VOCE APPARTENENTE AL BILANCIO */
 
     public function voceAppartieneAlBilancio(
         $idVoceBilancio,
@@ -137,22 +121,13 @@ class RevisioneRepository {
         return $stmt->fetchColumn() > 0;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ASSEGNA REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /* ASSEGNA REVISORE */
 
     public function assegna(
         $idBilancio,
         $idRevisore
     ) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO ASSEGNAZIONE GIA ESISTENTE
-        |--------------------------------------------------------------------------
-        */
 
         if(
             $this->isAssegnato(
@@ -164,11 +139,6 @@ class RevisioneRepository {
             return false;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREA ASSEGNAZIONE
-        |--------------------------------------------------------------------------
-        */
 
         $sql = "
 
@@ -194,11 +164,6 @@ class RevisioneRepository {
             return false;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | AGGIORNA AFFIDABILITA REVISORE
-        |--------------------------------------------------------------------------
-        */
 
         $sql = "
 
@@ -217,11 +182,7 @@ class RevisioneRepository {
         return true;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA REVISIONI
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA REVISIONI */
 
     public function getRevisioni() {
 
@@ -281,11 +242,7 @@ class RevisioneRepository {
         return $revisioni;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REVISIONI DEL REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /* REVISIONI DEL REVISORE */
 
     public function getRevisioniRevisore($idRevisore) {
 
@@ -347,11 +304,7 @@ class RevisioneRepository {
         return $revisioni;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETTAGLIO BILANCIO REVISIONE
-    |--------------------------------------------------------------------------
-    */
+    /* DETTAGLIO BILANCIO REVISIONE */
 
     public function getDettaglioBilancio($idBilancio) {
 

@@ -26,28 +26,16 @@ class Utente {
         $this->luogo_nascita = $luogo_nascita;
     }
 
-    /**
-     * Verifica se l'utente è un amministratore
-     * @return bool
-     */
     public function isAdmin() {
 
         return $this->ruolo === 'amministratore';
     }
 
-    /**
-     * Verifica se l'utente è un revisore
-     * @return bool
-     */
     public function isRevisore() {
 
         return $this->ruolo === 'revisore';
     }
 
-    /**
-     * Verifica se l'utente è un responsabile
-     * @return bool
-     */
     public function isResponsabile() {
 
         return $this->ruolo === 'responsabile';

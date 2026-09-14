@@ -8,7 +8,6 @@ class Revisione {
     public $data_assegnazione;
     public $stato;
 
-    // Campi ottenuti tramite JOIN
     public $username;
     public $azienda;
 

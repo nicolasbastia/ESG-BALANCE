@@ -17,10 +17,7 @@ class Revisore {
         $this->indice_affidabilita = $indice_affidabilita;
     }
 
-    /**
-     * Restituisce l'affidabilità come percentuale
-     * @return float|null
-     */
+    /* CONTROLLO AFFIDABILITA */
     public function getAffidabilitaPercentuale() {
 
         if ($this->indice_affidabilita === null) {
@@ -30,10 +27,7 @@ class Revisore {
         return (float) $this->indice_affidabilita;
     }
 
-    /**
-     * Verifica se il revisore è affidabile
-     * @return bool
-     */
+
     public function isAffidabile() {
 
         if ($this->indice_affidabilita === null) {
@@ -43,10 +37,7 @@ class Revisore {
         return $this->indice_affidabilita >= 80;
     }
 
-    /**
-     * Restituisce il livello di affidabilità
-     * @return string
-     */
+
     public function getLivelloAffidabilita() {
 
         if ($this->indice_affidabilita === null) {

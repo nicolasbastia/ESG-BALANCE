@@ -7,7 +7,6 @@ class VoceBilancio {
     public $id_voce;
     public $valore;
 
-    // Dato aggiuntivo proveniente dalla JOIN con voce_template
     public $nome_voce;
 
     public function __construct(

@@ -14,11 +14,53 @@ class BilancioRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA BILANCI DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
+
+    public function create(Bilancio $bilancio) {
+
+        $sql = "
+
+            CALL sp_crea_bilancio(
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+
+            $bilancio->id_azienda,
+            $bilancio->data_creazione
+
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+
+    public function delete($idBilancio) {
+
+        $sql = "
+
+            CALL sp_elimina_bilancio(?)
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idBilancio
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    /* LISTA BILANCI DEL RESPONSABILE */
 
     public function getByResponsabile($idResponsabile) {
 
@@ -66,11 +108,7 @@ class BilancioRepository {
         return $bilanci;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA AZIENDE DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA AZIENDE DEL RESPONSABILE */
 
     public function getAziendeResponsabile($idResponsabile) {
 
@@ -104,11 +142,7 @@ class BilancioRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETTAGLIO BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* DETTAGLIO BILANCIO */
 
     public function getDettaglioBilancio($idBilancio) {
 
@@ -149,61 +183,7 @@ class BilancioRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE BILANCIO
-    |--------------------------------------------------------------------------
-    */
 
-    public function create(Bilancio $bilancio) {
-
-        $sql = "
-
-            CALL sp_crea_bilancio(
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-
-            $bilancio->id_azienda,
-            $bilancio->data_creazione
-
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE BILANCIO
-    |--------------------------------------------------------------------------
-    */
-
-    public function delete($idBilancio) {
-
-        $sql = "
-
-            CALL sp_elimina_bilancio(?)
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $idBilancio
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
 }
 
 ?>

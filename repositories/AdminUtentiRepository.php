@@ -11,11 +11,7 @@ class AdminUtentiRepository {
         $this->pdo = $pdo;
     }
 
-    /**
-     * Restituisce tutti i revisori con le loro competenze.
-     *
-     * @return array
-     */
+
     public function getRevisoriConCompetenze() {
 
         $sql = "
@@ -72,11 +68,7 @@ class AdminUtentiRepository {
         return array_values($revisori);
     }
 
-    /**
-     * Restituisce tutti i responsabili con CV e aziende collegate.
-     *
-     * @return array
-     */
+
     public function getResponsabiliConAziende() {
 
         $sql = "

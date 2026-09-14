@@ -14,11 +14,59 @@ class IndicatoreRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA
-    |--------------------------------------------------------------------------
-    */
+    public function create(IndicatoreESG $indicatore) {
+
+        $sql = "
+
+            CALL sp_crea_indicatore_esg(
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $indicatore->nome,
+            $indicatore->immagine,
+            $indicatore->rilevanza,
+            $indicatore->categoria,
+            $indicatore->codice_normativa,
+            $indicatore->ambito_sociale,
+            $indicatore->frequenza_rilevazione
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    public function delete($idIndicatore) {
+
+        $sql = "
+
+            CALL sp_elimina_indicatore_esg(?)
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idIndicatore
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    /* LISTA */
 
     public function getAll() {
 
@@ -80,69 +128,7 @@ class IndicatoreRepository {
         return $indicatori;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INSERT
-    |--------------------------------------------------------------------------
-    */
 
-    public function create(IndicatoreESG $indicatore) {
-
-        $sql = "
-
-            CALL sp_crea_indicatore_esg(
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $indicatore->nome,
-            $indicatore->immagine,
-            $indicatore->rilevanza,
-            $indicatore->categoria,
-            $indicatore->codice_normativa,
-            $indicatore->ambito_sociale,
-            $indicatore->frequenza_rilevazione
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
-
-    public function delete($idIndicatore) {
-
-        $sql = "
-
-            CALL sp_elimina_indicatore_esg(?)
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $idIndicatore
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
 }
 
 ?>

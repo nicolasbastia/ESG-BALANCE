@@ -14,11 +14,38 @@ class VoceIndicatoreRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA INDICATORI
-    |--------------------------------------------------------------------------
-    */
+
+    public function create(VoceIndicatore $voceIndicatore) {
+
+        $sql = "
+
+            CALL sp_collega_indicatore_voce(
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $voceIndicatore->id_voce_bilancio,
+            $voceIndicatore->id_indicatore,
+            $voceIndicatore->valore_indicatore,
+            $voceIndicatore->fonte,
+            $voceIndicatore->data_rilevazione
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+
+    /* LISTA INDICATORI  */
 
     public function getIndicatori() {
 
@@ -41,11 +68,7 @@ class VoceIndicatoreRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA VOCI BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA VOCI BILANCIO  */
 
     public function getVociBilancio($idBilancio) {
 
@@ -78,11 +101,7 @@ class VoceIndicatoreRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA COLLEGAMENTI ESG
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA COLLEGAMENTI ESG  */
 
     public function getCollegamenti($idBilancio) {
 
@@ -140,40 +159,6 @@ class VoceIndicatoreRepository {
         return $collegamenti;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function create(VoceIndicatore $voceIndicatore) {
-
-        $sql = "
-
-            CALL sp_collega_indicatore_voce(
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $voceIndicatore->id_voce_bilancio,
-            $voceIndicatore->id_indicatore,
-            $voceIndicatore->valore_indicatore,
-            $voceIndicatore->fonte,
-            $voceIndicatore->data_rilevazione
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
 }
 
 ?>

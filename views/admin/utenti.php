@@ -13,9 +13,7 @@ include __DIR__ . '/../partials/back_button.php';
     Competenze e CV Utenti
 </h2>
 
-<!-- ========================= -->
 <!-- REVISORI ESG              -->
-<!-- ========================= -->
 
 <h3 class="mb-3">
     Revisori ESG
@@ -107,9 +105,7 @@ include __DIR__ . '/../partials/back_button.php';
 <?php endif; ?>
 
 
-<!-- ========================= -->
 <!-- RESPONSABILI AZIENDALI    -->
-<!-- ========================= -->
 
 <h3 class="mb-3">
     Responsabili Aziendali

@@ -7,12 +7,6 @@ class Bilancio {
     public $data_creazione;
     public $stato;
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATO AGGIUNTIVO DA JOIN
-    |--------------------------------------------------------------------------
-    */
-
     public $nome_azienda;
 
     public function __construct(

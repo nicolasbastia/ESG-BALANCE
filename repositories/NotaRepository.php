@@ -14,11 +14,6 @@ class NotaRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
 
     public function create(NotaRevisione $nota) {
 
@@ -47,11 +42,7 @@ class NotaRepository {
         return $result;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA NOTE DEL REVISORE
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA NOTE DEL REVISORE */
 
     public function getByRevisore($idRevisore) {
 
@@ -102,11 +93,7 @@ class NotaRepository {
         return $note;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | NOTE BY BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* NOTE DEL BILANCIO */
 
     public function getByBilancio($idBilancio) {
 
@@ -165,11 +152,7 @@ class NotaRepository {
         return $note;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | NOTE DEL REVISORE PER UNO SPECIFICO BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* NOTE DEL REVISORE PER UNO SPECIFICO BILANCIO */
 
     public function getByRevisoreEBilancio(
         $idRevisore,

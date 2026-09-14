@@ -14,11 +14,63 @@ class AziendaRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA AZIENDE DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
+
+    public function create(Azienda $azienda) {
+
+        $sql = "
+
+            CALL sp_registra_azienda(
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+
+            $azienda->nome,
+            $azienda->ragione_sociale,
+            $azienda->partita_iva,
+            $azienda->settore,
+            $azienda->numero_dipendenti,
+            $azienda->logo,
+            $azienda->id_responsabile
+
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+    public function delete($idAzienda) {
+
+        $sql = "
+
+            CALL sp_elimina_azienda(?)
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idAzienda
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+
+    /* LISTA AZIENDE DEL RESPONSABILE */
 
     public function getByResponsabile($idResponsabile) {
 
@@ -73,11 +125,8 @@ class AziendaRepository {
         return $aziende;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | AFFIDABILITA AZIENDA DEL RESPONSABILE
-    |--------------------------------------------------------------------------
-    */
+
+    /* AFFIDABILITA AZIENDA DEL RESPONSABILE */
 
     public function getAffidabilitaByResponsabile($idResponsabile) {
 
@@ -110,11 +159,7 @@ class AziendaRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | AFFIDABILITA TUTTE LE AZIENDE
-    |--------------------------------------------------------------------------
-    */
+    /* AFFIDABILITA DI TUTTE LE AZIENDE */
 
     public function getTutteAffidabilita() {
 
@@ -138,71 +183,7 @@ class AziendaRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function create(Azienda $azienda) {
-
-        $sql = "
-
-            CALL sp_registra_azienda(
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-
-            $azienda->nome,
-            $azienda->ragione_sociale,
-            $azienda->partita_iva,
-            $azienda->settore,
-            $azienda->numero_dipendenti,
-            $azienda->logo,
-            $azienda->id_responsabile
-
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
-
-    public function delete($idAzienda) {
-
-        $sql = "
-
-            CALL sp_elimina_azienda(?)
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $idAzienda
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
+ 
 }
 
 ?>

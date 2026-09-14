@@ -14,11 +14,7 @@ class VoceBilancioRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA VOCI TEMPLATE
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA VOCI TEMPLATE */
 
     public function getTemplate() {
 
@@ -41,11 +37,7 @@ class VoceBilancioRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA VOCI BILANCIO
-    |--------------------------------------------------------------------------
-    */
+    /* LISTA VOCI BILANCIO */
 
     public function getByBilancio($idBilancio) {
 
@@ -93,11 +85,6 @@ class VoceBilancioRepository {
         return $voci;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SALVA VALORE
-    |--------------------------------------------------------------------------
-    */
 
     public function salvaValore(VoceBilancio $voceBilancio) {
 

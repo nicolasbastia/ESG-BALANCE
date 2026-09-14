@@ -14,11 +14,81 @@ class VoceTemplateRepository {
         $this->pdo = $pdo;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LISTA
-    |--------------------------------------------------------------------------
-    */
+
+    public function create(VoceTemplate $voce) {
+
+        $sql = "
+
+            CALL sp_crea_voce_template(
+                ?,
+                ?,
+                ?
+            )
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+
+            $voce->nome,
+            $voce->descrizione,
+            $voce->id_amministratore
+
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+
+    public function delete($idVoce) {
+
+
+        $sql = "
+
+            SELECT COUNT(*)
+
+            FROM voce_bilancio
+
+            WHERE id_voce = ?
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            $idVoce
+        ]);
+
+        $utilizzata = $stmt->fetchColumn();
+
+        if($utilizzata > 0) {
+
+            return false;
+        }
+
+
+        $sql = "
+
+            CALL sp_elimina_voce_template(?)
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $result = $stmt->execute([
+            $idVoce
+        ]);
+
+        $stmt->closeCursor();
+
+        return $result;
+    }
+
+
+    /* LISTA */
 
     public function getAll() {
 
@@ -55,99 +125,6 @@ class VoceTemplateRepository {
         }
 
         return $voci;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function create(VoceTemplate $voce) {
-
-        $sql = "
-
-            CALL sp_crea_voce_template(
-                ?,
-                ?,
-                ?
-            )
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-
-            $voce->nome,
-            $voce->descrizione,
-            $voce->id_amministratore
-
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
-
-    public function delete($idVoce) {
-
-        /*
-        |--------------------------------------------------------------------------
-        | CONTROLLO SE LA VOCE È GIÀ UTILIZZATA
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            SELECT COUNT(*)
-
-            FROM voce_bilancio
-
-            WHERE id_voce = ?
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $stmt->execute([
-            $idVoce
-        ]);
-
-        $utilizzata = $stmt->fetchColumn();
-
-        if($utilizzata > 0) {
-
-            return false;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELIMINAZIONE
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-
-            CALL sp_elimina_voce_template(?)
-
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $idVoce
-        ]);
-
-        $stmt->closeCursor();
-
-        return $result;
     }
 }
 

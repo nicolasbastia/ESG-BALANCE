@@ -20,10 +20,6 @@ class Competenza {
         $this->nome = $nome;
     }
 
-    /**
-     * Valida il livello della competenza
-     * @return bool
-     */
     public function isValid() {
 
         return $this->livello >= 0 && $this->livello <= 5;
