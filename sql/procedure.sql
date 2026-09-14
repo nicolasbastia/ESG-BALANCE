@@ -1,4 +1,8 @@
+/* REGISTRAZIONE UTENTE */
+
 DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_registra_utente$$
 
 CREATE PROCEDURE sp_registra_utente(
 
@@ -42,7 +46,6 @@ END$$
 DELIMITER ;
 
 
-/* AGGIUNTA EMAIL UTENTE */
 
 DELIMITER $$
 
@@ -107,6 +110,8 @@ DELIMITER ;
 
 DELIMITER $$
 
+DROP PROCEDURE IF EXISTS sp_registra_azienda$$
+
 CREATE PROCEDURE sp_registra_azienda(
 
     IN p_nome VARCHAR(100),
@@ -149,7 +154,30 @@ END$$
 
 DELIMITER ;
 
+/* ELIMINA AZIENDE*/
+
 DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_elimina_azienda$$
+
+CREATE PROCEDURE sp_elimina_azienda(
+    IN p_id_azienda INT
+)
+BEGIN
+
+    DELETE FROM azienda
+    WHERE id_azienda = p_id_azienda;
+
+END$$
+
+DELIMITER ;
+
+
+/* CREAZIONE BILANCIO */
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_crea_bilancio$$
 
 CREATE PROCEDURE sp_crea_bilancio(
 
@@ -174,9 +202,7 @@ BEGIN
 
     );
 
-    /*
-        Aggiorna ridondanza nr_bilanci
-    */
+    /* Aggiorna ridondanza nr_bilanci */
 
     UPDATE azienda
 
@@ -187,6 +213,8 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+/* ASSEGNAZIONE REVISORE*/
 
 DELIMITER $$
 
@@ -222,9 +250,11 @@ END$$
 
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS sp_inserisci_giudizio;
+/* INSERIMENTO GIUDIZIO E NOTE*/
 
 DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inserisci_giudizio;
 
 CREATE PROCEDURE sp_inserisci_giudizio(
 
@@ -255,7 +285,7 @@ BEGIN
         esito,
         data_giudizio,
         rilievi
-        
+
     )
 
     VALUES (
@@ -272,6 +302,8 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_inserisci_nota$$
 
 CREATE PROCEDURE sp_inserisci_nota(
 
@@ -307,7 +339,7 @@ END$$
 DELIMITER ;
 
 
-/* STORED PROCEDURE PER INDICE AFFIDABILITÁ DEL REVISORE*/
+/* AFFIDABILITÁ DEL REVISORE */
 
 DELIMITER $$
 
@@ -328,11 +360,6 @@ BEGIN
     DECLARE v_indice DECIMAL(5,2) DEFAULT 0;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTA REVISIONI ASSEGNATE
-    |--------------------------------------------------------------------------
-    */
 
     SELECT COUNT(DISTINCT id_bilancio)
 
@@ -343,11 +370,6 @@ BEGIN
     WHERE id_revisore = p_id_revisore;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | CONTA REVISIONI CONCLUSE
-    |--------------------------------------------------------------------------
-    */
 
     SELECT COUNT(DISTINCT id_bilancio)
 
@@ -358,11 +380,6 @@ BEGIN
     WHERE id_revisore = p_id_revisore;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | CALCOLA INDICE
-    |--------------------------------------------------------------------------
-    */
 
     IF v_revisioni_assegnate > 0 THEN
 
@@ -381,11 +398,6 @@ BEGIN
     END IF;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | AGGIORNA REVISORE
-    |--------------------------------------------------------------------------
-    */
 
     UPDATE revisore_esg
 
@@ -402,13 +414,9 @@ END$$
 
 DELIMITER ;
 
-    /*
-    |--------------------------------------------------------------------------
-    | ELIMINA Bilancio
-    |--------------------------------------------------------------------------
-    */
+/* ELIMINA BILANCIO */
 
-    DELIMITER $$
+DELIMITER $$
 
 DROP PROCEDURE IF EXISTS sp_elimina_bilancio$$
 
@@ -419,12 +427,6 @@ BEGIN
 
     DECLARE v_id_azienda INT;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Se qualcosa fallisce, annulla tutta l'operazione
-    |--------------------------------------------------------------------------
-    */
-
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -433,31 +435,16 @@ BEGIN
 
     START TRANSACTION;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Recupera l'azienda proprietaria del bilancio
-    |--------------------------------------------------------------------------
-    */
 
     SELECT id_azienda
     INTO v_id_azienda
     FROM bilancio
     WHERE id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina giudizi
-    |--------------------------------------------------------------------------
-    */
 
     DELETE FROM giudizio_revisore
     WHERE id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina note dei revisori
-    |--------------------------------------------------------------------------
-    */
 
     DELETE nr
     FROM nota_revisore nr
@@ -465,20 +452,10 @@ BEGIN
         ON nr.id_voce_bilancio = vb.id_voce_bilancio
     WHERE vb.id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina assegnazioni revisori
-    |--------------------------------------------------------------------------
-    */
 
     DELETE FROM revisione
     WHERE id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina collegamenti voce-indicatore
-    |--------------------------------------------------------------------------
-    */
 
     DELETE vi
     FROM voce_indicatore vi
@@ -486,29 +463,16 @@ BEGIN
         ON vi.id_voce_bilancio = vb.id_voce_bilancio
     WHERE vb.id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina voci del bilancio
-    |--------------------------------------------------------------------------
-    */
 
     DELETE FROM voce_bilancio
     WHERE id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elimina bilancio
-    |--------------------------------------------------------------------------
-    */
 
     DELETE FROM bilancio
     WHERE id_bilancio = p_id_bilancio;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Ricalcola nr_bilanci dell'azienda
-    |--------------------------------------------------------------------------
-    */
+    
+    /* Ricalcola nr_bilanci dell'azienda*/
 
     UPDATE azienda
     SET nr_bilanci = (
@@ -524,12 +488,7 @@ END$$
 
 DELIMITER ;
 
-/*
-    |--------------------------------------------------------------------------
-    | Competenze revisore
-    |--------------------------------------------------------------------------
-    */
-
+/* COMPETENZE REVISORE */
 
 DELIMITER $$
 
@@ -599,11 +558,7 @@ END$$
 
 DELIMITER ;
 
-/*
-    |--------------------------------------------------------------------------
-    | aggiorna CV responsabile
-    |--------------------------------------------------------------------------
-    */
+/* OPERAZIONI CV RESPONSABILE */
 
 DELIMITER $$
 
@@ -637,11 +592,7 @@ END$$
 
 DELIMITER ;
 
-/*
-    |--------------------------------------------------------------------------
-    | salva voce bilancio
-    |--------------------------------------------------------------------------
-    */
+/* SALVATAGGIO VOCE BILANCIO*/
 
 DELIMITER $$
 
@@ -686,11 +637,7 @@ END$$
 DELIMITER ;
 
 
-/*
-    |--------------------------------------------------------------------------
-    | crea/elimina voce template
-    |--------------------------------------------------------------------------
-    */
+/* CREAZIONE/ELIMINAZIONE VOCE TEMPLATE */
 
 DELIMITER $$
 
@@ -733,11 +680,7 @@ DELIMITER ;
 
 
 
-/*
-    |--------------------------------------------------------------------------
-    | crea indicatore esg
-    |--------------------------------------------------------------------------
-    */
+/* CREAZIONE/ELIMINAZIONE INDICATORE ESG */
 
 DELIMITER $$
 
@@ -836,11 +779,7 @@ DELIMITER ;
 
 
 
-/*
-    |--------------------------------------------------------------------------
-    | collega indicatore
-    |--------------------------------------------------------------------------
-    */
+/*COLLEGAMENTO INDICATORE ESG */
 
 
 DELIMITER $$
@@ -870,28 +809,6 @@ BEGIN
         p_fonte,
         p_data_rilevazione
     );
-
-END$$
-
-DELIMITER ;
-
-/*
-    |--------------------------------------------------------------------------
-    | elimina aziende
-    |--------------------------------------------------------------------------
-    */
-
-DELIMITER $$
-
-DROP PROCEDURE IF EXISTS sp_elimina_azienda$$
-
-CREATE PROCEDURE sp_elimina_azienda(
-    IN p_id_azienda INT
-)
-BEGIN
-
-    DELETE FROM azienda
-    WHERE id_azienda = p_id_azienda;
 
 END$$
 

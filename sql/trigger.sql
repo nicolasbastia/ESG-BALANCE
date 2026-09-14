@@ -39,11 +39,7 @@ BEGIN
     DECLARE totale_giudizi INT;
     DECLARE respingimenti INT;
 
-    /*
-    |--------------------------------------------------------------------------
-    | NUMERO REVISORI ASSEGNATI
-    |--------------------------------------------------------------------------
-    */
+    /* NUMERO REVISORI ASSEGNATI*/
 
     SELECT COUNT(*)
 
@@ -54,11 +50,7 @@ BEGIN
     WHERE id_bilancio = NEW.id_bilancio;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | NUMERO GIUDIZI INSERITI
-    |--------------------------------------------------------------------------
-    */
+    /* NUMERO GIUDIZI INSERITI*/
 
     SELECT COUNT(DISTINCT id_revisore)
 
@@ -69,11 +61,7 @@ BEGIN
     WHERE id_bilancio = NEW.id_bilancio;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | NUMERO RESPINGIMENTI
-    |--------------------------------------------------------------------------
-    */
+    /*NUMERO RESPINGIMENTI*/
 
     SELECT COUNT(*)
 
@@ -86,19 +74,9 @@ BEGIN
     AND esito = 'respingimento';
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TUTTI I REVISORI HANNO INSERITO IL GIUDIZIO
-    |--------------------------------------------------------------------------
-    */
+    /*TUTTI I REVISORI HANNO INSERITO IL GIUDIZIO*/
 
     IF totale_revisori = totale_giudizi THEN
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALMENO UN RESPINGIMENTO
-        |--------------------------------------------------------------------------
-        */
 
         IF respingimenti > 0 THEN
 
