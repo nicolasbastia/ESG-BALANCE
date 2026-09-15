@@ -68,9 +68,11 @@ class BilancioRepository {
 
             SELECT
                 b.id_bilancio,
+                a.nome AS nome_azienda,
                 b.id_azienda,
                 b.data_creazione,
                 b.stato
+            
 
             FROM bilancio b
 
@@ -100,7 +102,8 @@ class BilancioRepository {
                 $row['id_bilancio'],
                 $row['id_azienda'],
                 $row['data_creazione'],
-                $row['stato']
+                $row['stato'],
+                $row['nome_azienda']
 
             );
         }
