@@ -59,6 +59,7 @@ include __DIR__ . '/../partials/back_button.php';
             <tr>
 
                 <th>ID Revisione</th>
+                <th>Data Bilancio</th>
                 <th>Azienda</th>
                 <th>Stato Revisione</th>
                 <th>Azioni</th>
@@ -77,6 +78,11 @@ include __DIR__ . '/../partials/back_button.php';
 
                     <?= htmlspecialchars((string) $r->id_revisione) ?>
 
+                </td>
+
+                <td>
+                    <?= htmlspecialchars((string) $r->data_bilancio) ?>
+                    
                 </td>
 
                 <td>

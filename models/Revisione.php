@@ -11,6 +11,8 @@ class Revisione {
     public $username;
     public $azienda;
 
+    public $data_bilancio;
+
     public function __construct(
         $id_revisione,
         $id_bilancio,
@@ -18,7 +20,8 @@ class Revisione {
         $data_assegnazione,
         $stato = null,
         $username = null,
-        $azienda = null
+        $azienda = null,
+        $data_bilancio = null
     ) {
 
         $this->id_revisione = $id_revisione;
@@ -29,6 +32,7 @@ class Revisione {
 
         $this->username = $username;
         $this->azienda = $azienda;
+        $this->data_bilancio = $data_bilancio;
     }
 }
 

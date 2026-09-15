@@ -193,6 +193,7 @@ class RevisioneRepository {
                 r.id_bilancio,
                 r.id_revisore,
                 r.data_assegnazione,
+                b.data_creazione AS data_bilancio,
 
                 CASE
                     WHEN g.id_giudizio IS NOT NULL
@@ -235,7 +236,8 @@ class RevisioneRepository {
                 $row['data_assegnazione'],
                 $row['stato'],
                 $row['username'],
-                $row['azienda']
+                $row['azienda'],
+                $row['data_bilancio']
             );
         }
 
@@ -253,6 +255,7 @@ class RevisioneRepository {
                 r.id_bilancio,
                 r.id_revisore,
                 r.data_assegnazione,
+                b.data_creazione AS data_bilancio,
 
                 CASE
                     WHEN g.id_giudizio IS NOT NULL
@@ -297,7 +300,8 @@ class RevisioneRepository {
                 $row['data_assegnazione'],
                 $row['stato'],
                 null,
-                $row['azienda']
+                $row['azienda'],
+                $row['data_bilancio']
             );
         }
 
