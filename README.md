@@ -117,6 +117,10 @@ Con la configurazione MAMP utilizzata durante lo sviluppo, la pagina di login è
 
 http://localhost:8888/esg-balance/login.php
 
+Per la configurazione XAMPP:
+
+http://localhost/esg-balance/login.php
+
 La porta e il percorso possono variare in base alla configurazione del server Web utilizzato.
 
 ## Accesso
