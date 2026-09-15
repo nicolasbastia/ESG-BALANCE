@@ -57,11 +57,11 @@ La password viene memorizzata nel database tramite hash e verificata dall'applic
 
 ## Configurazione MongoDB
 
-L'applicazione utilizza MongoDB per la registrazione degli eventi applicativi.
+L'applicazione utilizza MongoDB per la registrazione degli eventi significativi che avvengono durante l'utilizzo della piattaforma.
 
-La configurazione è contenuta nel file:
+La configurazione della connessione è contenuta nel file:
 
-config/mongo.php
+`config/mongo.php`
 
 La configurazione utilizzata durante lo sviluppo è:
 
@@ -70,6 +70,34 @@ Porta: 27017
 Database: esg_balance_logs
 
 Assicurarsi che il servizio MongoDB sia avviato prima di utilizzare le funzionalità dell'applicazione che effettuano il logging degli eventi.
+
+## Logging degli eventi con MongoDB
+
+Gli eventi significativi della piattaforma vengono registrati nel database MongoDB:
+
+`esg_balance_logs`
+
+all'interno della collezione:
+
+`eventi`
+
+Il logging è gestito dal file:
+
+`config/logger.php`
+
+Ogni documento della collezione `eventi` contiene:
+
+- `evento`: descrizione testuale dell'operazione effettuata;
+- `timestamp`: data e ora in cui l'evento è stato registrato.
+
+La struttura di un documento MongoDB è quindi, ad esempio:
+
+```javascript
+{
+    "_id": ObjectId("..."),
+    "evento": "Creato nuovo bilancio ID 5 per l'azienda GreenTech",
+    "timestamp": ISODate("2026-09-15T10:30:00Z")
+}
 
 ## Dipendenze PHP
 
