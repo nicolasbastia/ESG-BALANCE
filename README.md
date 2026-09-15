@@ -98,6 +98,8 @@ La struttura di un documento MongoDB è quindi, ad esempio:
     "evento": "Creato nuovo bilancio ID 5 per l'azienda GreenTech",
     "timestamp": ISODate("2026-09-15T10:30:00Z")
 }
+```
+
 
 ## Dipendenze PHP
 
