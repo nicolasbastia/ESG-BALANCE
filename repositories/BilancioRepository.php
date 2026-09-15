@@ -68,10 +68,10 @@ class BilancioRepository {
 
             SELECT
                 b.id_bilancio,
-                a.nome AS nome_azienda,
                 b.id_azienda,
                 b.data_creazione,
-                b.stato
+                b.stato,
+                a.nome AS nome_azienda
             
 
             FROM bilancio b
