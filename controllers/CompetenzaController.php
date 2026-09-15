@@ -4,6 +4,7 @@ session_start();
 
 require_once __DIR__ . '/../repositories/CompetenzaRepository.php';
 require_once __DIR__ . '/../models/Competenza.php';
+require_once __DIR__ . '/../config/logger.php';
 
 class CompetenzaController {
 
@@ -28,7 +29,7 @@ class CompetenzaController {
         return $_SESSION['utente'];
     }
 
-    /*Mostra le competenze del revisore e quelle disponibili*/
+    /* Mostra le competenze del revisore e quelle disponibili */
 
     public function index() {
 
@@ -43,7 +44,7 @@ class CompetenzaController {
         require __DIR__ . '/../views/revisore/competenze.php';
     }
 
-    /*Aggiunge una competenza al revisore */
+    /* Aggiunge una competenza al revisore */
 
     public function create() {
 
@@ -94,7 +95,7 @@ class CompetenzaController {
             exit;
         }
 
-        /*CONTROLLO DUPLICATO*/
+        /* CONTROLLO DUPLICATO */
 
         if(
             $this->repo->exists(
@@ -110,7 +111,7 @@ class CompetenzaController {
             exit;
         }
 
-        /*CREAZIONE MODEL*/
+        /* CREAZIONE MODEL */
 
         $competenza = new Competenza(
             $utente['id'],
@@ -133,6 +134,15 @@ class CompetenzaController {
                 exit;
             }
 
+            salvaEvento(
+                "Revisore " .
+                $utente['username'] .
+                ": aggiunta competenza ID " .
+                $idCompetenza .
+                " con livello " .
+                $livello
+            );
+
             $_SESSION['successo_competenza'] =
                 "Competenza aggiunta correttamente.";
 
@@ -154,7 +164,7 @@ class CompetenzaController {
         exit;
     }
 
-    /*Modifica il livello di una competenza*/
+    /* Modifica il livello di una competenza */
 
     public function update() {
 
@@ -218,7 +228,7 @@ class CompetenzaController {
             exit;
         }
 
-        /*CREAZIONE MODEL*/
+        /* CREAZIONE MODEL */
 
         $competenza = new Competenza(
             $utente['id'],
@@ -241,6 +251,15 @@ class CompetenzaController {
                 exit;
             }
 
+            salvaEvento(
+                "Revisore " .
+                $utente['username'] .
+                ": modificata competenza ID " .
+                $idCompetenza .
+                " - nuovo livello " .
+                $livello
+            );
+
             $_SESSION['successo_competenza'] =
                 "Competenza aggiornata correttamente.";
 
@@ -254,7 +273,7 @@ class CompetenzaController {
         exit;
     }
 
-    /*Elimina una competenza dal revisore*/
+    /* Elimina una competenza dal revisore */
 
     public function delete() {
 
@@ -298,7 +317,7 @@ class CompetenzaController {
             exit;
         }
 
-        /* ELIMINAZIONE*/
+        /* ELIMINAZIONE */
 
         try {
 
@@ -315,6 +334,13 @@ class CompetenzaController {
                 header('Location: competenza.php');
                 exit;
             }
+
+            salvaEvento(
+                "Revisore " .
+                $utente['username'] .
+                ": eliminata competenza ID " .
+                $idCompetenza
+            );
 
             $_SESSION['successo_competenza'] =
                 "Competenza eliminata correttamente.";
