@@ -10,7 +10,7 @@ Per eseguire l'applicazione sono necessari:
 - MySQL
 - MongoDB
 - Composer
-- un server Web locale compatibile con PHP (ad esempio MAMP)
+- un server Web locale compatibile con PHP (ad esempio MAMP o XAMPP)
 
 ## Configurazione MySQL
 
