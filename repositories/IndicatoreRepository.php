@@ -66,6 +66,27 @@ class IndicatoreRepository {
         return $result;
     }
 
+    public function isUtilizzato($idIndicatore) {
+
+        $sql = "
+
+            SELECT COUNT(*)
+
+            FROM voce_indicatore
+
+            WHERE id_indicatore = ?
+
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            $idIndicatore
+        ]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     /* LISTA */
 
     public function getAll() {
@@ -127,8 +148,6 @@ class IndicatoreRepository {
 
         return $indicatori;
     }
-
-
 }
 
 ?>

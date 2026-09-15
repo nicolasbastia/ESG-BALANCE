@@ -1,3 +1,4 @@
+
 <?php
 
 session_start();
@@ -29,7 +30,6 @@ class IndicatoreController {
         return $_SESSION['utente'];
     }
 
-
     public function index() {
 
         $this->verificaAmministratore();
@@ -53,10 +53,6 @@ class IndicatoreController {
             $_POST['nome'] ?? ''
         );
 
-        $immagine = trim(
-            $_POST['immagine'] ?? ''
-        );
-
         $rilevanza = filter_input(
             INPUT_POST,
             'rilevanza',
@@ -66,7 +62,6 @@ class IndicatoreController {
         $categoria = trim(
             $_POST['categoria'] ?? 'nessuna'
         );
-
 
         $categorieValide = [
             'nessuna',
@@ -82,7 +77,6 @@ class IndicatoreController {
             header('Location: indicatori.php');
             exit;
         }
-
 
         if($nome === '') {
 
@@ -108,10 +102,11 @@ class IndicatoreController {
 
         /* CAMPI SPECIFICI */
 
+
         $codiceNormativa = null;
         $ambitoSociale = null;
         $frequenzaRilevazione = null;
-
+        
         /* AMBIENTALE */
 
         if($categoria === 'ambientale') {
@@ -155,8 +150,102 @@ class IndicatoreController {
             }
         }
 
-        if($immagine === '') {
-            $immagine = null;
+        /* UPLOAD IMMAGINE */
+
+        $immagine = null;
+
+        if(
+            isset($_FILES['immagine']) &&
+            $_FILES['immagine']['error'] !== UPLOAD_ERR_NO_FILE
+        ) {
+
+            if($_FILES['immagine']['error'] !== UPLOAD_ERR_OK) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Errore durante il caricamento dell'immagine.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+
+            $file = $_FILES['immagine'];
+
+            $maxSize = 5 * 1024 * 1024;
+
+            if($file['size'] > $maxSize) {
+
+                $_SESSION['errore_indicatore'] =
+                    "L'immagine non può superare i 5 MB.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+
+            $mime = mime_content_type($file['tmp_name']);
+
+            $mimeConsentiti = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+            if(!in_array($mime, $mimeConsentiti, true)) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Formato immagine non valido. Sono consentiti JPG, PNG e WEBP.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+
+            $estensione = match($mime) {
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp'
+            };
+
+            $cartella =
+                __DIR__ .
+                '/../uploads/immagineESG/';
+
+            if(!is_dir($cartella)) {
+
+                mkdir(
+                    $cartella,
+                    0755,
+                    true
+                );
+            }
+
+            $nomeFile =
+                'esg_' .
+                time() .
+                '_' .
+                uniqid() .
+                '.' .
+                $estensione;
+
+            $destinazione =
+                $cartella .
+                $nomeFile;
+
+            if(
+                !move_uploaded_file(
+                    $file['tmp_name'],
+                    $destinazione
+                )
+            ) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Impossibile salvare l'immagine.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
+
+            $immagine =
+                'uploads/immagineESG/' .
+                $nomeFile;
         }
 
         /* CREAZIONE MODEL */
@@ -172,7 +261,6 @@ class IndicatoreController {
             $frequenzaRilevazione
         );
 
-
         try {
 
             $risultato = $this->repo->create(
@@ -180,6 +268,18 @@ class IndicatoreController {
             );
 
             if(!$risultato) {
+
+                if(
+                    $immagine !== null &&
+                    file_exists(
+                        __DIR__ . '/../' . $immagine
+                    )
+                ) {
+
+                    unlink(
+                        __DIR__ . '/../' . $immagine
+                    );
+                }
 
                 $_SESSION['errore_indicatore'] =
                     "Impossibile creare l'indicatore ESG.";
@@ -200,6 +300,18 @@ class IndicatoreController {
 
         } catch(PDOException $e) {
 
+            if(
+                $immagine !== null &&
+                file_exists(
+                    __DIR__ . '/../' . $immagine
+                )
+            ) {
+
+                unlink(
+                    __DIR__ . '/../' . $immagine
+                );
+            }
+
             if($e->getCode() === '23000') {
 
                 $_SESSION['errore_indicatore'] =
@@ -216,7 +328,6 @@ class IndicatoreController {
         exit;
     }
 
-
     public function delete() {
 
         $this->verificaAmministratore();
@@ -226,7 +337,6 @@ class IndicatoreController {
             header('Location: indicatori.php');
             exit;
         }
-
 
         $idIndicatore = filter_input(
             INPUT_POST,
@@ -244,6 +354,15 @@ class IndicatoreController {
         }
 
         try {
+
+            if($this->repo->isUtilizzato($idIndicatore)) {
+
+                $_SESSION['errore_indicatore'] =
+                    "Impossibile eliminare l'indicatore ESG perché è utilizzato in uno o più bilanci.";
+
+                header('Location: indicatori.php');
+                exit;
+            }
 
             $risultato = $this->repo->delete(
                 $idIndicatore

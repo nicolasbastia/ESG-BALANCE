@@ -36,6 +36,7 @@ include __DIR__ . '/../partials/back_button.php';
 <form
     method="POST"
     action="/esg-balance/indicatori.php?action=create"
+    enctype="multipart/form-data"
     class="mb-5"
 >
 
@@ -61,10 +62,15 @@ include __DIR__ . '/../partials/back_button.php';
         </label>
 
         <input
-            type="text"
+            type="file"
             name="immagine"
             class="form-control"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         >
+
+        <div class="form-text">
+            Formati consentiti: JPG, PNG e WEBP.
+        </div>
 
     </div>
 
@@ -114,8 +120,6 @@ include __DIR__ . '/../partials/back_button.php';
 
     </div>
 
-    <!-- CAMPI AMBIENTALI -->
-
     <div
         id="campiAmbientali"
         style="display: none;"
@@ -137,8 +141,6 @@ include __DIR__ . '/../partials/back_button.php';
         </div>
 
     </div>
-
-    <!-- CAMPI SOCIALI -->
 
     <div
         id="campiSociali"
@@ -201,12 +203,13 @@ include __DIR__ . '/../partials/back_button.php';
 
 <?php else : ?>
 
-    <table class="table table-bordered">
+    <table class="table table-bordered align-middle">
 
         <thead>
 
             <tr>
                 <th>ID</th>
+                <th>Immagine</th>
                 <th>Nome</th>
                 <th>Rilevanza</th>
                 <th>Categoria</th>
@@ -224,6 +227,31 @@ include __DIR__ . '/../partials/back_button.php';
 
                 <td>
                     <?= htmlspecialchars((string) $i->id_indicatore) ?>
+                </td>
+
+                <td>
+
+                    <?php if(!empty($i->immagine)) : ?>
+
+                        <img
+                            src="/esg-balance/<?= htmlspecialchars($i->immagine) ?>"
+                            alt="<?= htmlspecialchars($i->nome) ?>"
+                            style="
+                                width: 70px;
+                                height: 70px;
+                                object-fit: cover;
+                                border-radius: 5px;
+                            "
+                        >
+
+                    <?php else : ?>
+
+                        <span class="text-muted">
+                            Nessuna
+                        </span>
+
+                    <?php endif; ?>
+
                 </td>
 
                 <td>
@@ -336,7 +364,8 @@ include __DIR__ . '/../partials/back_button.php';
 
 <script>
 
-const categoria = document.getElementById('categoria');
+const categoria =
+    document.getElementById('categoria');
 
 const campiAmbientali =
     document.getElementById('campiAmbientali');
@@ -358,12 +387,6 @@ function aggiornaCampiCategoria() {
 
     const valore = categoria.value;
 
-    /*
-    |--------------------------------------------------------------------------
-    | RESET
-    |--------------------------------------------------------------------------
-    */
-
     campiAmbientali.style.display = 'none';
 
     campiSociali.style.display = 'none';
@@ -374,11 +397,6 @@ function aggiornaCampiCategoria() {
 
     frequenzaRilevazione.required = false;
 
-    /*
-    |--------------------------------------------------------------------------
-    | AMBIENTALE
-    |--------------------------------------------------------------------------
-    */
 
     if(valore === 'ambientale') {
 
@@ -387,11 +405,6 @@ function aggiornaCampiCategoria() {
         codiceNormativa.required = true;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SOCIALE
-    |--------------------------------------------------------------------------
-    */
 
     if(valore === 'sociale') {
 
